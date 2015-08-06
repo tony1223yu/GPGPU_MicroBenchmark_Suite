@@ -97,7 +97,7 @@ void InitialAndParseArgs(int argc, char* argv[], CUDATestHelper &helper)
 {
     if (argc != 7)
     {
-        fprintf(stderr, "executable -f <file> -k <file> -t <type>\n");
+        fprintf(stderr, "executable -f <ptx_file> -k <test_case_file> -t <0:INT, 1:DBL>\n");
         exit(1);
     }
 

@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         error = cudaFree(helper.deviceData);
         CHECK_CUDA_ERROR(error);
         
-        printf("%-30s %u\n", helper.ptxKernelName[idx], helper.hostTime[1] - helper.hostTime[0]);
+        printf("%-50s %u\n", helper.ptxKernelName[idx], helper.hostTime[1] - helper.hostTime[0]);
     } 
 
     return 0;
