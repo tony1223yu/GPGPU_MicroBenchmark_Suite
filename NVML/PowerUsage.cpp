@@ -21,11 +21,12 @@ typedef struct GlobalCtrl
 {
     int intervalTime;
     int totalTime;
+    int cudaDeviceNumber;
     char outputFile[MAX_FILE_LEN];
     bool enablePowerUsage;
     bool enablePowerLimit;
 
-    GlobalCtrl(): intervalTime(200), totalTime(10), enablePowerUsage(0), enablePowerLimit(0) {sprintf(outputFile, "PowerUsageOutput.log");}
+    GlobalCtrl(): cudaDeviceNumber(0), intervalTime(200), totalTime(10), enablePowerUsage(0), enablePowerLimit(0) {sprintf(outputFile, "PowerUsageOutput.log");}
 } GlobalCtrl;
 
 bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
@@ -33,33 +34,27 @@ bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
     int cmd;
     while(1)
     {
-        cmd = getopt(argc, argv, "ult::o::T::");
+        cmd = getopt(argc, argv, "ult:o:T:D:");
         if (cmd == -1)
             break;
 
         switch (cmd)
         {
-            printf("%c\n", cmd);
+            case 'D':
+                ctrl->cudaDeviceNumber = atoi(optarg);
+                break;
+
             case 't':
-                if (optarg)
-                {
-                    ctrl->intervalTime = atoi(optarg);
-                }
+                ctrl->intervalTime = atoi(optarg);
                 break;
 
             case 'T':
-                if (optarg)
-                {
-                    ctrl->totalTime = atoi(optarg);
-                }
+                ctrl->totalTime = atoi(optarg);
                 break;
 
             case 'o':
-                if (optarg)
-                {
-                    memset(ctrl->outputFile, 0, MAX_FILE_LEN);
-                    memcpy(ctrl->outputFile, optarg, sizeof(optarg));
-                }
+                memset(ctrl->outputFile, 0, MAX_FILE_LEN);
+                memcpy(ctrl->outputFile, optarg, sizeof(optarg));
                 break;
 
             case 'u':
@@ -110,22 +105,23 @@ int main(int argc, char *argv[])
             unsigned int deviceNum, i;
             char name[NVML_DEVICE_NAME_BUFFER_SIZE];
             nvmlDevice_t currDevice;
-            
+
             error = nvmlDeviceGetCount(&deviceNum);
             CheckNVMLError(error, strdup("Unable to get device count"));
-        
+
             for (i = 0 ; i < deviceNum ; i ++)
             {
                 error = nvmlDeviceGetHandleByIndex(i, &currDevice);
                 CheckNVMLError(error, strdup("Unable to get device handler"));
-            
-                error = nvmlDeviceGetName(currDevice, name, NVML_DEVICE_NAME_BUFFER_SIZE); 
+
+                error = nvmlDeviceGetName(currDevice, name, NVML_DEVICE_NAME_BUFFER_SIZE);
                 CheckNVMLError(error, strdup("Unable to get device name"));
-            
+
                 printf("device %d: %s\n", i, name);
             }
 
-            error = nvmlDeviceGetHandleByIndex(0, &device);
+            printf("Select device %d\n", ctrl.cudaDeviceNumber);
+            error = nvmlDeviceGetHandleByIndex(ctrl.cudaDeviceNumber, &device);
         }
 
 #if 0
@@ -146,11 +142,11 @@ int main(int argc, char *argv[])
                 for (iterGraphic = 0 ; iterGraphic < graphicCount ; iterGraphic ++)
                 {
                     printf("set memory clock: %5uMHz, graphics clock %5uMHz\n", memoryClock[iterMemory], graphicClock[iterGraphic]);
-                
+
                     error = nvmlDeviceSetApplicationsClocks(device, memoryClock[iterMemory], graphicClock[iterGraphic]);
                     CheckNVMLError(error, strdup("Unable to set application clock"));
                     usleep(1000);
-                
+
                 }
             }
         }
@@ -189,7 +185,7 @@ int main(int argc, char *argv[])
                 {
                     gettimeofday(&curTime, NULL);
                     cur_utime = curTime.tv_sec * 1000 + curTime.tv_usec / 1000;
-                    
+
                     // Sample
                     if ((cur_utime - pre_utime) > ctrl.intervalTime)
                     {
@@ -198,10 +194,10 @@ int main(int argc, char *argv[])
 
                         error = nvmlDeviceGetPowerUsage(device, &curPower);
                         CheckNVMLError(error, strdup("Unable to read current power"));
-                        
+
                         error = nvmlDeviceGetUtilizationRates(device, &curUtil);
                         CheckNVMLError(error, strdup("Unable to read current utilization"));
-                        
+
                         error = nvmlDeviceGetPerformanceState(device, &perfState);
                         CheckNVMLError(error, strdup("Unable to get performance state"));
 
@@ -211,7 +207,7 @@ int main(int argc, char *argv[])
 
                     // Grab end
                     if ((cur_utime - start_utime) > (ctrl.totalTime * 1000))
-                        break;                
+                        break;
                 }
                 printf("end_time: %llu msec\n", cur_utime);
                 fclose(fp);
@@ -231,14 +227,14 @@ int main(int argc, char *argv[])
             //error = nvmlDeviceGetSamples(device, NVML_GPU_UTILIZATION_SAMPLES, start_utime * 1000, &sampleType, &sampleCount, NULL);
             //error = nvmlDeviceGetSamples(device, NVML_MEMORY_UTILIZATION_SAMPLES, start_utime * 1000, &sampleType, &sampleCount, NULL);
             CheckNVMLError(error, strdup("Unable to get maximum sample size"));
-            printf("total sample count %u, type %d\n", sampleCount, sampleType); 
+            printf("total sample count %u, type %d\n", sampleCount, sampleType);
 
-            sample = (nvmlSample_t *) (malloc(sizeof(nvmlSample_t) * sampleCount)); 
+            sample = (nvmlSample_t *) (malloc(sizeof(nvmlSample_t) * sampleCount));
             error = nvmlDeviceGetSamples(device, NVML_TOTAL_POWER_SAMPLES, start_utime * 1000, &sampleType, &sampleCount, sample);
             //error = nvmlDeviceGetSamples(device, NVML_GPU_UTILIZATION_SAMPLES, start_utime * 1000, &sampleType, &sampleCount, sample);
             //error = nvmlDeviceGetSamples(device, NVML_MEMORY_UTILIZATION_SAMPLES, start_utime * 1000, &sampleType, &sampleCount, sample);
             CheckNVMLError(error, strdup("Unable to access sample buffer"));
-            printf("total sample count %u, type %d\n", sampleCount, sampleType); 
+            printf("total sample count %u, type %d\n", sampleCount, sampleType);
 
             for (idx = 0 ; idx < sampleCount ; idx ++)
             {
@@ -247,7 +243,7 @@ int main(int argc, char *argv[])
             free (sample);
         }
 #endif
-    
+
     }
 }
 
