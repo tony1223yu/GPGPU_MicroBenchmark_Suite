@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
             error = nvmlDeviceGetCount(&deviceNum);
             CheckNVMLError(error, strdup("Unable to get device count"));
 
+            printf("====== SUPPORT DEVICES ======\n");
             for (i = 0 ; i < deviceNum ; i ++)
             {
                 error = nvmlDeviceGetHandleByIndex(i, &currDevice);
@@ -118,6 +119,13 @@ int main(int argc, char *argv[])
                 CheckNVMLError(error, strdup("Unable to get device name"));
 
                 printf("device %d: %s\n", i, name);
+            }
+            printf("=============================\n\n");
+
+            if (ctrl.cudaDeviceNumber >= deviceNum)
+            {
+                printf("Invalid device number\n");
+                exit(1);
             }
 
             printf("Select device %d\n", ctrl.cudaDeviceNumber);
