@@ -66,7 +66,7 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd2;
+	mul.f64   	%fd1, %fd1, %fd2;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -107,8 +107,8 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd3;
-	add.f64  	%fd2, %fd1, %fd4;
+	mul.f64   	%fd1, %fd1, %fd3;
+	mul.f64   	%fd2, %fd1, %fd4;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -152,9 +152,9 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd4;
-	add.f64  	%fd2, %fd1, %fd5;
-	add.f64  	%fd3, %fd2, %fd6;
+	mul.f64   	%fd1, %fd1, %fd4;
+	mul.f64   	%fd2, %fd1, %fd5;
+	mul.f64   	%fd3, %fd2, %fd6;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -201,10 +201,10 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd5;
-	add.f64  	%fd2, %fd1, %fd6;
-	add.f64  	%fd3, %fd2, %fd7;
-	add.f64  	%fd4, %fd3, %fd8;
+	mul.f64   	%fd1, %fd1, %fd5;
+	mul.f64   	%fd2, %fd1, %fd6;
+	mul.f64   	%fd3, %fd2, %fd7;
+	mul.f64   	%fd4, %fd3, %fd8;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -254,11 +254,11 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd6;
-	add.f64  	%fd2, %fd1, %fd7;
-	add.f64  	%fd3, %fd2, %fd8;
-	add.f64  	%fd4, %fd3, %fd9;
-	add.f64  	%fd5, %fd4, %fd10;
+	mul.f64   	%fd1, %fd1, %fd6;
+	mul.f64   	%fd2, %fd1, %fd7;
+	mul.f64   	%fd3, %fd2, %fd8;
+	mul.f64   	%fd4, %fd3, %fd9;
+	mul.f64   	%fd5, %fd4, %fd10;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -311,12 +311,12 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd7;
-	add.f64  	%fd2, %fd1, %fd8;
-	add.f64  	%fd3, %fd2, %fd9;
-	add.f64  	%fd4, %fd3, %fd10;
-	add.f64  	%fd5, %fd4, %fd11;
-	add.f64  	%fd6, %fd5, %fd12;
+	mul.f64   	%fd1, %fd1, %fd7;
+	mul.f64   	%fd2, %fd1, %fd8;
+	mul.f64   	%fd3, %fd2, %fd9;
+	mul.f64   	%fd4, %fd3, %fd10;
+	mul.f64   	%fd5, %fd4, %fd11;
+	mul.f64   	%fd6, %fd5, %fd12;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -372,13 +372,13 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd8;
-	add.f64  	%fd2, %fd1, %fd9;
-	add.f64  	%fd3, %fd2, %fd10;
-	add.f64  	%fd4, %fd3, %fd11;
-	add.f64  	%fd5, %fd4, %fd12;
-	add.f64  	%fd6, %fd5, %fd13;
-	add.f64  	%fd7, %fd6, %fd14;
+	mul.f64   	%fd1, %fd1, %fd8;
+	mul.f64   	%fd2, %fd1, %fd9;
+	mul.f64   	%fd3, %fd2, %fd10;
+	mul.f64   	%fd4, %fd3, %fd11;
+	mul.f64   	%fd5, %fd4, %fd12;
+	mul.f64   	%fd6, %fd5, %fd13;
+	mul.f64   	%fd7, %fd6, %fd14;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -437,14 +437,14 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd9;
-	add.f64  	%fd2, %fd1, %fd10;
-	add.f64  	%fd3, %fd2, %fd11;
-	add.f64  	%fd4, %fd3, %fd12;
-	add.f64  	%fd5, %fd4, %fd13;
-	add.f64  	%fd6, %fd5, %fd14;
-	add.f64  	%fd7, %fd6, %fd15;
-	add.f64  	%fd8, %fd7, %fd16;
+	mul.f64   	%fd1, %fd1, %fd9;
+	mul.f64   	%fd2, %fd1, %fd10;
+	mul.f64   	%fd3, %fd2, %fd11;
+	mul.f64   	%fd4, %fd3, %fd12;
+	mul.f64   	%fd5, %fd4, %fd13;
+	mul.f64   	%fd6, %fd5, %fd14;
+	mul.f64   	%fd7, %fd6, %fd15;
+	mul.f64   	%fd8, %fd7, %fd16;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -506,15 +506,15 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd10;
-	add.f64  	%fd2, %fd1, %fd11;
-	add.f64  	%fd3, %fd2, %fd12;
-	add.f64  	%fd4, %fd3, %fd13;
-	add.f64  	%fd5, %fd4, %fd14;
-	add.f64  	%fd6, %fd5, %fd15;
-	add.f64  	%fd7, %fd6, %fd16;
-	add.f64  	%fd8, %fd7, %fd17;
-	add.f64  	%fd9, %fd8, %fd18;
+	mul.f64   	%fd1, %fd1, %fd10;
+	mul.f64   	%fd2, %fd1, %fd11;
+	mul.f64   	%fd3, %fd2, %fd12;
+	mul.f64   	%fd4, %fd3, %fd13;
+	mul.f64   	%fd5, %fd4, %fd14;
+	mul.f64   	%fd6, %fd5, %fd15;
+	mul.f64   	%fd7, %fd6, %fd16;
+	mul.f64   	%fd8, %fd7, %fd17;
+	mul.f64   	%fd9, %fd8, %fd18;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -579,16 +579,16 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd11;
-	add.f64  	%fd2, %fd1, %fd12;
-	add.f64  	%fd3, %fd2, %fd13;
-	add.f64  	%fd4, %fd3, %fd14;
-	add.f64  	%fd5, %fd4, %fd15;
-	add.f64  	%fd6, %fd5, %fd16;
-	add.f64  	%fd7, %fd6, %fd17;
-	add.f64  	%fd8, %fd7, %fd18;
-	add.f64  	%fd9, %fd8, %fd19;
-	add.f64  	%fd10, %fd9, %fd20;
+	mul.f64   	%fd1, %fd1, %fd11;
+	mul.f64   	%fd2, %fd1, %fd12;
+	mul.f64   	%fd3, %fd2, %fd13;
+	mul.f64   	%fd4, %fd3, %fd14;
+	mul.f64   	%fd5, %fd4, %fd15;
+	mul.f64   	%fd6, %fd5, %fd16;
+	mul.f64   	%fd7, %fd6, %fd17;
+	mul.f64   	%fd8, %fd7, %fd18;
+	mul.f64   	%fd9, %fd8, %fd19;
+	mul.f64   	%fd10, %fd9, %fd20;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -638,8 +638,8 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd3;
-	add.f64  	%fd2, %fd2, %fd4;
+	mul.f64   	%fd1, %fd1, %fd3;
+	mul.f64   	%fd2, %fd2, %fd4;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -683,9 +683,9 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd4;
-	add.f64  	%fd2, %fd2, %fd5;
-	add.f64  	%fd3, %fd3, %fd6;
+	mul.f64   	%fd1, %fd1, %fd4;
+	mul.f64   	%fd2, %fd2, %fd5;
+	mul.f64   	%fd3, %fd3, %fd6;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -732,10 +732,10 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd5;
-	add.f64  	%fd2, %fd2, %fd6;
-	add.f64  	%fd3, %fd3, %fd7;
-	add.f64  	%fd4, %fd4, %fd8;
+	mul.f64   	%fd1, %fd1, %fd5;
+	mul.f64   	%fd2, %fd2, %fd6;
+	mul.f64   	%fd3, %fd3, %fd7;
+	mul.f64   	%fd4, %fd4, %fd8;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -785,11 +785,11 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd6;
-	add.f64  	%fd2, %fd2, %fd7;
-	add.f64  	%fd3, %fd3, %fd8;
-	add.f64  	%fd4, %fd4, %fd9;
-	add.f64  	%fd5, %fd5, %fd10;
+	mul.f64   	%fd1, %fd1, %fd6;
+	mul.f64   	%fd2, %fd2, %fd7;
+	mul.f64   	%fd3, %fd3, %fd8;
+	mul.f64   	%fd4, %fd4, %fd9;
+	mul.f64   	%fd5, %fd5, %fd10;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -842,12 +842,12 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd7;
-	add.f64  	%fd2, %fd2, %fd8;
-	add.f64  	%fd3, %fd3, %fd9;
-	add.f64  	%fd4, %fd4, %fd10;
-	add.f64  	%fd5, %fd5, %fd11;
-	add.f64  	%fd6, %fd6, %fd12;
+	mul.f64   	%fd1, %fd1, %fd7;
+	mul.f64   	%fd2, %fd2, %fd8;
+	mul.f64   	%fd3, %fd3, %fd9;
+	mul.f64   	%fd4, %fd4, %fd10;
+	mul.f64   	%fd5, %fd5, %fd11;
+	mul.f64   	%fd6, %fd6, %fd12;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -903,13 +903,13 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd8;
-	add.f64  	%fd2, %fd2, %fd9;
-	add.f64  	%fd3, %fd3, %fd10;
-	add.f64  	%fd4, %fd4, %fd11;
-	add.f64  	%fd5, %fd5, %fd12;
-	add.f64  	%fd6, %fd6, %fd13;
-	add.f64  	%fd7, %fd7, %fd14;
+	mul.f64   	%fd1, %fd1, %fd8;
+	mul.f64   	%fd2, %fd2, %fd9;
+	mul.f64   	%fd3, %fd3, %fd10;
+	mul.f64   	%fd4, %fd4, %fd11;
+	mul.f64   	%fd5, %fd5, %fd12;
+	mul.f64   	%fd6, %fd6, %fd13;
+	mul.f64   	%fd7, %fd7, %fd14;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -968,14 +968,14 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd9;
-	add.f64  	%fd2, %fd2, %fd10;
-	add.f64  	%fd3, %fd3, %fd11;
-	add.f64  	%fd4, %fd4, %fd12;
-	add.f64  	%fd5, %fd5, %fd13;
-	add.f64  	%fd6, %fd6, %fd14;
-	add.f64  	%fd7, %fd7, %fd15;
-	add.f64  	%fd8, %fd8, %fd16;
+	mul.f64   	%fd1, %fd1, %fd9;
+	mul.f64   	%fd2, %fd2, %fd10;
+	mul.f64   	%fd3, %fd3, %fd11;
+	mul.f64   	%fd4, %fd4, %fd12;
+	mul.f64   	%fd5, %fd5, %fd13;
+	mul.f64   	%fd6, %fd6, %fd14;
+	mul.f64   	%fd7, %fd7, %fd15;
+	mul.f64   	%fd8, %fd8, %fd16;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -1037,15 +1037,15 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd10;
-	add.f64  	%fd2, %fd2, %fd11;
-	add.f64  	%fd3, %fd3, %fd12;
-	add.f64  	%fd4, %fd4, %fd13;
-	add.f64  	%fd5, %fd5, %fd14;
-	add.f64  	%fd6, %fd6, %fd15;
-	add.f64  	%fd7, %fd7, %fd16;
-	add.f64  	%fd8, %fd8, %fd17;
-	add.f64  	%fd9, %fd9, %fd18;
+	mul.f64   	%fd1, %fd1, %fd10;
+	mul.f64   	%fd2, %fd2, %fd11;
+	mul.f64   	%fd3, %fd3, %fd12;
+	mul.f64   	%fd4, %fd4, %fd13;
+	mul.f64   	%fd5, %fd5, %fd14;
+	mul.f64   	%fd6, %fd6, %fd15;
+	mul.f64   	%fd7, %fd7, %fd16;
+	mul.f64   	%fd8, %fd8, %fd17;
+	mul.f64   	%fd9, %fd9, %fd18;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
@@ -1110,16 +1110,16 @@ BB0_2:
 
 BB0_1:
 	mov.u32 	%r2, %clock;
-	add.f64  	%fd1, %fd1, %fd11;
-	add.f64  	%fd2, %fd2, %fd12;
-	add.f64  	%fd3, %fd3, %fd13;
-	add.f64  	%fd4, %fd4, %fd14;
-	add.f64  	%fd5, %fd5, %fd15;
-	add.f64  	%fd6, %fd6, %fd16;
-	add.f64  	%fd7, %fd7, %fd17;
-	add.f64  	%fd8, %fd8, %fd18;
-	add.f64  	%fd9, %fd9, %fd19;
-	add.f64  	%fd10, %fd10, %fd20;
+	mul.f64   	%fd1, %fd1, %fd11;
+	mul.f64   	%fd2, %fd2, %fd12;
+	mul.f64   	%fd3, %fd3, %fd13;
+	mul.f64   	%fd4, %fd4, %fd14;
+	mul.f64   	%fd5, %fd5, %fd15;
+	mul.f64   	%fd6, %fd6, %fd16;
+	mul.f64   	%fd7, %fd7, %fd17;
+	mul.f64   	%fd8, %fd8, %fd18;
+	mul.f64   	%fd9, %fd9, %fd19;
+	mul.f64   	%fd10, %fd10, %fd20;
 	mov.u32 	%r3, %clock;
 	add.s32 	%r1, %r1, -1;
 	setp.gt.s32	%p2, %r1, 0;
