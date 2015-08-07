@@ -49,7 +49,7 @@ public:
     Type dataType;
     char *ptxFileName;
     vector <char *> ptxKernelName;
-    
+
     unsigned int *hostTime;
     unsigned int *deviceTime;
 
@@ -59,6 +59,8 @@ public:
     void *deviceData;
     size_t sizeOfData;
 
+    int cudaDeviceNumber;
+
     bool useOriginKernel;
 
     CUDATestHelper():
@@ -67,6 +69,7 @@ public:
         hostData(NULL),
         hostData_int(NULL),
         hostData_dbl(NULL),
+        cudaDeviceNumber(0),
         sizeOfData(0) {}
 
     ~CUDATestHelper()
@@ -74,7 +77,7 @@ public:
         /* use strdup */
         if (ptxFileName)
             free(ptxFileName);
-        
+
         /* use strdup */
         for (unsigned int i = 0 ; i < ptxKernelName.size(); i ++)
             free(ptxKernelName[i]);
@@ -87,7 +90,7 @@ public:
 
         if (hostData_dbl)
             delete [] hostData_dbl;
-        
+
         ptxKernelName.clear();
     }
 
@@ -95,27 +98,26 @@ public:
 
 void InitialAndParseArgs(int argc, char* argv[], CUDATestHelper &helper)
 {
-    if (argc != 7)
+    char* short_options = strdup("f:k:t:d:");
+    struct option long_options[] =
     {
-        fprintf(stderr, "executable -f <ptx_file> -k <test_case_file> -t <0:INT, 1:DBL>\n");
-        exit(1);
-    }
-
-    char* short_options = strdup("f:k:t:");
-    struct option long_options[] = 
-    { 
         {"ptxFile", required_argument, NULL, 'f'},
         {"ptxKernelFile", required_argument, NULL, 'k'},
         {"type", required_argument, NULL, 't'},
-        /* option end */ 
-        {0, 0, 0, 0} 
-    }; 
+        {"cudaDevice", required_argument, NULL, 'd'},
+        /* option end */
+        {0, 0, 0, 0}
+    };
     int optionIdx = 0;
     int optGet;
     while ((optGet = getopt_long(argc, argv, short_options, long_options, &optionIdx)) != -1)
     {
         switch (optGet)
         {
+            case 'd':
+                helper.cudaDeviceNumber = atoi(optarg);
+                break;
+
             case 'f':
                 helper.ptxFileName = strdup(optarg);
                 break;
@@ -144,7 +146,7 @@ void InitialAndParseArgs(int argc, char* argv[], CUDATestHelper &helper)
                             helper.sizeOfData = DATA_SIZE * sizeof(int);
                             helper.hostData = helper.hostData_int;
                             break;
-                        
+
                         case TYPE_DBL:
                             helper.hostData_dbl = new double[DATA_SIZE];
                             helper.dataType = TYPE_DBL;
@@ -164,10 +166,26 @@ void InitialAndParseArgs(int argc, char* argv[], CUDATestHelper &helper)
         }
     }
 
+    if (helper.hostData == NULL || helper.ptxFileName == NULL || helper.ptxKernelName.size() == 0)
+    {
+        fprintf(stderr, "executable -f <ptx_file> -k <test_case_file> -t <0:INT, 1:DBL> [-d <device_numver>]\n");
+        exit(1);
+    }
+
     free(short_options);
     helper.hostTime = new unsigned int[2];
     helper.hostTime[0] = 0;
     helper.hostTime[1] = 0;
+
+    // Get selected device name
+    {
+        cudaError_t error;
+        cudaDeviceProp properties;
+        error = cudaGetDeviceProperties(&properties, helper.cudaDeviceNumber);
+        CHECK_CUDA_ERROR(error);
+        fprintf(stderr, "Select device: %s\n\n", properties.name);
+    }
+    cudaSetDevice(helper.cudaDeviceNumber);
 }
 
 #endif
