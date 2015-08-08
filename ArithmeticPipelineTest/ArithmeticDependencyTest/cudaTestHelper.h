@@ -60,6 +60,7 @@ public:
     size_t sizeOfData;
 
     int cudaDeviceNumber;
+    int testIteration;
 
     bool useOriginKernel;
 
@@ -70,6 +71,7 @@ public:
         hostData_int(NULL),
         hostData_dbl(NULL),
         cudaDeviceNumber(0),
+        testIteration(1),
         sizeOfData(0) {}
 
     ~CUDATestHelper()
@@ -98,13 +100,14 @@ public:
 
 void InitialAndParseArgs(int argc, char* argv[], CUDATestHelper &helper)
 {
-    char* short_options = strdup("f:k:t:d:");
+    char* short_options = strdup("f:k:t:d:i:");
     struct option long_options[] =
     {
         {"ptxFile", required_argument, NULL, 'f'},
         {"ptxKernelFile", required_argument, NULL, 'k'},
         {"type", required_argument, NULL, 't'},
         {"cudaDevice", required_argument, NULL, 'd'},
+        {"iteration", required_argument, NULL, 'i'},
         /* option end */
         {0, 0, 0, 0}
     };
@@ -114,6 +117,10 @@ void InitialAndParseArgs(int argc, char* argv[], CUDATestHelper &helper)
     {
         switch (optGet)
         {
+        	case 'i':
+        		helper.testIteration = atoi(optarg);
+        		break;
+
             case 'd':
                 helper.cudaDeviceNumber = atoi(optarg);
                 break;
