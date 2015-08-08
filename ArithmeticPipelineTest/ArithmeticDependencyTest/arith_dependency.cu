@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     CUDATestHelper helper;
     InitialAndParseArgs(argc, argv, helper);
     int kernelIter = 2;
-    unsigned executionTime;
+    double executionTime;
 
     printf("Run testcase for %d iterations\n", helper.testIteration);
     for (unsigned int idx = 0 ; idx < helper.ptxKernelName.size() ; idx ++)
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	        executionTime += (helper.hostTime[1] - helper.hostTime[0]);
 		}
 		executionTime /= helper.testIteration;
-        printf("%-50s %u\n", helper.ptxKernelName[idx], executionTime);
+        printf("%-50s %lf\n", helper.ptxKernelName[idx], executionTime);
     }
 
     return 0;
