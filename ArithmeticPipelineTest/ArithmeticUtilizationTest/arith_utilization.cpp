@@ -292,7 +292,10 @@ void HostDataCreation(void* &data)
                 int *tmp;
                 tmp = (int *)data;
                 for (int i = 0 ; i < DATA_SIZE ; i ++)
+                {
                     tmp[i] = (rand() % INT_MAX);
+                    tmp[i] += (tmp[i] % 2) + 1;
+                }
             }
             break;
         case TYPE_DOUBLE:
@@ -418,7 +421,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stdout, "\n[Execution time] %lu ns\n", (endTime - startTime));
+    fprintf(stdout, "\n['%s' execution time] %lu ns\n", g_opencl_ctrl.kernelName, (endTime - startTime));
 
     /* Read the output */
 
