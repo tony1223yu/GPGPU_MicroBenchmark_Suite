@@ -20,6 +20,7 @@
 #define CL_FILE_NAME "arith_utilization.bin"
 #define PTX_FILE_NAME "arith_utilization.ptx"
 #define DATA_SIZE 20
+#define POWER_LOG_FILE_LEN 200
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
         do                                                                                                                          \
@@ -49,8 +50,9 @@ struct OpenCL_Ctrl
     int local_size;
     int iteration;
     char *kernelName;
+    char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL) {}
+    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL) {sprintf(powerFile, "KernelExecution.log");}
     ~OpenCL_Ctrl()
     {
         if (kernelName)
@@ -72,7 +74,7 @@ void PrintTimingInfo(FILE* fptr)
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:t:i:g:l:k:");
+    char* short_options = strdup("p:d:t:i:g:l:k:o:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
@@ -82,6 +84,7 @@ void CommandParser(int argc, char *argv[])
         {"globalSize", required_argument, NULL, 'g'},
         {"localSize", required_argument, NULL, 'l'},
         {"kernelName", required_argument, NULL, 'k'},
+        {"powerLogFile", required_argument, NULL, 'o'},
         /* option end */
         {0, 0, 0, 0}
     };
@@ -97,6 +100,10 @@ void CommandParser(int argc, char *argv[])
 
         switch (cmd)
         {
+            case 'o':
+                sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
+                break;
+
             case 'k':
                 g_opencl_ctrl.kernelName = strdup(optarg);
                 break;
@@ -326,7 +333,7 @@ int main(int argc, char *argv[])
     cl_event event;
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
-    FILE* fptr = fopen("/home/tony/OpenCL_Benchmark/NVML/KernelExecution.log", "w");
+    FILE* fptr;
 
     void* hostData = NULL;
 
@@ -335,6 +342,7 @@ int main(int argc, char *argv[])
     HostDataCreation(hostData);
 
     GetPlatformAndDevice(platform, device);
+    fptr = fopen(g_opencl_ctrl.powerFile, "w");
 
     /* Create context */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &error);
@@ -385,12 +393,14 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     PrintTimingInfo(fptr);
+
     globalSize[0] = g_opencl_ctrl.global_size;
     localSize[0] = g_opencl_ctrl.local_size;
     error = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, globalSize, localSize, 0, NULL, &event);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
+
     PrintTimingInfo(fptr);
     fclose(fptr);
 

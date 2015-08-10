@@ -15,7 +15,7 @@
  * -l        : show power limit
  */
 
-#define MAX_FILE_LEN 50
+#define MAX_FILE_LEN 200
 
 typedef struct GlobalCtrl
 {
@@ -54,7 +54,7 @@ bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
 
             case 'o':
                 memset(ctrl->outputFile, 0, MAX_FILE_LEN);
-                memcpy(ctrl->outputFile, optarg, sizeof(optarg));
+                sprintf(ctrl->outputFile, "%s", optarg);
                 break;
 
             case 'u':
