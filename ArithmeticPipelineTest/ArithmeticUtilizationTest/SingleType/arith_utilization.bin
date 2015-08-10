@@ -2605,7 +2605,6 @@ BB2_1:
 	add.f64 	%fd23, %fd23, %fd25;
 	add.f64 	%fd24, %fd24, %fd25;
 	add.f64 	%fd27, %fd27, %fd25;
-    shl.b64     %fd25, %fd25, 10;
 	add.f64     %fd25, %fd25, 0d41D26580B486522C;
     add.s32 	%r4, %r4, -1;
 	setp.gt.s32	%p2, %r4, 0;
@@ -2952,7 +2951,6 @@ BB2_1:
 	add.f64 	%fd7, %fd23, %fd25;
 	add.f64 	%fd8, %fd24, %fd25;
 	add.f64 	%fd9, %fd27, %fd25;
-	shl.b64     %fd25, %fd25, 10;
 	add.f64     %fd25, %fd25, 0d41D26580B486522C;
     add.s32 	%r4, %r4, -1;
 	setp.gt.s32	%p2, %r4, 0;
@@ -3299,7 +3297,6 @@ BB2_1:
 	add.f64 	%fd8, %fd23, %fd25;
 	add.f64 	%fd9, %fd24, %fd25;
 	add.f64 	%fd10, %fd27, %fd25;
-    shl.b64     %fd25, %fd25, 10;
 	add.f64     %fd25, %fd25, 0d41D26580B486522C;
     add.s32 	%r4, %r4, -1;
 	setp.gt.s32	%p2, %r4, 0;
@@ -3646,7 +3643,6 @@ BB2_1:
 	add.f64 	%fd27, %fd23, %fd25;
 	add.f64 	%fd6, %fd24, %fd25;
 	add.f64 	%fd7, %fd27, %fd25;
-	shl.b64     %fd25, %fd25, 10;
 	add.f64     %fd25, %fd25, 0d41D26580B486522C;
     add.s32 	%r4, %r4, -1;
 	setp.gt.s32	%p2, %r4, 0;
@@ -3993,7 +3989,6 @@ BB2_1:
 	add.f64 	%fd8, %fd23, %fd25;
 	add.f64 	%fd9, %fd24, %fd25;
 	add.f64 	%fd10, %fd27, %fd25;
-	shl.b64     %fd25, %fd25, 10;
 	add.f64     %fd25, %fd25, 0d41D26580B486522C;
     add.s32 	%r4, %r4, -1;
 	setp.gt.s32	%p2, %r4, 0;
@@ -4340,7 +4335,6 @@ BB2_1:
 	add.f64 	%fd27, %fd23, %fd25;
 	add.f64 	%fd6, %fd24, %fd25;
 	add.f64 	%fd7, %fd27, %fd25;
-	shl.b64     %fd25, %fd25, 10;
 	add.f64     %fd25, %fd25, 0d41D26580B486522C;
     add.s32 	%r4, %r4, -1;
 	setp.gt.s32	%p2, %r4, 0;
@@ -4687,7 +4681,6 @@ BB2_1:
 	add.f64 	%fd24, %fd23, %fd25;
 	add.f64 	%fd27, %fd24, %fd25;
 	add.f64 	%fd6, %fd27, %fd25;
-	shl.b64     %fd25, %fd25, 10;
 	add.f64     %fd25, %fd25, 0d41D26580B486522C;
     add.s32 	%r4, %r4, -1;
 	setp.gt.s32	%p2, %r4, 0;
