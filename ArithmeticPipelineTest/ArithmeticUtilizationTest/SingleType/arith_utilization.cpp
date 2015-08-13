@@ -214,7 +214,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
 
     queryString = (char *)malloc(sizeof(char) * length);
     clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
-    fprintf(stdout, "Device selected: '%s'\n", queryString);
+    fprintf(stderr, "Device selected: '%s'\n", queryString);
 
     /* Free the space */
     free(platforms);
@@ -264,7 +264,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         error = clGetProgramBuildInfo(target_program, device, CL_PROGRAM_BUILD_LOG, logSize + 1, programBuildLog, NULL);
         CHECK_CL_ERROR(error);
 
-        fprintf(stdout, "%s\n", programBuildLog);
+        fprintf(stderr, "%s\n", programBuildLog);
         free(programBuildLog);
         exit(1);
     }
@@ -362,23 +362,23 @@ int main(int argc, char *argv[])
     error = clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(size_t), &warpSize, NULL);
     CHECK_CL_ERROR(error);
 
-    fprintf(stdout, "\nData before process:\n");
+    fprintf(stderr, "\nData before process:\n");
     switch (g_opencl_ctrl.dataType)
     {
         case TYPE_INT:
             {
                 int *intptr = (int *)(hostData);
                 for (int i = 0 ; i < DATA_SIZE ; i ++)
-                    fprintf(stdout, "%d ", intptr[i]);
-                fprintf(stdout, "\n");
+                    fprintf(stderr, "%d ", intptr[i]);
+                fprintf(stderr, "\n");
             }
             break;
         case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
                 for (int i = 0 ; i < DATA_SIZE ; i ++)
-                    fprintf(stdout, "%lf ", dblptr[i]);
-                fprintf(stdout, "\n");
+                    fprintf(stderr, "%lf ", dblptr[i]);
+                fprintf(stderr, "\n");
             }
     }
 
@@ -407,23 +407,23 @@ int main(int argc, char *argv[])
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
-    fprintf(stdout, "\nData after process:\n");
+    fprintf(stderr, "\nData after process:\n");
     switch (g_opencl_ctrl.dataType)
     {
         case TYPE_INT:
             {
                 int *intptr = (int *)(hostData);
                 for (int i = 0 ; i < DATA_SIZE ; i ++)
-                    fprintf(stdout, "%d ", intptr[i]);
-                fprintf(stdout, "\n");
+                    fprintf(stderr, "%d ", intptr[i]);
+                fprintf(stderr, "\n");
             }
             break;
         case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
                 for (int i = 0 ; i < DATA_SIZE ; i ++)
-                    fprintf(stdout, "%lf ", dblptr[i]);
-                fprintf(stdout, "\n");
+                    fprintf(stderr, "%lf ", dblptr[i]);
+                fprintf(stderr, "\n");
             }
     }
     /* Event profiling */
@@ -431,7 +431,8 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stdout, "\n['%s' execution time] %lu ns\n", g_opencl_ctrl.kernelName, (endTime - startTime));
+    fprintf(stderr, "\n['%s' execution time] %lu ns\n", g_opencl_ctrl.kernelName, (endTime - startTime));
+    fprintf(stdout, "%lu\n", (endTime - startTime));
 
     /* Read the output */
 
