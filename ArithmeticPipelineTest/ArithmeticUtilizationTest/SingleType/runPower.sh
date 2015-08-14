@@ -4,15 +4,9 @@ TRACE_TIME=$2
 PLATFORM=$3
 DEVICE=$4
 ITERATION=$5
-GLOBAL_SIZE=$6
-LOCAL_SIZE=$7
-
-echo "${TEST_NAME}" | grep -q Integer
-if [ $? == 0 ]; then
-    TYPE=0;
-else
-    TYPE=1;
-fi
+TYPE=$6
+GLOBAL_SIZE=$7
+LOCAL_SIZE=$8
 
 ${NVML_DIR}/PowerUsage -t 5 -T ${TRACE_TIME} -D ${DEVICE} -o ${NVML_DIR}'/PowerUsageOutput.log' &
 for (( i = 0 ; i < 10 ; i ++ ))

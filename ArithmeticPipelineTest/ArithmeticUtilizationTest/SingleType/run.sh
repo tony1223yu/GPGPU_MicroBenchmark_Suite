@@ -1,16 +1,10 @@
-platform=$1;
-device=$2;
+platform=$1
+device=$2
 testcase=$3
-iteration=$4;
-global=$5;
-local=$6;
-
-echo "${TEST_NAME}" | grep -q Integer
-if [ $? == 0 ]; then
-    TYPE=0;
-else
-    TYPE=1;
-fi
+iteration=$4
+TYPE=$5
+global=$6
+local=$7
 
 for (( i = 1 ; i <= 10 ; i ++ ))
 do

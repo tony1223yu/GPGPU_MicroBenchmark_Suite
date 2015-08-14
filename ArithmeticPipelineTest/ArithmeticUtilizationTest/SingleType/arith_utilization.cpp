@@ -36,6 +36,7 @@
 enum DATA_TYPE
 {
     TYPE_INT = 0,
+    TYPE_FLOAT = 1,
     TYPE_DOUBLE
 };
 
@@ -136,6 +137,9 @@ void CommandParser(int argc, char *argv[])
                         case TYPE_INT:
                             g_opencl_ctrl.dataType = TYPE_INT;
                             break;
+                        case TYPE_FLOAT:
+                            g_opencl_ctrl.dataType = TYPE_FLOAT;
+                            break;
                         case TYPE_DOUBLE:
                             g_opencl_ctrl.dataType = TYPE_DOUBLE;
                             break;
@@ -165,6 +169,9 @@ void CommandParser(int argc, char *argv[])
     {
         case TYPE_INT:
             g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(int);
+            break;
+        case TYPE_FLOAT:
+            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(float);
             break;
         case TYPE_DOUBLE:
             g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(double);
@@ -305,7 +312,19 @@ void HostDataCreation(void* &data)
                 }
             }
             break;
-        case TYPE_DOUBLE:
+         case TYPE_FLOAT:
+            {
+                float *tmp;
+                tmp = (float *)data;
+                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                {
+                    tmp[i] = ((float)(rand()) / RAND_MAX) * 1e5;
+                    if (i % 2 == 0)
+                        tmp[i] *= -1;
+                }
+            }
+           break;
+         case TYPE_DOUBLE:
             {
                 double *tmp;
                 tmp = (double *)data;
@@ -373,13 +392,22 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "\n");
             }
             break;
-        case TYPE_DOUBLE:
+        case TYPE_FLOAT:
+            {
+                float *fltptr = (float *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                    fprintf(stderr, "%f ", fltptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
+       case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
                 for (int i = 0 ; i < DATA_SIZE ; i ++)
                     fprintf(stderr, "%lf ", dblptr[i]);
                 fprintf(stderr, "\n");
             }
+            break;
     }
 
     /* Create buffers */
@@ -418,14 +446,24 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "\n");
             }
             break;
-        case TYPE_DOUBLE:
+        case TYPE_FLOAT:
+            {
+                float *fltptr = (float *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                    fprintf(stderr, "%f ", fltptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
+       case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
                 for (int i = 0 ; i < DATA_SIZE ; i ++)
                     fprintf(stderr, "%lf ", dblptr[i]);
                 fprintf(stderr, "\n");
             }
+            break;
     }
+
     /* Event profiling */
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(startTime), &startTime, NULL);
     CHECK_CL_ERROR(error);

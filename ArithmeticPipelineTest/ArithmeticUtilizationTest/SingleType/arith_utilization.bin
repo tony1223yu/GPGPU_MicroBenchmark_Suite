@@ -96,6 +96,93 @@ BB0_2:
 	ret;
 }
 
+.entry Float_addition_0_20(
+	.param .u64 .ptr .global .align 8 Float_addition_0_20_param_0,
+	.param .u32 Float_addition_0_20_param_1
+)
+{
+	.reg .pred 	%p<3>;
+	.reg .b32 	%r<5>;
+	.reg .f32 	%f<28>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.param.u64 	%rd1, [Float_addition_0_20_param_0];
+	ld.param.u32 	%r4, [Float_addition_0_20_param_1];
+    ld.global.f32 	%f6, [%rd1];
+	ld.global.f32 	%f7, [%rd1+4];
+	ld.global.f32 	%f8, [%rd1+8];
+	ld.global.f32 	%f9, [%rd1+12];
+	ld.global.f32 	%f10, [%rd1+16];
+	ld.global.f32 	%f11, [%rd1+20];
+	ld.global.f32 	%f12, [%rd1+24];
+	ld.global.f32 	%f13, [%rd1+28];
+	ld.global.f32 	%f14, [%rd1+32];
+	ld.global.f32 	%f15, [%rd1+36];
+	ld.global.f32 	%f16, [%rd1+40];
+	ld.global.f32 	%f17, [%rd1+44];
+	ld.global.f32 	%f18, [%rd1+48];
+	ld.global.f32 	%f19, [%rd1+52];
+	ld.global.f32 	%f20, [%rd1+56];
+	ld.global.f32 	%f21, [%rd1+60];
+	ld.global.f32 	%f22, [%rd1+64];
+	ld.global.f32 	%f23, [%rd1+68];
+	ld.global.f32 	%f24, [%rd1+72];
+	ld.global.f32 	%f27, [%rd1+76];
+	mov.f32 	%f25, %f6;
+	setp.lt.s32	%p1, %r4, 1;
+	@%p1 bra 	BB2_2;
+
+BB2_1:
+	add.f32 	%f6, %f6, %f25;
+	add.f32 	%f7, %f7, %f25;
+	add.f32 	%f8, %f8, %f25;
+	add.f32 	%f9, %f9, %f25;
+	add.f32 	%f10, %f10, %f25;
+	add.f32 	%f11, %f11, %f25;
+	add.f32 	%f12, %f12, %f25;
+	add.f32 	%f13, %f13, %f25;
+	add.f32 	%f14, %f14, %f25;
+	add.f32 	%f15, %f15, %f25;
+	add.f32 	%f16, %f16, %f25;
+	add.f32 	%f17, %f17, %f25;
+	add.f32 	%f18, %f18, %f25;
+	add.f32 	%f19, %f19, %f25;
+	add.f32 	%f20, %f20, %f25;
+	add.f32 	%f21, %f21, %f25;
+	add.f32 	%f22, %f22, %f25;
+	add.f32 	%f23, %f23, %f25;
+	add.f32 	%f24, %f24, %f25;
+	add.f32 	%f27, %f27, %f25;
+	mul.f32     %f25, %f25, 0Fbf800000;
+    add.s32 	%r4, %r4, -1;
+	setp.gt.s32	%p2, %r4, 0;
+	@%p2 bra 	BB2_1;
+
+BB2_2:
+	st.global.f32 	[%rd1], %f6;
+	st.global.f32 	[%rd1+4], %f7;
+	st.global.f32 	[%rd1+8], %f8;
+	st.global.f32 	[%rd1+12], %f9;
+	st.global.f32 	[%rd1+16], %f10;
+	st.global.f32 	[%rd1+20], %f11;
+	st.global.f32 	[%rd1+24], %f12;
+	st.global.f32 	[%rd1+28], %f13;
+	st.global.f32 	[%rd1+32], %f14;
+	st.global.f32 	[%rd1+36], %f15;
+	st.global.f32 	[%rd1+40], %f16;
+	st.global.f32 	[%rd1+44], %f17;
+	st.global.f32 	[%rd1+48], %f18;
+	st.global.f32 	[%rd1+52], %f19;
+	st.global.f32 	[%rd1+56], %f20;
+	st.global.f32 	[%rd1+60], %f21;
+	st.global.f32 	[%rd1+64], %f22;
+	st.global.f32 	[%rd1+68], %f23;
+	st.global.f32 	[%rd1+72], %f24;
+	st.global.f32 	[%rd1+76], %f27;
+	ret;
+}
+
 .entry Double_addition_0_20(
 	.param .u64 .ptr .global .align 8 Double_addition_0_20_param_0,
 	.param .u32 Double_addition_0_20_param_1
@@ -439,6 +526,93 @@ BB0_2:
 	st.global.u32 	[%rd1+68], %r26;
 	st.global.u32 	[%rd1+72], %r27;
 	st.global.u32 	[%rd1+76], %r30;
+	ret;
+}
+
+.entry Float_addition_5_20(
+	.param .u64 .ptr .global .align 8 Float_addition_5_20_param_0,
+	.param .u32 Float_addition_5_20_param_1
+)
+{
+	.reg .pred 	%p<3>;
+	.reg .b32 	%r<5>;
+	.reg .f32 	%f<28>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.param.u64 	%rd1, [Float_addition_5_20_param_0];
+	ld.param.u32 	%r4, [Float_addition_5_20_param_1];
+    ld.global.f32 	%f6, [%rd1];
+	ld.global.f32 	%f7, [%rd1+4];
+	ld.global.f32 	%f8, [%rd1+8];
+	ld.global.f32 	%f9, [%rd1+12];
+	ld.global.f32 	%f10, [%rd1+16];
+	ld.global.f32 	%f11, [%rd1+20];
+	ld.global.f32 	%f12, [%rd1+24];
+	ld.global.f32 	%f13, [%rd1+28];
+	ld.global.f32 	%f14, [%rd1+32];
+	ld.global.f32 	%f15, [%rd1+36];
+	ld.global.f32 	%f16, [%rd1+40];
+	ld.global.f32 	%f17, [%rd1+44];
+	ld.global.f32 	%f18, [%rd1+48];
+	ld.global.f32 	%f19, [%rd1+52];
+	ld.global.f32 	%f20, [%rd1+56];
+	ld.global.f32 	%f21, [%rd1+60];
+	ld.global.f32 	%f22, [%rd1+64];
+	ld.global.f32 	%f23, [%rd1+68];
+	ld.global.f32 	%f24, [%rd1+72];
+	ld.global.f32 	%f27, [%rd1+76];
+	mov.f32 	%f25, %f6;
+	setp.lt.s32	%p1, %r4, 1;
+	@%p1 bra 	BB2_2;
+
+BB2_1:
+	add.f32 	%f10, %f6, %f25;
+	add.f32 	%f11, %f7, %f25;
+	add.f32 	%f12, %f8, %f25;
+	add.f32 	%f13, %f9, %f25;
+	add.f32 	%f14, %f10, %f25;
+	add.f32 	%f15, %f11, %f25;
+	add.f32 	%f16, %f12, %f25;
+	add.f32 	%f17, %f13, %f25;
+	add.f32 	%f18, %f14, %f25;
+	add.f32 	%f19, %f15, %f25;
+	add.f32 	%f20, %f16, %f25;
+	add.f32 	%f21, %f17, %f25;
+	add.f32 	%f22, %f18, %f25;
+	add.f32 	%f23, %f19, %f25;
+	add.f32 	%f24, %f20, %f25;
+	add.f32 	%f27, %f21, %f25;
+	add.f32 	%f6, %f22, %f25;
+	add.f32 	%f7, %f23, %f25;
+	add.f32 	%f8, %f24, %f25;
+	add.f32 	%f9, %f27, %f25;
+	mul.f32     %f25, %f25, 0Fbf800000;
+    add.s32 	%r4, %r4, -1;
+	setp.gt.s32	%p2, %r4, 0;
+	@%p2 bra 	BB2_1;
+
+BB2_2:
+	st.global.f32 	[%rd1], %f6;
+	st.global.f32 	[%rd1+4], %f7;
+	st.global.f32 	[%rd1+8], %f8;
+	st.global.f32 	[%rd1+12], %f9;
+	st.global.f32 	[%rd1+16], %f10;
+	st.global.f32 	[%rd1+20], %f11;
+	st.global.f32 	[%rd1+24], %f12;
+	st.global.f32 	[%rd1+28], %f13;
+	st.global.f32 	[%rd1+32], %f14;
+	st.global.f32 	[%rd1+36], %f15;
+	st.global.f32 	[%rd1+40], %f16;
+	st.global.f32 	[%rd1+44], %f17;
+	st.global.f32 	[%rd1+48], %f18;
+	st.global.f32 	[%rd1+52], %f19;
+	st.global.f32 	[%rd1+56], %f20;
+	st.global.f32 	[%rd1+60], %f21;
+	st.global.f32 	[%rd1+64], %f22;
+	st.global.f32 	[%rd1+68], %f23;
+	st.global.f32 	[%rd1+72], %f24;
+	st.global.f32 	[%rd1+76], %f27;
 	ret;
 }
 
@@ -788,6 +962,93 @@ BB0_2:
 	ret;
 }
 
+.entry Float_addition_7_20(
+	.param .u64 .ptr .global .align 8 Float_addition_7_20_param_0,
+	.param .u32 Float_addition_7_20_param_1
+)
+{
+	.reg .pred 	%p<3>;
+	.reg .b32 	%r<5>;
+	.reg .f32 	%f<28>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.param.u64 	%rd1, [Float_addition_7_20_param_0];
+	ld.param.u32 	%r4, [Float_addition_7_20_param_1];
+    ld.global.f32 	%f6, [%rd1];
+	ld.global.f32 	%f7, [%rd1+4];
+	ld.global.f32 	%f8, [%rd1+8];
+	ld.global.f32 	%f9, [%rd1+12];
+	ld.global.f32 	%f10, [%rd1+16];
+	ld.global.f32 	%f11, [%rd1+20];
+	ld.global.f32 	%f12, [%rd1+24];
+	ld.global.f32 	%f13, [%rd1+28];
+	ld.global.f32 	%f14, [%rd1+32];
+	ld.global.f32 	%f15, [%rd1+36];
+	ld.global.f32 	%f16, [%rd1+40];
+	ld.global.f32 	%f17, [%rd1+44];
+	ld.global.f32 	%f18, [%rd1+48];
+	ld.global.f32 	%f19, [%rd1+52];
+	ld.global.f32 	%f20, [%rd1+56];
+	ld.global.f32 	%f21, [%rd1+60];
+	ld.global.f32 	%f22, [%rd1+64];
+	ld.global.f32 	%f23, [%rd1+68];
+	ld.global.f32 	%f24, [%rd1+72];
+	ld.global.f32 	%f27, [%rd1+76];
+	mov.f32 	%f25, %f6;
+	setp.lt.s32	%p1, %r4, 1;
+	@%p1 bra 	BB2_2;
+
+BB2_1:
+	add.f32 	%f8, %f6, %f25;
+	add.f32 	%f9, %f7, %f25;
+	add.f32 	%f10, %f8, %f25;
+	add.f32 	%f11, %f9, %f25;
+	add.f32 	%f12, %f10, %f25;
+	add.f32 	%f13, %f11, %f25;
+	add.f32 	%f14, %f12, %f25;
+	add.f32 	%f15, %f13, %f25;
+	add.f32 	%f16, %f14, %f25;
+	add.f32 	%f17, %f15, %f25;
+	add.f32 	%f21, %f16, %f25;
+	add.f32 	%f22, %f17, %f25;
+	add.f32 	%f23, %f18, %f25;
+	add.f32 	%f24, %f19, %f25;
+	add.f32 	%f27, %f20, %f25;
+	add.f32 	%f6, %f21, %f25;
+	add.f32 	%f7, %f22, %f25;
+	add.f32 	%f8, %f23, %f25;
+	add.f32 	%f9, %f24, %f25;
+	add.f32 	%f10, %f27, %f25;
+	mul.f32     %f25, %f25, 0Fbf800000;
+    add.s32 	%r4, %r4, -1;
+	setp.gt.s32	%p2, %r4, 0;
+	@%p2 bra 	BB2_1;
+
+BB2_2:
+	st.global.f32 	[%rd1], %f6;
+	st.global.f32 	[%rd1+4], %f7;
+	st.global.f32 	[%rd1+8], %f8;
+	st.global.f32 	[%rd1+12], %f9;
+	st.global.f32 	[%rd1+16], %f10;
+	st.global.f32 	[%rd1+20], %f11;
+	st.global.f32 	[%rd1+24], %f12;
+	st.global.f32 	[%rd1+28], %f13;
+	st.global.f32 	[%rd1+32], %f14;
+	st.global.f32 	[%rd1+36], %f15;
+	st.global.f32 	[%rd1+40], %f16;
+	st.global.f32 	[%rd1+44], %f17;
+	st.global.f32 	[%rd1+48], %f18;
+	st.global.f32 	[%rd1+52], %f19;
+	st.global.f32 	[%rd1+56], %f20;
+	st.global.f32 	[%rd1+60], %f21;
+	st.global.f32 	[%rd1+64], %f22;
+	st.global.f32 	[%rd1+68], %f23;
+	st.global.f32 	[%rd1+72], %f24;
+	st.global.f32 	[%rd1+76], %f27;
+	ret;
+}
+
 .entry Double_addition_7_20(
 	.param .u64 .ptr .global .align 8 Double_addition_7_20_param_0,
 	.param .u32 Double_addition_7_20_param_1
@@ -1131,6 +1392,93 @@ BB0_2:
 	st.global.u32 	[%rd1+68], %r26;
 	st.global.u32 	[%rd1+72], %r27;
 	st.global.u32 	[%rd1+76], %r30;
+	ret;
+}
+
+.entry Float_addition_10_20(
+	.param .u64 .ptr .global .align 8 Float_addition_10_20_param_0,
+	.param .u32 Float_addition_10_20_param_1
+)
+{
+	.reg .pred 	%p<3>;
+	.reg .b32 	%r<5>;
+	.reg .f32 	%f<28>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.param.u64 	%rd1, [Float_addition_10_20_param_0];
+	ld.param.u32 	%r4, [Float_addition_10_20_param_1];
+    ld.global.f32 	%f6, [%rd1];
+	ld.global.f32 	%f7, [%rd1+4];
+	ld.global.f32 	%f8, [%rd1+8];
+	ld.global.f32 	%f9, [%rd1+12];
+	ld.global.f32 	%f10, [%rd1+16];
+	ld.global.f32 	%f11, [%rd1+20];
+	ld.global.f32 	%f12, [%rd1+24];
+	ld.global.f32 	%f13, [%rd1+28];
+	ld.global.f32 	%f14, [%rd1+32];
+	ld.global.f32 	%f15, [%rd1+36];
+	ld.global.f32 	%f16, [%rd1+40];
+	ld.global.f32 	%f17, [%rd1+44];
+	ld.global.f32 	%f18, [%rd1+48];
+	ld.global.f32 	%f19, [%rd1+52];
+	ld.global.f32 	%f20, [%rd1+56];
+	ld.global.f32 	%f21, [%rd1+60];
+	ld.global.f32 	%f22, [%rd1+64];
+	ld.global.f32 	%f23, [%rd1+68];
+	ld.global.f32 	%f24, [%rd1+72];
+	ld.global.f32 	%f27, [%rd1+76];
+	mov.f32 	%f25, %f6;
+	setp.lt.s32	%p1, %r4, 1;
+	@%p1 bra 	BB2_2;
+
+BB2_1:
+	add.f32 	%f8, %f6, %f25;
+	add.f32 	%f9, %f7, %f25;
+	add.f32 	%f10, %f8, %f25;
+	add.f32 	%f11, %f9, %f25;
+	add.f32 	%f12, %f10, %f25;
+	add.f32 	%f13, %f11, %f25;
+	add.f32 	%f14, %f12, %f25;
+	add.f32 	%f15, %f13, %f25;
+	add.f32 	%f16, %f14, %f25;
+	add.f32 	%f17, %f15, %f25;
+	add.f32 	%f18, %f16, %f25;
+	add.f32 	%f19, %f17, %f25;
+	add.f32 	%f20, %f18, %f25;
+	add.f32 	%f21, %f19, %f25;
+	add.f32 	%f22, %f20, %f25;
+	add.f32 	%f23, %f21, %f25;
+	add.f32 	%f24, %f22, %f25;
+	add.f32 	%f27, %f23, %f25;
+	add.f32 	%f6, %f24, %f25;
+	add.f32 	%f7, %f27, %f25;
+	mul.f32     %f25, %f25, 0Fbf800000;
+    add.s32 	%r4, %r4, -1;
+	setp.gt.s32	%p2, %r4, 0;
+	@%p2 bra 	BB2_1;
+
+BB2_2:
+	st.global.f32 	[%rd1], %f6;
+	st.global.f32 	[%rd1+4], %f7;
+	st.global.f32 	[%rd1+8], %f8;
+	st.global.f32 	[%rd1+12], %f9;
+	st.global.f32 	[%rd1+16], %f10;
+	st.global.f32 	[%rd1+20], %f11;
+	st.global.f32 	[%rd1+24], %f12;
+	st.global.f32 	[%rd1+28], %f13;
+	st.global.f32 	[%rd1+32], %f14;
+	st.global.f32 	[%rd1+36], %f15;
+	st.global.f32 	[%rd1+40], %f16;
+	st.global.f32 	[%rd1+44], %f17;
+	st.global.f32 	[%rd1+48], %f18;
+	st.global.f32 	[%rd1+52], %f19;
+	st.global.f32 	[%rd1+56], %f20;
+	st.global.f32 	[%rd1+60], %f21;
+	st.global.f32 	[%rd1+64], %f22;
+	st.global.f32 	[%rd1+68], %f23;
+	st.global.f32 	[%rd1+72], %f24;
+	st.global.f32 	[%rd1+76], %f27;
 	ret;
 }
 
@@ -1480,6 +1828,93 @@ BB0_2:
 	ret;
 }
 
+.entry Float_addition_12_20(
+	.param .u64 .ptr .global .align 8 Float_addition_12_20_param_0,
+	.param .u32 Float_addition_12_20_param_1
+)
+{
+	.reg .pred 	%p<3>;
+	.reg .b32 	%r<5>;
+	.reg .f32 	%f<28>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.param.u64 	%rd1, [Float_addition_12_20_param_0];
+	ld.param.u32 	%r4, [Float_addition_12_20_param_1];
+    ld.global.f32 	%f6, [%rd1];
+	ld.global.f32 	%f7, [%rd1+4];
+	ld.global.f32 	%f8, [%rd1+8];
+	ld.global.f32 	%f9, [%rd1+12];
+	ld.global.f32 	%f10, [%rd1+16];
+	ld.global.f32 	%f11, [%rd1+20];
+	ld.global.f32 	%f12, [%rd1+24];
+	ld.global.f32 	%f13, [%rd1+28];
+	ld.global.f32 	%f14, [%rd1+32];
+	ld.global.f32 	%f15, [%rd1+36];
+	ld.global.f32 	%f16, [%rd1+40];
+	ld.global.f32 	%f17, [%rd1+44];
+	ld.global.f32 	%f18, [%rd1+48];
+	ld.global.f32 	%f19, [%rd1+52];
+	ld.global.f32 	%f20, [%rd1+56];
+	ld.global.f32 	%f21, [%rd1+60];
+	ld.global.f32 	%f22, [%rd1+64];
+	ld.global.f32 	%f23, [%rd1+68];
+	ld.global.f32 	%f24, [%rd1+72];
+	ld.global.f32 	%f27, [%rd1+76];
+	mov.f32 	%f25, %f6;
+	setp.lt.s32	%p1, %r4, 1;
+	@%p1 bra 	BB2_2;
+
+BB2_1:
+	add.f32 	%f7, %f6, %f25;
+	add.f32 	%f8, %f7, %f25;
+	add.f32 	%f9, %f8, %f25;
+	add.f32 	%f10, %f9, %f25;
+	add.f32 	%f11, %f10, %f25;
+	add.f32 	%f12, %f11, %f25;
+	add.f32 	%f13, %f12, %f25;
+	add.f32 	%f14, %f13, %f25;
+	add.f32 	%f15, %f14, %f25;
+	add.f32 	%f16, %f15, %f25;
+	add.f32 	%f21, %f16, %f25;
+	add.f32 	%f22, %f17, %f25;
+	add.f32 	%f23, %f18, %f25;
+	add.f32 	%f24, %f19, %f25;
+	add.f32 	%f27, %f20, %f25;
+	add.f32 	%f6, %f21, %f25;
+	add.f32 	%f7, %f22, %f25;
+	add.f32 	%f8, %f23, %f25;
+	add.f32 	%f9, %f24, %f25;
+	add.f32 	%f10, %f27, %f25;
+	mul.f32     %f25, %f25, 0Fbf800000;
+    add.s32 	%r4, %r4, -1;
+	setp.gt.s32	%p2, %r4, 0;
+	@%p2 bra 	BB2_1;
+
+BB2_2:
+	st.global.f32 	[%rd1], %f6;
+	st.global.f32 	[%rd1+4], %f7;
+	st.global.f32 	[%rd1+8], %f8;
+	st.global.f32 	[%rd1+12], %f9;
+	st.global.f32 	[%rd1+16], %f10;
+	st.global.f32 	[%rd1+20], %f11;
+	st.global.f32 	[%rd1+24], %f12;
+	st.global.f32 	[%rd1+28], %f13;
+	st.global.f32 	[%rd1+32], %f14;
+	st.global.f32 	[%rd1+36], %f15;
+	st.global.f32 	[%rd1+40], %f16;
+	st.global.f32 	[%rd1+44], %f17;
+	st.global.f32 	[%rd1+48], %f18;
+	st.global.f32 	[%rd1+52], %f19;
+	st.global.f32 	[%rd1+56], %f20;
+	st.global.f32 	[%rd1+60], %f21;
+	st.global.f32 	[%rd1+64], %f22;
+	st.global.f32 	[%rd1+68], %f23;
+	st.global.f32 	[%rd1+72], %f24;
+	st.global.f32 	[%rd1+76], %f27;
+	ret;
+}
+
 .entry Double_addition_12_20(
 	.param .u64 .ptr .global .align 8 Double_addition_12_20_param_0,
 	.param .u32 Double_addition_12_20_param_1
@@ -1826,6 +2261,93 @@ BB0_2:
 	ret;
 }
 
+.entry Float_addition_15_20(
+	.param .u64 .ptr .global .align 8 Float_addition_15_20_param_0,
+	.param .u32 Float_addition_15_20_param_1
+)
+{
+	.reg .pred 	%p<3>;
+	.reg .b32 	%r<5>;
+	.reg .f32 	%f<28>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.param.u64 	%rd1, [Float_addition_15_20_param_0];
+	ld.param.u32 	%r4, [Float_addition_15_20_param_1];
+    ld.global.f32 	%f6, [%rd1];
+	ld.global.f32 	%f7, [%rd1+4];
+	ld.global.f32 	%f8, [%rd1+8];
+	ld.global.f32 	%f9, [%rd1+12];
+	ld.global.f32 	%f10, [%rd1+16];
+	ld.global.f32 	%f11, [%rd1+20];
+	ld.global.f32 	%f12, [%rd1+24];
+	ld.global.f32 	%f13, [%rd1+28];
+	ld.global.f32 	%f14, [%rd1+32];
+	ld.global.f32 	%f15, [%rd1+36];
+	ld.global.f32 	%f16, [%rd1+40];
+	ld.global.f32 	%f17, [%rd1+44];
+	ld.global.f32 	%f18, [%rd1+48];
+	ld.global.f32 	%f19, [%rd1+52];
+	ld.global.f32 	%f20, [%rd1+56];
+	ld.global.f32 	%f21, [%rd1+60];
+	ld.global.f32 	%f22, [%rd1+64];
+	ld.global.f32 	%f23, [%rd1+68];
+	ld.global.f32 	%f24, [%rd1+72];
+	ld.global.f32 	%f27, [%rd1+76];
+	mov.f32 	%f25, %f6;
+	setp.lt.s32	%p1, %r4, 1;
+	@%p1 bra 	BB2_2;
+
+BB2_1:
+	add.f32 	%f7, %f6, %f25;
+	add.f32 	%f8, %f7, %f25;
+	add.f32 	%f9, %f8, %f25;
+	add.f32 	%f10, %f9, %f25;
+	add.f32 	%f11, %f10, %f25;
+	add.f32 	%f12, %f11, %f25;
+	add.f32 	%f13, %f12, %f25;
+	add.f32 	%f14, %f13, %f25;
+	add.f32 	%f15, %f14, %f25;
+	add.f32 	%f16, %f15, %f25;
+	add.f32 	%f18, %f16, %f25;
+	add.f32 	%f19, %f17, %f25;
+	add.f32 	%f20, %f18, %f25;
+	add.f32 	%f21, %f19, %f25;
+	add.f32 	%f22, %f20, %f25;
+	add.f32 	%f23, %f21, %f25;
+	add.f32 	%f24, %f22, %f25;
+	add.f32 	%f27, %f23, %f25;
+	add.f32 	%f6, %f24, %f25;
+	add.f32 	%f7, %f27, %f25;
+	mul.f32     %f25, %f25, 0Fbf800000;
+    add.s32 	%r4, %r4, -1;
+	setp.gt.s32	%p2, %r4, 0;
+	@%p2 bra 	BB2_1;
+
+BB2_2:
+	st.global.f32 	[%rd1], %f6;
+	st.global.f32 	[%rd1+4], %f7;
+	st.global.f32 	[%rd1+8], %f8;
+	st.global.f32 	[%rd1+12], %f9;
+	st.global.f32 	[%rd1+16], %f10;
+	st.global.f32 	[%rd1+20], %f11;
+	st.global.f32 	[%rd1+24], %f12;
+	st.global.f32 	[%rd1+28], %f13;
+	st.global.f32 	[%rd1+32], %f14;
+	st.global.f32 	[%rd1+36], %f15;
+	st.global.f32 	[%rd1+40], %f16;
+	st.global.f32 	[%rd1+44], %f17;
+	st.global.f32 	[%rd1+48], %f18;
+	st.global.f32 	[%rd1+52], %f19;
+	st.global.f32 	[%rd1+56], %f20;
+	st.global.f32 	[%rd1+60], %f21;
+	st.global.f32 	[%rd1+64], %f22;
+	st.global.f32 	[%rd1+68], %f23;
+	st.global.f32 	[%rd1+72], %f24;
+	st.global.f32 	[%rd1+76], %f27;
+	ret;
+}
+
 .entry Double_addition_15_20(
 	.param .u64 .ptr .global .align 8 Double_addition_15_20_param_0,
 	.param .u32 Double_addition_15_20_param_1
@@ -2169,6 +2691,93 @@ BB0_2:
 	st.global.u32 	[%rd1+68], %r26;
 	st.global.u32 	[%rd1+72], %r27;
 	st.global.u32 	[%rd1+76], %r30;
+	ret;
+}
+
+.entry Float_addition_20_20(
+	.param .u64 .ptr .global .align 8 Float_addition_20_20_param_0,
+	.param .u32 Float_addition_20_20_param_1
+)
+{
+	.reg .pred 	%p<3>;
+	.reg .b32 	%r<5>;
+	.reg .f32 	%f<28>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.param.u64 	%rd1, [Float_addition_20_20_param_0];
+	ld.param.u32 	%r4, [Float_addition_20_20_param_1];
+    ld.global.f32 	%f6, [%rd1];
+	ld.global.f32 	%f7, [%rd1+4];
+	ld.global.f32 	%f8, [%rd1+8];
+	ld.global.f32 	%f9, [%rd1+12];
+	ld.global.f32 	%f10, [%rd1+16];
+	ld.global.f32 	%f11, [%rd1+20];
+	ld.global.f32 	%f12, [%rd1+24];
+	ld.global.f32 	%f13, [%rd1+28];
+	ld.global.f32 	%f14, [%rd1+32];
+	ld.global.f32 	%f15, [%rd1+36];
+	ld.global.f32 	%f16, [%rd1+40];
+	ld.global.f32 	%f17, [%rd1+44];
+	ld.global.f32 	%f18, [%rd1+48];
+	ld.global.f32 	%f19, [%rd1+52];
+	ld.global.f32 	%f20, [%rd1+56];
+	ld.global.f32 	%f21, [%rd1+60];
+	ld.global.f32 	%f22, [%rd1+64];
+	ld.global.f32 	%f23, [%rd1+68];
+	ld.global.f32 	%f24, [%rd1+72];
+	ld.global.f32 	%f27, [%rd1+76];
+	mov.f32 	%f25, %f6;
+	setp.lt.s32	%p1, %r4, 1;
+	@%p1 bra 	BB2_2;
+
+BB2_1:
+	add.f32 	%f7, %f6, %f25;
+	add.f32 	%f8, %f7, %f25;
+	add.f32 	%f9, %f8, %f25;
+	add.f32 	%f10, %f9, %f25;
+	add.f32 	%f11, %f10, %f25;
+	add.f32 	%f12, %f11, %f25;
+	add.f32 	%f13, %f12, %f25;
+	add.f32 	%f14, %f13, %f25;
+	add.f32 	%f15, %f14, %f25;
+	add.f32 	%f16, %f15, %f25;
+	add.f32 	%f17, %f16, %f25;
+	add.f32 	%f18, %f17, %f25;
+	add.f32 	%f19, %f18, %f25;
+	add.f32 	%f20, %f19, %f25;
+	add.f32 	%f21, %f20, %f25;
+	add.f32 	%f22, %f21, %f25;
+	add.f32 	%f23, %f22, %f25;
+	add.f32 	%f24, %f23, %f25;
+	add.f32 	%f27, %f24, %f25;
+	add.f32 	%f6, %f27, %f25;
+	mul.f32     %f25, %f25, 0Fbf800000;
+    add.s32 	%r4, %r4, -1;
+	setp.gt.s32	%p2, %r4, 0;
+	@%p2 bra 	BB2_1;
+
+BB2_2:
+	st.global.f32 	[%rd1], %f6;
+	st.global.f32 	[%rd1+4], %f7;
+	st.global.f32 	[%rd1+8], %f8;
+	st.global.f32 	[%rd1+12], %f9;
+	st.global.f32 	[%rd1+16], %f10;
+	st.global.f32 	[%rd1+20], %f11;
+	st.global.f32 	[%rd1+24], %f12;
+	st.global.f32 	[%rd1+28], %f13;
+	st.global.f32 	[%rd1+32], %f14;
+	st.global.f32 	[%rd1+36], %f15;
+	st.global.f32 	[%rd1+40], %f16;
+	st.global.f32 	[%rd1+44], %f17;
+	st.global.f32 	[%rd1+48], %f18;
+	st.global.f32 	[%rd1+52], %f19;
+	st.global.f32 	[%rd1+56], %f20;
+	st.global.f32 	[%rd1+60], %f21;
+	st.global.f32 	[%rd1+64], %f22;
+	st.global.f32 	[%rd1+68], %f23;
+	st.global.f32 	[%rd1+72], %f24;
+	st.global.f32 	[%rd1+76], %f27;
 	ret;
 }
 
