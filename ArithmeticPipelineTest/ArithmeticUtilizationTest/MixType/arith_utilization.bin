@@ -140,7 +140,7 @@ BB0_2:
 	st.global.f32 	[%rd2+20], %f6;
 	st.global.f32 	[%rd2+24], %f7;
 	st.global.f32 	[%rd2+28], %f8;
-	st.global.f32 	[%rd2+32], %f8;
+	st.global.f32 	[%rd2+32], %f9;
 	st.global.f32 	[%rd2+36], %f10;
 	st.global.f64 	[%rd3], %fd1;
 	st.global.f64 	[%rd3+8], %fd2;
