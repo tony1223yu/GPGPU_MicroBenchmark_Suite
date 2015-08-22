@@ -45,6 +45,7 @@ struct OpenCL_Ctrl
     int platform_id;
     int device_id;
     int dataByteInt;
+    int dataByteFloat;
     int dataByteDouble;
     int global_size;
     int local_size;
@@ -144,6 +145,7 @@ void CommandParser(int argc, char *argv[])
     }
 
     g_opencl_ctrl.dataByteInt = DATA_SIZE * sizeof(int);
+    g_opencl_ctrl.dataByteFloat = DATA_SIZE * sizeof(float);
     g_opencl_ctrl.dataByteDouble = DATA_SIZE * sizeof(double);
 
     free (short_options);
@@ -187,7 +189,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
 
     queryString = (char *)malloc(sizeof(char) * length);
     clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
-    fprintf(stdout, "Device selected: '%s'\n", queryString);
+    fprintf(stderr, "Device selected: '%s'\n", queryString);
 
     /* Free the space */
     free(platforms);
@@ -237,7 +239,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         error = clGetProgramBuildInfo(target_program, device, CL_PROGRAM_BUILD_LOG, logSize + 1, programBuildLog, NULL);
         CHECK_CL_ERROR(error);
 
-        fprintf(stdout, "%s\n", programBuildLog);
+        fprintf(stderr, "%s\n", programBuildLog);
         free(programBuildLog);
         exit(1);
     }
@@ -261,10 +263,11 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     free(fileName);
 }
 
-void HostDataCreation(void* &dataInt, void* &dataDouble)
+void HostDataCreation(void* &dataInt, void* &dataFloat, void* &dataDouble)
 {
     srand(time(NULL));
     dataInt = malloc(g_opencl_ctrl.dataByteInt);
+    dataFloat = malloc(g_opencl_ctrl.dataByteFloat);
     dataDouble = malloc(g_opencl_ctrl.dataByteDouble);
     {
         int *tmp;
@@ -273,6 +276,16 @@ void HostDataCreation(void* &dataInt, void* &dataDouble)
         {
             tmp[i] = (rand() % INT_MAX);
             tmp[i] += (tmp[i] % 2) + 1;
+        }
+    }
+    {
+        float *tmp;
+        tmp = (float *)dataFloat;
+        for (int i = 0 ; i < DATA_SIZE ; i ++)
+        {
+            tmp[i] = ((float)(rand()) / RAND_MAX) * 1e5;
+            if (i % 2 == 0)
+                tmp[i] *= -1;
         }
     }
     {
@@ -295,7 +308,7 @@ int main(int argc, char *argv[])
     cl_command_queue command_queue;
     cl_program program;
     cl_kernel kernel;
-    cl_mem bufferInt, bufferDouble;
+    cl_mem bufferInt, bufferFloat, bufferDouble;
     cl_int error;
     cl_event event;
     cl_ulong startTime, endTime;
@@ -303,11 +316,12 @@ int main(int argc, char *argv[])
     FILE* fptr;
 
     void* hostDataInt = NULL;
+    void* hostDataFloat = NULL;
     void* hostDataDouble = NULL;
 
     /* Parse options */
     CommandParser(argc, argv);
-    HostDataCreation(hostDataInt, hostDataDouble);
+    HostDataCreation(hostDataInt, hostDataFloat, hostDataDouble);
 
     GetPlatformAndDevice(platform, device);
     fptr = fopen(g_opencl_ctrl.powerFile, "w");
@@ -330,22 +344,30 @@ int main(int argc, char *argv[])
     error = clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(size_t), &warpSize, NULL);
     CHECK_CL_ERROR(error);
 
-    fprintf(stdout, "\nData before process:\n");
+    fprintf(stderr, "\nData before process:\n");
     {
         int *intptr = (int *)(hostDataInt);
         for (int i = 0 ; i < DATA_SIZE ; i ++)
-            fprintf(stdout, "%d ", intptr[i]);
-        fprintf(stdout, "\n");
+            fprintf(stderr, "%d ", intptr[i]);
+        fprintf(stderr, "\n");
+    }
+    {
+        float *fltptr = (float *)(hostDataFloat);
+        for (int i = 0 ; i < DATA_SIZE ; i ++)
+            fprintf(stderr, "%f ", fltptr[i]);
+        fprintf(stderr, "\n");
     }
     {
         double *dblptr = (double *)(hostDataDouble);
         for (int i = 0 ; i < DATA_SIZE ; i ++)
-            fprintf(stdout, "%lf ", dblptr[i]);
-        fprintf(stdout, "\n");
+            fprintf(stderr, "%lf ", dblptr[i]);
+        fprintf(stderr, "\n");
     }
 
     /* Create buffers */
     bufferInt = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByteInt, hostDataInt, &error);
+    CHECK_CL_ERROR(error);
+    bufferFloat = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByteFloat, hostDataFloat, &error);
     CHECK_CL_ERROR(error);
     bufferDouble = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByteDouble, hostDataDouble, &error);
     CHECK_CL_ERROR(error);
@@ -353,9 +375,11 @@ int main(int argc, char *argv[])
     /* Execute kernels */
     error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &bufferInt);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &bufferDouble);
+    error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &bufferFloat);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 2, sizeof(int), &g_opencl_ctrl.iteration);
+    error = clSetKernelArg(kernel, 2, sizeof(cl_mem), &bufferDouble);
+    CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel, 3, sizeof(int), &g_opencl_ctrl.iteration);
     CHECK_CL_ERROR(error);
 
     PrintTimingInfo(fptr);
@@ -372,21 +396,29 @@ int main(int argc, char *argv[])
 
     error = clEnqueueReadBuffer(command_queue, bufferInt, CL_TRUE, 0, g_opencl_ctrl.dataByteInt, hostDataInt, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
+    error = clEnqueueReadBuffer(command_queue, bufferFloat, CL_TRUE, 0, g_opencl_ctrl.dataByteFloat, hostDataFloat, 0, NULL, NULL);
+    CHECK_CL_ERROR(error);
     error = clEnqueueReadBuffer(command_queue, bufferDouble, CL_TRUE, 0, g_opencl_ctrl.dataByteDouble, hostDataDouble, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
-    fprintf(stdout, "\nData after process:\n");
+    fprintf(stderr, "\nData after process:\n");
     {
         int *intptr = (int *)(hostDataInt);
         for (int i = 0 ; i < DATA_SIZE ; i ++)
-            fprintf(stdout, "%d ", intptr[i]);
-        fprintf(stdout, "\n");
+            fprintf(stderr, "%d ", intptr[i]);
+        fprintf(stderr, "\n");
+    }
+    {
+        float *fltptr = (float *)(hostDataFloat);
+        for (int i = 0 ; i < DATA_SIZE ; i ++)
+            fprintf(stderr, "%f ", fltptr[i]);
+        fprintf(stderr, "\n");
     }
     {
         double *dblptr = (double *)(hostDataDouble);
         for (int i = 0 ; i < DATA_SIZE ; i ++)
-            fprintf(stdout, "%lf ", dblptr[i]);
-        fprintf(stdout, "\n");
+            fprintf(stderr, "%lf ", dblptr[i]);
+        fprintf(stderr, "\n");
     }
     
     /* Event profiling */
@@ -394,19 +426,22 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stdout, "\n['%s' execution time] %lu ns\n", g_opencl_ctrl.kernelName, (endTime - startTime));
+    fprintf(stderr, "\n['%s' execution time] %lu ns\n", g_opencl_ctrl.kernelName, (endTime - startTime));
+    fprintf(stdout, "%lu\n", (endTime - startTime));
 
     /* Read the output */
 
     /* Release object */
     clReleaseKernel(kernel);
     clReleaseMemObject(bufferInt);
+    clReleaseMemObject(bufferFloat);
     clReleaseMemObject(bufferDouble);
     clReleaseEvent(event);
     clReleaseProgram(program);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
     free(hostDataInt);
+    free(hostDataFloat);
     free(hostDataDouble);
 
     return 0;
