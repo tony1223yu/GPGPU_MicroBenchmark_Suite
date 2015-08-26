@@ -23,10 +23,8 @@ typedef struct GlobalCtrl
     int totalTime;
     int cudaDeviceNumber;
     char outputFile[MAX_FILE_LEN];
-    bool enablePowerUsage;
-    bool enablePowerLimit;
 
-    GlobalCtrl(): cudaDeviceNumber(0), intervalTime(200), totalTime(10), enablePowerUsage(0), enablePowerLimit(0) {sprintf(outputFile, "PowerUsageOutput.log");}
+    GlobalCtrl(): cudaDeviceNumber(0), intervalTime(200), totalTime(10) {sprintf(outputFile, "PowerUsageOutput.log");}
 } GlobalCtrl;
 
 bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
@@ -34,7 +32,7 @@ bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
     int cmd;
     while(1)
     {
-        cmd = getopt(argc, argv, "ult:o:T:D:");
+        cmd = getopt(argc, argv, "t:o:T:D:");
         if (cmd == -1)
             break;
 
@@ -55,14 +53,6 @@ bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
             case 'o':
                 memset(ctrl->outputFile, 0, MAX_FILE_LEN);
                 sprintf(ctrl->outputFile, "%s", optarg);
-                break;
-
-            case 'u':
-                ctrl->enablePowerUsage = true;
-                break;
-
-            case 'l':
-                ctrl->enablePowerLimit = true;
                 break;
 
             default:
@@ -209,7 +199,7 @@ int main(int argc, char *argv[])
                         error = nvmlDeviceGetPerformanceState(device, &perfState);
                         CheckNVMLError(error, strdup("Unable to get performance state"));
 
-                        fprintf(fp, "%llu %u %u %u %u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState);
+                        fprintf(fp, "%llu %7u %3u %3u %2u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState);
                         //printf("Power = %u milliwatts.\n", curPower);
                     }
 
