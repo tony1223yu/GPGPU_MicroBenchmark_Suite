@@ -1,4 +1,4 @@
-NVML_DIR=../../../NVML
+NVML_DIR=../../../../NVML
 TEST_NAME=$1
 TRACE_TIME=$2
 PLATFORM=$3
