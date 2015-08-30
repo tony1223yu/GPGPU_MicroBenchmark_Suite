@@ -223,6 +223,25 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
     fprintf(stderr, "Device selected: '%s'\n", queryString);
 
+    {
+        cl_uint vectorSize;
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred char vector width : %u\n", vectorSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred int vector width : %u\n", vectorSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred float vector width : %u\n", vectorSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred double vector width : %u\n", vectorSize);
+    }
+
     /* Free the space */
     free(platforms);
     free(devices);
