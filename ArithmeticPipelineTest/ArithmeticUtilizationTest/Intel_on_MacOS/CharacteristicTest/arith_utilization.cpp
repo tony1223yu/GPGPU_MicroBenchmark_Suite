@@ -20,6 +20,7 @@
 #define CL_FILE_NAME "arith_utilization.cl"
 #define PTX_FILE_NAME "arith_utilization.ptx"
 #define DATA_SIZE 80
+#define INTERVAL 10
 #define POWER_LOG_FILE_LEN 200
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
@@ -50,10 +51,11 @@ struct OpenCL_Ctrl
     int global_size;
     int local_size;
     int iteration;
+    int interval;
     char *kernelName;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL) {sprintf(powerFile, "KernelExecution.log");}
+    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL), interval(INTERVAL) {sprintf(powerFile, "KernelExecution.log");}
     ~OpenCL_Ctrl()
     {
         if (kernelName)
@@ -168,13 +170,13 @@ void CommandParser(int argc, char *argv[])
     switch(g_opencl_ctrl.dataType)
     {
         case TYPE_INT:
-            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(int);
+            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(int) * g_opencl_ctrl.global_size;
             break;
         case TYPE_FLOAT:
-            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(float);
+            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(float) * g_opencl_ctrl.global_size;
             break;
         case TYPE_DOUBLE:
-            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(double);
+            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(double) * g_opencl_ctrl.global_size;
             break;
         default:
             break;
@@ -323,7 +325,7 @@ void HostDataCreation(void* &data)
             {
                 int *tmp;
                 tmp = (int *)data;
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                 {
                     tmp[i] = (rand() % INT_MAX);
                     tmp[i] += (tmp[i] % 2) + 1;
@@ -334,7 +336,7 @@ void HostDataCreation(void* &data)
             {
                 float *tmp;
                 tmp = (float *)data;
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                 {
                     tmp[i] = ((float)(rand()) / RAND_MAX) * 1e5;
                     if (i % 2 == 0)
@@ -346,7 +348,7 @@ void HostDataCreation(void* &data)
             {
                 double *tmp;
                 tmp = (double *)data;
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                 {
                     tmp[i] = ((double)(rand()) / RAND_MAX) * 1e100;
                     if (i % 2 == 0)
@@ -406,7 +408,7 @@ int main(int argc, char *argv[])
         case TYPE_INT:
             {
                 int *intptr = (int *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%d ", intptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -414,7 +416,7 @@ int main(int argc, char *argv[])
         case TYPE_FLOAT:
             {
                 float *fltptr = (float *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%f ", fltptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -422,7 +424,7 @@ int main(int argc, char *argv[])
        case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%lf ", dblptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -437,6 +439,8 @@ int main(int argc, char *argv[])
     error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
     error = clSetKernelArg(kernel, 1, sizeof(int), &g_opencl_ctrl.iteration);
+    CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel, 2, sizeof(int), &g_opencl_ctrl.interval);
     CHECK_CL_ERROR(error);
 
     PrintTimingInfo(fptr);
@@ -460,7 +464,7 @@ int main(int argc, char *argv[])
         case TYPE_INT:
             {
                 int *intptr = (int *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%d ", intptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -468,7 +472,7 @@ int main(int argc, char *argv[])
         case TYPE_FLOAT:
             {
                 float *fltptr = (float *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%f ", fltptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -476,7 +480,7 @@ int main(int argc, char *argv[])
        case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%lf ", dblptr[i]);
                 fprintf(stderr, "\n");
             }
