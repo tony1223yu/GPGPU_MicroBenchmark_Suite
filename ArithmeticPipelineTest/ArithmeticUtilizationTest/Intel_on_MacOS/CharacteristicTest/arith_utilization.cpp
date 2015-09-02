@@ -402,6 +402,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     fprintf(stderr, "Preferred work group size: %lu\n", warpSize);
 
+#if 0
     fprintf(stderr, "\nData before process:\n");
     switch (g_opencl_ctrl.dataType)
     {
@@ -430,6 +431,7 @@ int main(int argc, char *argv[])
             }
             break;
     }
+#endif
 
     /* Create buffers */
     buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByte, hostData, &error);
@@ -458,6 +460,7 @@ int main(int argc, char *argv[])
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
+#if 0
     fprintf(stderr, "\nData after process:\n");
     switch (g_opencl_ctrl.dataType)
     {
@@ -486,6 +489,7 @@ int main(int argc, char *argv[])
             }
             break;
     }
+#endif
 
     /* Event profiling */
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(startTime), &startTime, NULL);
