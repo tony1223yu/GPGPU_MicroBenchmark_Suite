@@ -255,7 +255,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     FILE *fptr;
     size_t programSize;
     char *programSource;
-    cl_int error;
+    cl_int error, binaryError;
 
     fptr = fopen(fileName, "r");
     if (fptr == NULL)
