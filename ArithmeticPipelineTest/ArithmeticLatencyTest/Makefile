@@ -1,5 +1,7 @@
+include ../../common/make.config
+
 all:
-	/usr/local/cuda-6.5/bin/nvcc arith_latency.cu -o arith_latency -lcuda
+	${NVCC} arith_latency.cu -o arith_latency ${CUDA_LIB}
 
 clean:
 	rm arith_latency

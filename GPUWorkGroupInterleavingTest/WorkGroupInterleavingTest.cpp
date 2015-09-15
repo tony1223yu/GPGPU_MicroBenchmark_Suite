@@ -263,7 +263,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         exit(1);
     }
 
-#if 1
+#if 0
     {
         size_t binarySize;
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binarySize, NULL);

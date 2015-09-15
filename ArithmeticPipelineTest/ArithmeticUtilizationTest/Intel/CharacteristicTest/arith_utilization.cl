@@ -292,6 +292,81 @@ __kernel void Integer4_addition_10_10(__global int4* dataArray, int iter, int in
     curArray[9] = a9;
 }
 
+__kernel void Integer8_addition_merge(__global int8* dataArray, int iter, int interval)
+{
+	__global int8* curArray = dataArray + get_global_id(0) * interval;
+    int8 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
+    int8 a10, a11, a12, a13, a14, a15, a16, a17, a18, a19;
+    int8 addend1, addend2;
+    a0 = curArray[0];
+    a1 = curArray[1];
+    a2 = curArray[2];
+    a3 = curArray[3];
+    a4 = curArray[4];
+    a5 = curArray[5];
+    a6 = curArray[6];
+    a7 = curArray[7];
+    a8 = curArray[8];
+    a9 = curArray[9];
+    a10 = curArray[10];
+    a11 = curArray[11];
+    a12 = curArray[12];
+    a13 = curArray[13];
+    a14 = curArray[14];
+    a15 = curArray[15];
+    a16 = curArray[16];
+    a17 = curArray[17];
+    a18 = curArray[18];
+    a19 = curArray[19];
+    addend1 = a0;
+    addend2 = a1;
+    while (iter -- > 1)
+    {
+        a2 = a0 + addend1;
+        a3 = a1 + addend2;
+        a4 = a2 + addend1;
+        a5 = a3 + addend2;
+        a6 = a4 + addend1;
+        a7 = a5 + addend2;
+        a8 = a6 + addend1;
+        a9 = a7 + addend2;
+        a10 = a8 + addend1;
+        a11 = a9 + addend2;
+        a12 = a10 + addend1;
+        a13 = a11 + addend2;
+        a14 = a12 + addend1;
+        a15 = a13 + addend2;
+        a16 = a14 + addend1;
+        a17 = a15 + addend2;
+        a18 = a16 + addend1;
+        a19 = a17 + addend2;
+        a0 = a18 + addend1;
+        a1 = a19 + addend2;
+        addend1 = addend1 + a0;
+        addend2 = addend2 + a1;
+    }
+    curArray[0] = a0;
+    curArray[1] = a1;
+    curArray[2] = a2;
+    curArray[3] = a3;
+    curArray[4] = a4;
+    curArray[5] = a5;
+    curArray[6] = a6;
+    curArray[7] = a7;
+    curArray[8] = a8;
+    curArray[9] = a9;
+    curArray[10] = a10;
+    curArray[11] = a11;
+    curArray[12] = a12;
+    curArray[13] = a13;
+    curArray[14] = a14;
+    curArray[15] = a15;
+    curArray[16] = a16;
+    curArray[17] = a17;
+    curArray[18] = a18;
+    curArray[19] = a19;
+}
+
 __kernel void Integer8_addition_10_10(__global int8* dataArray, int iter, int interval)
 {
 	__global int8* curArray = dataArray + get_global_id(0) * interval;

@@ -1,5 +1,7 @@
+include ../../common/make.config
+
 all:
-	/usr/local/cuda-6.5/bin/nvcc arith_dependency.cu -o arith_dependency -lcuda
+	${NVCC} arith_dependency.cu -o arith_dependency ${CUDA_LIB}
 
 clean:
 	rm arith_dependency

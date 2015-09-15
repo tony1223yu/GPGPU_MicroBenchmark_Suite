@@ -19,8 +19,8 @@
 /* Macros */
 #define CL_FILE_NAME "arith_utilization.cl"
 #define PTX_FILE_NAME "arith_utilization.ptx"
-#define DATA_SIZE 80
-#define INTERVAL 10
+#define DATA_SIZE 160
+#define INTERVAL 20
 #define POWER_LOG_FILE_LEN 200
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
