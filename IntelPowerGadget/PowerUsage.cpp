@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
                 }
 
                 else if (funcID == MSR_FUNC_FREQ) {
-                    printf(", %s Freq (MHz)", szName);
+                    printf(", %s (MHz)", szName);
                 }
 
                 // Temperature
