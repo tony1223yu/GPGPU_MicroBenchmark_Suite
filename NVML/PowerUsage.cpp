@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
             {
                 struct timeval startTime, curTime;
                 unsigned long long start_utime, cur_utime, pre_utime;
-                unsigned int curPower;
+                unsigned int curPower, curFreq;
                 nvmlPstates_t perfState;
                 nvmlUtilization_t curUtil;
                 FILE *fp = fopen(ctrl.outputFile, "w");
@@ -199,7 +199,9 @@ int main(int argc, char *argv[])
                         error = nvmlDeviceGetPerformanceState(device, &perfState);
                         CheckNVMLError(error, strdup("Unable to get performance state"));
 
-                        fprintf(fp, "%llu %7u %3u %3u %2u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState);
+                        error = nvmlDeviceGetApplicationsClock (device, NVML_CLOCK_SM, &curFreq);
+
+                        fprintf(fp, "%llu %7u %3u %3u %2u %u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState, curFreq);
                         //printf("Power = %u milliwatts.\n", curPower);
                     }
 
