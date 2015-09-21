@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
             {
                 struct timeval startTime, curTime;
                 unsigned long long start_utime, cur_utime, pre_utime;
-                unsigned int curPower, curFreq;
+                unsigned int curPower, curFreq, curTemp;
                 nvmlPstates_t perfState;
                 nvmlUtilization_t curUtil;
                 FILE *fp = fopen(ctrl.outputFile, "w");
@@ -202,7 +202,10 @@ int main(int argc, char *argv[])
                         error = nvmlDeviceGetClockInfo(device, NVML_CLOCK_SM, &curFreq);
                         CheckNVMLError(error, strdup("Unable to get clock frequency"));
 
-                        fprintf(fp, "%llu %7u %3u %3u %2u %u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState, curFreq);
+                        error = nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &curTemp);
+                        CheckNVMLError(error, strdup("Unable to get GPU temperature"));
+
+                        fprintf(fp, "%llu %7u %3u %3u %3u %5u %3u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState, curFreq, curTemp);
                         //printf("Power = %u milliwatts.\n", curPower);
                     }
 
