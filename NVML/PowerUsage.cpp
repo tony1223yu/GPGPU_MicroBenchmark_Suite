@@ -199,7 +199,8 @@ int main(int argc, char *argv[])
                         error = nvmlDeviceGetPerformanceState(device, &perfState);
                         CheckNVMLError(error, strdup("Unable to get performance state"));
 
-                        error = nvmlDeviceGetApplicationsClock (device, NVML_CLOCK_SM, &curFreq);
+                        error = nvmlDeviceGetClockInfo(device, NVML_CLOCK_SM, &curFreq);
+                        CheckNVMLError(error, strdup("Unable to get clock frequency"));
 
                         fprintf(fp, "%llu %7u %3u %3u %2u %u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState, curFreq);
                         //printf("Power = %u milliwatts.\n", curPower);
