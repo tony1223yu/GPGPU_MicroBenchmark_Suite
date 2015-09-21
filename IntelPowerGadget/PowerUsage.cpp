@@ -88,6 +88,10 @@ int main(int argc, char* argv[])
                     printf(", %s Power (mW)", szName);
                 }
 
+                else if (funcID == MSR_FUNC_FREQ) {
+                    printf(", %s Freq (MHz)", szName);
+                }
+
                 // Temperature
                 else if (funcID == MSR_FUNC_TEMP) {
                     printf(", %s Temp (C)", szName);
@@ -125,6 +129,10 @@ int main(int argc, char* argv[])
                     // Power
                     if (funcID == MSR_FUNC_POWER) {
                         fprintf(fp, " %11.3f", data[0] * 1000);
+                    }
+
+                    else if (funcID == MSR_FUNC_FREQ) {
+                        fprintf(fp, " %4.0f", data[0]);
                     }
 
                     // Temperature
