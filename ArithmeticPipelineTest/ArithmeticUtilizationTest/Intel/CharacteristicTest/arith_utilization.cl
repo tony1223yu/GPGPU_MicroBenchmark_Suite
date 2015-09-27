@@ -1,4 +1,4 @@
-__kernel void Integer_addition_0_10(__global int* dataArray, int iter, int interval)
+__kernel void Integer_addition_0_10(__global int* dataArray, long iter, int interval)
 {
 	__global int* curArray = dataArray + get_global_id(0) * interval;
     int a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -40,7 +40,7 @@ __kernel void Integer_addition_0_10(__global int* dataArray, int iter, int inter
     curArray[9] = a9;
 }
 
-__kernel void Integer2_addition_0_10(__global int2* dataArray, int iter, int interval)
+__kernel void Integer2_addition_0_10(__global int2* dataArray, long iter, int interval)
 {
 	__global int2* curArray = dataArray + get_global_id(0) * interval;
     int2 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -82,7 +82,7 @@ __kernel void Integer2_addition_0_10(__global int2* dataArray, int iter, int int
     curArray[9] = a9;
 }
 
-__kernel void Integer4_addition_0_10(__global int4* dataArray, int iter, int interval)
+__kernel void Integer4_addition_0_10(__global int4* dataArray, long iter, int interval)
 {
 	__global int4* curArray = dataArray + get_global_id(0) * interval;
     int4 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -124,7 +124,7 @@ __kernel void Integer4_addition_0_10(__global int4* dataArray, int iter, int int
     curArray[9] = a9;
 }
 
-__kernel void Integer8_addition_0_10(__global int8* dataArray, int iter, int interval)
+__kernel void Integer8_addition_0_10(__global int8* dataArray, long iter, int interval)
 {
 	__global int8* curArray = dataArray + get_global_id(0) * interval;
     int8 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -166,7 +166,7 @@ __kernel void Integer8_addition_0_10(__global int8* dataArray, int iter, int int
     curArray[9] = a9;
 }
 
-__kernel void Integer_addition_10_10(__global int* dataArray, int iter, int interval)
+__kernel void Integer_addition_10_10(__global int* dataArray, long iter, int interval)
 {
 	__global int* curArray = dataArray + get_global_id(0) * interval;
     int a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -208,7 +208,7 @@ __kernel void Integer_addition_10_10(__global int* dataArray, int iter, int inte
     curArray[9] = a9;
 }
 
-__kernel void Integer2_addition_10_10(__global int2* dataArray, int iter, int interval)
+__kernel void Integer2_addition_10_10(__global int2* dataArray, long iter, int interval)
 {
 	__global int2* curArray = dataArray + get_global_id(0) * interval;
     int2 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -250,7 +250,7 @@ __kernel void Integer2_addition_10_10(__global int2* dataArray, int iter, int in
     curArray[9] = a9;
 }
 
-__kernel void Integer4_addition_10_10(__global int4* dataArray, int iter, int interval)
+__kernel void Integer4_addition_10_10(__global int4* dataArray, long iter, int interval)
 {
 	__global int4* curArray = dataArray + get_global_id(0) * interval;
     int4 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -292,7 +292,7 @@ __kernel void Integer4_addition_10_10(__global int4* dataArray, int iter, int in
     curArray[9] = a9;
 }
 
-__kernel void Integer8_addition_merge(__global int8* dataArray, int iter, int interval)
+__kernel void Integer8_addition_merge(__global int8* dataArray, long iter, int interval)
 {
 	__global int8* curArray = dataArray + get_global_id(0) * interval;
     int8 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -367,7 +367,7 @@ __kernel void Integer8_addition_merge(__global int8* dataArray, int iter, int in
     curArray[19] = a19;
 }
 
-__kernel void Integer8_addition_10_10(__global int8* dataArray, int iter, int interval)
+__kernel void Integer8_addition_10_10(__global int8* dataArray, long iter, int interval)
 {
 	__global int8* curArray = dataArray + get_global_id(0) * interval;
     int8 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -409,7 +409,7 @@ __kernel void Integer8_addition_10_10(__global int8* dataArray, int iter, int in
     curArray[9] = a9;
 }
 
-__kernel void Float_addition_0_10(__global float* dataArray, int iter, int interval)
+__kernel void Float_addition_0_10(__global float* dataArray, long iter, int interval)
 {
 	__global float* curArray = dataArray + get_global_id(0) * interval;
     float a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -451,7 +451,7 @@ __kernel void Float_addition_0_10(__global float* dataArray, int iter, int inter
     curArray[9] = a9;
 }
 
-__kernel void Float2_addition_0_10(__global float2* dataArray, int iter, int interval)
+__kernel void Float2_addition_0_10(__global float2* dataArray, long iter, int interval)
 {
 	__global float2* curArray = dataArray + get_global_id(0) * interval;
     float2 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -493,7 +493,7 @@ __kernel void Float2_addition_0_10(__global float2* dataArray, int iter, int int
     curArray[9] = a9;
 }
 
-__kernel void Float4_addition_0_10(__global float4* dataArray, int iter, int interval)
+__kernel void Float4_addition_0_10(__global float4* dataArray, long iter, int interval)
 {
 	__global float4* curArray = dataArray + get_global_id(0) * interval;
     float4 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -535,7 +535,7 @@ __kernel void Float4_addition_0_10(__global float4* dataArray, int iter, int int
     curArray[9] = a9;
 }
 
-__kernel void Float8_addition_0_10(__global float8* dataArray, int iter, int interval)
+__kernel void Float8_addition_0_10(__global float8* dataArray, long iter, int interval)
 {
 	__global float8* curArray = dataArray + get_global_id(0) * interval;
     float8 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -577,7 +577,7 @@ __kernel void Float8_addition_0_10(__global float8* dataArray, int iter, int int
     curArray[9] = a9;
 }
 
-__kernel void Double_addition_0_10(__global double* dataArray, int iter, int interval)
+__kernel void Double_addition_0_10(__global double* dataArray, long iter, int interval)
 {
 	__global double* curArray = dataArray + get_global_id(0) * interval;
     double a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -619,7 +619,7 @@ __kernel void Double_addition_0_10(__global double* dataArray, int iter, int int
     curArray[9] = a9;
 }
 
-__kernel void Double2_addition_0_10(__global double2* dataArray, int iter, int interval)
+__kernel void Double2_addition_0_10(__global double2* dataArray, long iter, int interval)
 {
 	__global double2* curArray = dataArray + get_global_id(0) * interval;
     double2 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -661,7 +661,7 @@ __kernel void Double2_addition_0_10(__global double2* dataArray, int iter, int i
     curArray[9] = a9;
 }
 
-__kernel void Double4_addition_0_10(__global double4* dataArray, int iter, int interval)
+__kernel void Double4_addition_0_10(__global double4* dataArray, long iter, int interval)
 {
 	__global double4* curArray = dataArray + get_global_id(0) * interval;
     double4 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
@@ -703,7 +703,7 @@ __kernel void Double4_addition_0_10(__global double4* dataArray, int iter, int i
     curArray[9] = a9;
 }
 
-__kernel void Double8_addition_0_10(__global double8* dataArray, int iter, int interval)
+__kernel void Double8_addition_0_10(__global double8* dataArray, long iter, int interval)
 {
 	__global double8* curArray = dataArray + get_global_id(0) * interval;
     double8 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;

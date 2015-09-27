@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
                     }
 
                     else if (funcID == MSR_FUNC_FREQ) {
-                        fprintf(fp, " %4.0f", data[0]);
+                        fprintf(fp, " %6.0f", data[0]);
                     }
 
                     // Temperature
@@ -146,5 +146,6 @@ int main(int argc, char* argv[])
                 usleep(sampleInterval);
             }
         }
+        printf("Stop tracing\n");
     }
 }

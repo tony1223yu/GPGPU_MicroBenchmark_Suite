@@ -50,7 +50,7 @@ struct OpenCL_Ctrl
     int dataByte;
     int global_size;
     int local_size;
-    int iteration;
+    long iteration;
     int interval;
     char *kernelName;
     char powerFile[POWER_LOG_FILE_LEN];
@@ -128,7 +128,7 @@ void CommandParser(int argc, char *argv[])
                 break;
 
             case 'i':
-                g_opencl_ctrl.iteration = atoi(optarg);
+                g_opencl_ctrl.iteration = atol(optarg);
                 break;
 
             case 't':
@@ -440,7 +440,7 @@ int main(int argc, char *argv[])
     /* Execute kernels */
     error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 1, sizeof(int), &g_opencl_ctrl.iteration);
+    error = clSetKernelArg(kernel, 1, sizeof(long), &g_opencl_ctrl.iteration);
     CHECK_CL_ERROR(error);
     error = clSetKernelArg(kernel, 2, sizeof(int), &g_opencl_ctrl.interval);
     CHECK_CL_ERROR(error);
@@ -460,7 +460,7 @@ int main(int argc, char *argv[])
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
-#if 0
+#if 0 
     fprintf(stderr, "\nData after process:\n");
     switch (g_opencl_ctrl.dataType)
     {
