@@ -20,6 +20,7 @@
 #define CL_FILE_NAME "arith_utilization.cl"
 #define PTX_FILE_NAME "arith_utilization.ptx"
 #define DATA_SIZE 20
+#define INTERVAL 10
 #define POWER_LOG_FILE_LEN 200
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
@@ -49,11 +50,12 @@ struct OpenCL_Ctrl
     int dataByte;
     int global_size;
     int local_size;
-    int iteration;
+    long iteration;
+    int interval;
     char *kernelName;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL) {sprintf(powerFile, "KernelExecution.log");}
+    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL), interval(INTERVAL) {sprintf(powerFile, "KernelExecution.log");}
     ~OpenCL_Ctrl()
     {
         if (kernelName)
@@ -126,7 +128,7 @@ void CommandParser(int argc, char *argv[])
                 break;
 
             case 'i':
-                g_opencl_ctrl.iteration = atoi(optarg);
+                g_opencl_ctrl.iteration = atol(optarg);
                 break;
 
             case 't':
@@ -168,13 +170,13 @@ void CommandParser(int argc, char *argv[])
     switch(g_opencl_ctrl.dataType)
     {
         case TYPE_INT:
-            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(int);
+            g_opencl_ctrl.dataByte = DATA_SIZE * g_opencl_ctrl.global_size * sizeof(int);
             break;
         case TYPE_FLOAT:
-            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(float);
+            g_opencl_ctrl.dataByte = DATA_SIZE * g_opencl_ctrl.global_size * sizeof(float);
             break;
         case TYPE_DOUBLE:
-            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(double);
+            g_opencl_ctrl.dataByte = DATA_SIZE * g_opencl_ctrl.global_size * sizeof(double);
             break;
         default:
             break;
@@ -222,6 +224,25 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     queryString = (char *)malloc(sizeof(char) * length);
     clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
     fprintf(stderr, "Device selected: '%s'\n", queryString);
+
+    {
+        cl_uint vectorSize;
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred char vector width : %u\n", vectorSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred int vector width : %u\n", vectorSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred float vector width : %u\n", vectorSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, sizeof(vectorSize), &vectorSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Preferred double vector width : %u\n", vectorSize);
+    }
 
     /* Free the space */
     free(platforms);
@@ -304,7 +325,7 @@ void HostDataCreation(void* &data)
             {
                 int *tmp;
                 tmp = (int *)data;
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                 {
                     tmp[i] = (rand() % INT_MAX);
                     tmp[i] += (tmp[i] % 2) + 1;
@@ -315,7 +336,7 @@ void HostDataCreation(void* &data)
             {
                 float *tmp;
                 tmp = (float *)data;
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                 {
                     tmp[i] = ((float)(rand()) / RAND_MAX) * 1e5;
                     if (i % 2 == 0)
@@ -327,7 +348,7 @@ void HostDataCreation(void* &data)
             {
                 double *tmp;
                 tmp = (double *)data;
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                 {
                     tmp[i] = ((double)(rand()) / RAND_MAX) * 1e100;
                     if (i % 2 == 0)
@@ -381,13 +402,14 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     fprintf(stderr, "Preferred work group size: %lu\n", warpSize);
 
+#if 0
     fprintf(stderr, "\nData before process:\n");
     switch (g_opencl_ctrl.dataType)
     {
         case TYPE_INT:
             {
                 int *intptr = (int *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%d ", intptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -395,7 +417,7 @@ int main(int argc, char *argv[])
         case TYPE_FLOAT:
             {
                 float *fltptr = (float *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%f ", fltptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -403,12 +425,13 @@ int main(int argc, char *argv[])
        case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%lf ", dblptr[i]);
                 fprintf(stderr, "\n");
             }
             break;
     }
+#endif
 
     /* Create buffers */
     buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByte, hostData, &error);
@@ -417,7 +440,9 @@ int main(int argc, char *argv[])
     /* Execute kernels */
     error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 1, sizeof(int), &g_opencl_ctrl.iteration);
+    error = clSetKernelArg(kernel, 1, sizeof(long), &g_opencl_ctrl.iteration);
+    CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel, 2, sizeof(int), &g_opencl_ctrl.interval);
     CHECK_CL_ERROR(error);
 
     PrintTimingInfo(fptr);
@@ -435,13 +460,14 @@ int main(int argc, char *argv[])
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
+#if 0
     fprintf(stderr, "\nData after process:\n");
     switch (g_opencl_ctrl.dataType)
     {
         case TYPE_INT:
             {
                 int *intptr = (int *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%d ", intptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -449,7 +475,7 @@ int main(int argc, char *argv[])
         case TYPE_FLOAT:
             {
                 float *fltptr = (float *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%f ", fltptr[i]);
                 fprintf(stderr, "\n");
             }
@@ -457,12 +483,13 @@ int main(int argc, char *argv[])
        case TYPE_DOUBLE:
             {
                 double *dblptr = (double *)(hostData);
-                for (int i = 0 ; i < DATA_SIZE ; i ++)
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
                     fprintf(stderr, "%lf ", dblptr[i]);
                 fprintf(stderr, "\n");
             }
             break;
     }
+#endif
 
     /* Event profiling */
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(startTime), &startTime, NULL);
