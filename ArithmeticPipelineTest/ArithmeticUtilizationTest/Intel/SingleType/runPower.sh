@@ -15,25 +15,25 @@ done
 
 for (( i = 1 ; i <= 5 ; i ++ ))
 do
-    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Double4_addition_0_10 -i 70000000 -o ${POWER_DIR}'/'${PREFIX}'_0_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_0_10_ExecutionTime.log'
+    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Integer_addition_0_10 -i 500000000 -o ${POWER_DIR}'/'${PREFIX}'_0_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_0_10_ExecutionTime.log'
 done
 
 for (( i = 1 ; i <= 5 ; i ++ ))
 do
-    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Double4_addition_2_10 -i 70000000 -o ${POWER_DIR}'/'${PREFIX}'_2_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_2_10_ExecutionTime.log'
+    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Integer_addition_2_10 -i 500000000 -o ${POWER_DIR}'/'${PREFIX}'_2_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_2_10_ExecutionTime.log'
 done
 
 for (( i = 1 ; i <= 5 ; i ++ ))
 do
-    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Double4_addition_5_10 -i 70000000 -o ${POWER_DIR}'/'${PREFIX}'_5_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_5_10_ExecutionTime.log'
+    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Integer_addition_5_10 -i 500000000 -o ${POWER_DIR}'/'${PREFIX}'_5_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_5_10_ExecutionTime.log'
 done
 
 for (( i = 1 ; i <= 5 ; i ++ ))
 do
-    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Double4_addition_7_10 -i 70000000 -o ${POWER_DIR}'/'${PREFIX}'_7_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_7_10_ExecutionTime.log'
+    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Integer_addition_7_10 -i 500000000 -o ${POWER_DIR}'/'${PREFIX}'_7_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_7_10_ExecutionTime.log'
 done
 
 for (( i = 1 ; i <= 5 ; i ++ ))
 do
-    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Double4_addition_10_10 -i 70000000 -o ${POWER_DIR}'/'${PREFIX}'_10_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_10_10_ExecutionTime.log'
+    ./arith_utilization -p 0 -d 0 -t ${TYPE} -k Integer_addition_10_10 -i 500000000 -o ${POWER_DIR}'/'${PREFIX}'_10_10_KernelExecution'${i}'.log' -g 4 -l 1 >> ${POWER_DIR}'/'${PREFIX}'_10_10_ExecutionTime.log'
 done
