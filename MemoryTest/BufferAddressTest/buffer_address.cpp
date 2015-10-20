@@ -177,7 +177,6 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     /* Create and build cl_program object */
     target_program = clCreateProgramWithSource(context, 1, (const char **)(&programSource), &programSize, &error);
     CHECK_CL_ERROR(error);
-    CHECK_CL_ERROR(binaryError);
     free(programSource);
 
     error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
