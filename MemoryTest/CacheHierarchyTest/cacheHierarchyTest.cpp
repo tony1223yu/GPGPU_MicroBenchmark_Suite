@@ -17,8 +17,11 @@
 
 
 /* Macros */
-#define CL_FILE_NAME "buffer_address.cl"
-#define PTX_FILE_NAME "buffer_address.ptx"
+#define CL_FILE_NAME "cacheHierarchyTest.cl"
+#define PTX_FILE_NAME "cacheHierarchyTest.ptx"
+#define KERNEL_1 "GeneratePattern"
+#define KERNEL_2 "Process"
+
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
         do                                                                                                                          \
@@ -37,25 +40,25 @@ struct OpenCL_Ctrl
     int platform_id;
     int device_id;
     int dataByte;
-    char *kernelName;
+    long iteration;
+    int size;
+    int stride;
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), kernelName(NULL) {} 
-    ~OpenCL_Ctrl()
-    {
-        if (kernelName)
-            free(kernelName);
-    }
+    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1) {} 
+    ~OpenCL_Ctrl() {}
 
 } g_opencl_ctrl;
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:k:");
+    char* short_options = strdup("p:d:s:S:i:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
         {"deviceID", required_argument, NULL, 'd'},
-        {"kernelName", required_argument, NULL, 'k'},
+        {"iteration", required_argument, NULL, 'i'},
+        {"size", required_argument, NULL, 'S'},
+        {"stride", required_argument, NULL, 's'},
         /* option end */
         {0, 0, 0, 0}
     };
@@ -71,8 +74,16 @@ void CommandParser(int argc, char *argv[])
 
         switch (cmd)
         {
-            case 'k':
-                g_opencl_ctrl.kernelName = strdup(optarg);
+            case 'S':
+                g_opencl_ctrl.size = atoi(optarg);
+                break;
+
+            case 's':
+                g_opencl_ctrl.stride = atoi(optarg);
+                break;
+
+            case 'i':
+                g_opencl_ctrl.iteration = atol(optarg);
                 break;
 
             case 'p':
@@ -93,7 +104,7 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * 4;
+    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * g_opencl_ctrl.stride * g_opencl_ctrl.size;
 
     free (short_options);
 }
@@ -135,8 +146,34 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     CHECK_CL_ERROR(error);
 
     queryString = (char *)malloc(sizeof(char) * length);
-    clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
+    error = clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
+    CHECK_CL_ERROR(error);
     fprintf(stderr, "Device selected: '%s'\n", queryString);
+
+    {
+        cl_ulong global_cache_size;
+        cl_device_mem_cache_type global_cache_type;
+        cl_uint global_cache_line_size;
+        cl_ulong global_memory_size;
+        
+        error = clGetDeviceInfo(target_device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(global_memory_size), &global_memory_size, NULL);
+        CHECK_CL_ERROR(error);
+        error = clGetDeviceInfo(target_device, CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, sizeof(global_cache_size), &global_cache_size, NULL);
+        CHECK_CL_ERROR(error);
+        error = clGetDeviceInfo(target_device, CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, sizeof(global_cache_line_size), &global_cache_line_size, NULL);
+        CHECK_CL_ERROR(error);
+        error = clGetDeviceInfo(target_device, CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, sizeof(global_cache_type), &global_cache_type, NULL);
+        CHECK_CL_ERROR(error);
+
+        printf("Global memory size:            %lu B\n", global_memory_size);
+        printf("Global memory cache size:      %lu B\n", global_cache_size);
+        printf("Global memory cache line size: %u B\n", global_cache_line_size);
+        printf("Global memory cache type:      ");
+        if (global_cache_type == CL_READ_ONLY_CACHE)
+            printf("Read Only\n");
+        else if (global_cache_type == CL_READ_WRITE_CACHE)
+            printf("Read Write\n");
+    }
 
     /* Free the space */
     free(platforms);
@@ -190,7 +227,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         exit(1);
     }
 
-#if 0
+#if 1
     {
         size_t binarySize;
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binarySize, NULL);
@@ -213,10 +250,9 @@ void HostDataCreation(void* &data)
 {
     srand(time(NULL));
     data = malloc(g_opencl_ctrl.dataByte);
-    ((cl_ulong *)(data))[0] = 0x1234;
-    ((cl_ulong *)(data))[1] = 0x5678;
-    ((cl_ulong *)(data))[2] = 0x0000;
-    ((cl_ulong *)(data))[3] = 0x0000;
+    
+    for (int i = 0 ; i < g_opencl_ctrl.size * g_opencl_ctrl.stride ; i ++)
+        ((long *)(data))[i] = 0;
 }
 
 int main(int argc, char *argv[])
@@ -226,8 +262,7 @@ int main(int argc, char *argv[])
     cl_context context;
     cl_command_queue command_queue;
     cl_program program;
-    cl_kernel kernel;
-    cl_kernel kernel2;
+    cl_kernel kernel1, kernel2;
     cl_mem buffer;
     cl_int error;
     cl_event event;
@@ -254,59 +289,67 @@ int main(int argc, char *argv[])
     CreateAndBuildProgram(program, context, device, strdup(CL_FILE_NAME));
 
     /* Create kernels */
-    kernel = clCreateKernel(program, "getBufferAddress", &error);
+    kernel1 = clCreateKernel(program, KERNEL_1, &error);
     CHECK_CL_ERROR(error);
-    kernel2 = clCreateKernel(program, "getBufferAddress2", &error);
+    kernel2 = clCreateKernel(program, KERNEL_2, &error);
     CHECK_CL_ERROR(error);
 
-    error = clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(size_t), &warpSize, NULL);
+    error = clGetKernelWorkGroupInfo(kernel1, device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(size_t), &warpSize, NULL);
     CHECK_CL_ERROR(error);
 
     /* Create buffers */
     buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByte, hostData, &error);
     CHECK_CL_ERROR(error);
 
-    printf("buffer location %p\n", &buffer);
-    
     /* Execute kernels */
-    error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer);
+    error = clSetKernelArg(kernel1, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel1, 1, sizeof(int), &g_opencl_ctrl.size);
+    CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel1, 2, sizeof(int), &g_opencl_ctrl.stride);
+    CHECK_CL_ERROR(error);
+    
     error = clSetKernelArg(kernel2, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
-
+    error = clSetKernelArg(kernel2, 1, sizeof(long), &g_opencl_ctrl.iteration);
+    CHECK_CL_ERROR(error);
 
     globalSize[0] = 1;
     localSize[0] = 1;
-    error = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, globalSize, localSize, 0, NULL, &event);
+    error = clEnqueueNDRangeKernel(command_queue, kernel1, 1, NULL, globalSize, localSize, 0, NULL, &event);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
-    
+
     error = clEnqueueNDRangeKernel(command_queue, kernel2, 1, NULL, globalSize, localSize, 0, NULL, &event);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
 
-
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
-    printf("In kernel location (first)  %p %p\n", (void *)(*(cl_ulong *)(hostData)), (void *)(*((cl_ulong*)(hostData)+1)));
-    printf("In kernel location (second) %p %p\n", (void *)(*((cl_ulong *)(hostData)+2)), (void *)(*((cl_ulong*)(hostData)+3)));
+#if 0
+    for (int i = 0 ; i < g_opencl_ctrl.size * g_opencl_ctrl.stride ; i ++)
+    {
+        //printf("%lu ", ((long *)(hostData))[i * g_opencl_ctrl.stride]);
+        printf("%lu ", ((long *)(hostData))[i]);
+    }
+    printf("\n");
+#endif
 
     /* Event profiling */
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(startTime), &startTime, NULL);
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stderr, "\n['%s' execution time] %lu ns\n", g_opencl_ctrl.kernelName, (endTime - startTime));
+    fprintf(stderr, "\n['Process' execution time] %lu ns\n", (endTime - startTime));
     fprintf(stdout, "%lu\n", (endTime - startTime));
 
     /* Read the output */
 
     /* Release object */
-    clReleaseKernel(kernel);
-    clReleaseKernel(kernel2);
+    clReleaseKernel(kernel1);
     clReleaseMemObject(buffer);
     clReleaseEvent(event);
     clReleaseProgram(program);
