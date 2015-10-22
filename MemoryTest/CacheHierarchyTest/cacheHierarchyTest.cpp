@@ -21,6 +21,7 @@
 #define PTX_FILE_NAME "cacheHierarchyTest.ptx"
 #define KERNEL_1 "GeneratePattern"
 #define KERNEL_2 "Process"
+#define POWER_LOG_FILE_LEN 300
 
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
@@ -43,15 +44,28 @@ struct OpenCL_Ctrl
     long iteration;
     int size;
     int stride;
+    char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1) {} 
+    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1) {sprintf(powerFile, "KernelExecution.log");} 
     ~OpenCL_Ctrl() {}
 
 } g_opencl_ctrl;
 
+void PrintTimingInfo(FILE* fptr)
+{
+    struct timeval current;
+    unsigned long long curr_time;
+
+    gettimeofday(&current, NULL);
+    curr_time = current.tv_sec * 1000 + current.tv_usec / 1000;
+
+    fprintf(fptr, "%llu\n", curr_time);
+}
+
+
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:s:S:i:");
+    char* short_options = strdup("p:d:s:S:i:o:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
@@ -59,6 +73,7 @@ void CommandParser(int argc, char *argv[])
         {"iteration", required_argument, NULL, 'i'},
         {"size", required_argument, NULL, 'S'},
         {"stride", required_argument, NULL, 's'},
+        {"powerLogFile", required_argument, NULL, 'o'},
         /* option end */
         {0, 0, 0, 0}
     };
@@ -74,6 +89,10 @@ void CommandParser(int argc, char *argv[])
 
         switch (cmd)
         {
+            case 'o':
+                sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
+                break;
+            
             case 'S':
                 g_opencl_ctrl.size = atoi(optarg);
                 break;
@@ -150,6 +169,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     CHECK_CL_ERROR(error);
     fprintf(stderr, "Device selected: '%s'\n", queryString);
 
+#if 0
     {
         cl_ulong global_cache_size;
         cl_device_mem_cache_type global_cache_type;
@@ -165,15 +185,16 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
         error = clGetDeviceInfo(target_device, CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, sizeof(global_cache_type), &global_cache_type, NULL);
         CHECK_CL_ERROR(error);
 
-        printf("Global memory size:            %lu B\n", global_memory_size);
-        printf("Global memory cache size:      %lu B\n", global_cache_size);
-        printf("Global memory cache line size: %u B\n", global_cache_line_size);
-        printf("Global memory cache type:      ");
+        fprintf(stderr, "Global memory size:            %lu B\n", global_memory_size);
+        fprintf(stderr, "Global memory cache size:      %lu B\n", global_cache_size);
+        fprintf(stderr, "Global memory cache line size: %u B\n", global_cache_line_size);
+        fprintf(stderr, "Global memory cache type:      ");
         if (global_cache_type == CL_READ_ONLY_CACHE)
             printf("Read Only\n");
         else if (global_cache_type == CL_READ_WRITE_CACHE)
             printf("Read Write\n");
     }
+#endif
 
     /* Free the space */
     free(platforms);
@@ -210,7 +231,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
+    error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
     if (error < 0)
     {
         size_t logSize;
@@ -268,6 +289,7 @@ int main(int argc, char *argv[])
     cl_event event;
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
+    FILE* fptr;
 
     void* hostData = NULL;
 
@@ -276,6 +298,7 @@ int main(int argc, char *argv[])
     HostDataCreation(hostData);
 
     GetPlatformAndDevice(platform, device);
+    fptr = fopen(g_opencl_ctrl.powerFile, "w");
 
     /* Create context */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &error);
@@ -320,11 +343,16 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
+    
+    PrintTimingInfo(fptr);
 
     error = clEnqueueNDRangeKernel(command_queue, kernel2, 1, NULL, globalSize, localSize, 0, NULL, &event);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
+
+    PrintTimingInfo(fptr);
+    fclose(fptr);
 
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
