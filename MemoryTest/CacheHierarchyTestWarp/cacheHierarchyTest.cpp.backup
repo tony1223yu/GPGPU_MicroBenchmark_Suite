@@ -138,7 +138,7 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * g_opencl_ctrl.stride * g_opencl_ctrl.size * g_opencl_ctrl.globalSize;
+    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * g_opencl_ctrl.stride * g_opencl_ctrl.size;
 
     free (short_options);
 }
@@ -302,6 +302,7 @@ int main(int argc, char *argv[])
     cl_mem buffer;
     cl_int error;
     cl_event event;
+    int offsetSize;
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
     FILE* fptr;
@@ -347,11 +348,12 @@ int main(int argc, char *argv[])
     error = clSetKernelArg(kernel1, 2, sizeof(int), &g_opencl_ctrl.stride);
     CHECK_CL_ERROR(error);
     
+    offsetSize = g_opencl_ctrl.size * g_opencl_ctrl.stride;
     error = clSetKernelArg(kernel2, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
     error = clSetKernelArg(kernel2, 1, sizeof(long), &g_opencl_ctrl.iteration);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel2, 2, sizeof(int), &g_opencl_ctrl.stride);
+    error = clSetKernelArg(kernel2, 2, sizeof(int), &offsetSize);
     CHECK_CL_ERROR(error);
 
     globalSize[0] = g_opencl_ctrl.globalSize;
