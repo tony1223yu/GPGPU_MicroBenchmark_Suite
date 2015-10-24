@@ -15,12 +15,17 @@
 #include <CL/cl.h>
 #endif
 
+
 /* Macros */
 #define CL_FILE_NAME "cacheHierarchyTest.cl"
 #define PTX_FILE_NAME "cacheHierarchyTest.ptx"
 #define KERNEL_1 "GeneratePattern"
 #define KERNEL_2 "Process"
 #define POWER_LOG_FILE_LEN 300
+
+//#define BUFFER_MAX_SIZE 1073741824 /* 1GB */
+#define BUFFER_MAX_SIZE 1048576 /* 1GB */
+#define KERNEL_FLUSH "FlushCache"
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
         do                                                                                                                          \
@@ -42,9 +47,11 @@ struct OpenCL_Ctrl
     long iteration;
     int size;
     int stride;
+    int globalSize;
+    int localSize;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1) {sprintf(powerFile, "KernelExecution.log");} 
+    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1), globalSize(1), localSize(1) {sprintf(powerFile, "KernelExecution.log");} 
     ~OpenCL_Ctrl() {}
 
 } g_opencl_ctrl;
@@ -63,7 +70,7 @@ void PrintTimingInfo(FILE* fptr)
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:s:S:i:o:");
+    char* short_options = strdup("p:d:s:S:i:o:g:l:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
@@ -72,6 +79,8 @@ void CommandParser(int argc, char *argv[])
         {"size", required_argument, NULL, 'S'},
         {"stride", required_argument, NULL, 's'},
         {"powerLogFile", required_argument, NULL, 'o'},
+        {"globalSize", required_argument, NULL, 'g'},
+        {"localSize", required_argument, NULL, 'l'},
         /* option end */
         {0, 0, 0, 0}
     };
@@ -87,6 +96,14 @@ void CommandParser(int argc, char *argv[])
 
         switch (cmd)
         {
+            case 'g':
+                g_opencl_ctrl.globalSize = atoi(optarg);
+                break;
+
+            case 'l':
+                g_opencl_ctrl.localSize = atoi(optarg);
+                break;
+
             case 'o':
                 sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
                 break;
@@ -121,7 +138,7 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * g_opencl_ctrl.stride * g_opencl_ctrl.size;
+    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * g_opencl_ctrl.stride * g_opencl_ctrl.size * g_opencl_ctrl.globalSize;
 
     free (short_options);
 }
@@ -285,7 +302,7 @@ int main(int argc, char *argv[])
     cl_mem buffer;
     cl_int error;
     cl_event event;
-    int flushSize;
+    int offsetSize;
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
     FILE* fptr;
@@ -331,19 +348,22 @@ int main(int argc, char *argv[])
     error = clSetKernelArg(kernel1, 2, sizeof(int), &g_opencl_ctrl.stride);
     CHECK_CL_ERROR(error);
     
+    offsetSize = g_opencl_ctrl.size * g_opencl_ctrl.stride;
     error = clSetKernelArg(kernel2, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
     error = clSetKernelArg(kernel2, 1, sizeof(long), &g_opencl_ctrl.iteration);
     CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel2, 2, sizeof(int), &offsetSize);
+    CHECK_CL_ERROR(error);
 
-    globalSize[0] = 1;
-    localSize[0] = 1;
+    globalSize[0] = g_opencl_ctrl.globalSize;
+    localSize[0] = g_opencl_ctrl.localSize;
     
     error = clEnqueueNDRangeKernel(command_queue, kernel1, 1, NULL, globalSize, localSize, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
-
+    
     PrintTimingInfo(fptr);
 
     error = clEnqueueNDRangeKernel(command_queue, kernel2, 1, NULL, globalSize, localSize, 0, NULL, &event);
@@ -357,13 +377,17 @@ int main(int argc, char *argv[])
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
-#if 0
-    for (int i = 0 ; i < g_opencl_ctrl.size * g_opencl_ctrl.stride ; i ++)
+#if 1
+    long *currData;
+    for (int id = 0 ; id < g_opencl_ctrl.globalSize ; id ++)
     {
-        //printf("%lu ", ((long *)(hostData))[i * g_opencl_ctrl.stride]);
-        printf("%lu ", ((long *)(hostData))[i]);
+        currData = ((long *)(hostData)) + id * g_opencl_ctrl.size * g_opencl_ctrl.stride;
+        for (int i = 0 ; i < g_opencl_ctrl.size * g_opencl_ctrl.stride ; i ++)
+        {
+            printf("%lu ", ((long *)(currData))[i]);
+        }
+        printf("\n");
     }
-    printf("\n");
 #endif
 
     /* Event profiling */

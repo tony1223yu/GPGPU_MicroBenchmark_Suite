@@ -1,6 +1,6 @@
-__kernel void Process(__global ulong* dataArray, long iter)
+__kernel void Process(__global ulong* dataArray, long iter, int offset)
 {
-    __global ulong* currPtr = dataArray;
+    __global ulong* currPtr = dataArray + get_global_id(0) * offset;
     while (iter -- > 0)
     {
         currPtr = (__global ulong *)(*currPtr);
@@ -107,14 +107,15 @@ __kernel void Process(__global ulong* dataArray, long iter)
     dataArray[1] = (ulong)(currPtr);
 }
 
-// only one single work-item
+// 1D ork-item
 __kernel void GeneratePattern(__global ulong* dataArray, int size, int stride)
 {
     int idx = 0;
+    __global ulong* currArray = dataArray + get_global_id(0) * size * stride;
     for (int i = 0 ; i < size - 1 ; i ++)
     {
-        dataArray[idx] = (ulong)(&dataArray[idx + stride]);
+        currArray[idx] = (ulong)(&currArray[idx + stride]);
         idx = idx + stride;
     }
-    dataArray[idx] = (ulong)dataArray;
+    currArray[idx] = (ulong)currArray;
 }
