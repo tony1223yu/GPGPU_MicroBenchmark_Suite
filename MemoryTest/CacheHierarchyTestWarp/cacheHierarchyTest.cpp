@@ -43,15 +43,16 @@ struct OpenCL_Ctrl
 {
     int platform_id;
     int device_id;
-    int dataByte;
+    long dataByte;
     long iteration;
     int size;
     int stride;
+    long offset;
     int globalSize;
     int localSize;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1), globalSize(1), localSize(1) {sprintf(powerFile, "KernelExecution.log");} 
+    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1), globalSize(1), localSize(1), offset(1) {sprintf(powerFile, "KernelExecution.log");} 
     ~OpenCL_Ctrl() {}
 
 } g_opencl_ctrl;
@@ -138,7 +139,10 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * g_opencl_ctrl.stride * g_opencl_ctrl.size * g_opencl_ctrl.globalSize;
+    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size) * (long)(g_opencl_ctrl.globalSize);
+    g_opencl_ctrl.offset = (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size);
+
+    fprintf(stderr, "Total buffer size: %ld\n", g_opencl_ctrl.dataByte);
 
     free (short_options);
 }
@@ -184,7 +188,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     CHECK_CL_ERROR(error);
     fprintf(stderr, "Device selected: '%s'\n", queryString);
 
-#if 1
+#if 0
     {
         cl_ulong global_cache_size;
         cl_device_mem_cache_type global_cache_type;
@@ -351,7 +355,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clSetKernelArg(kernel2, 1, sizeof(long), &g_opencl_ctrl.iteration);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel2, 2, sizeof(int), &g_opencl_ctrl.stride);
+    error = clSetKernelArg(kernel2, 2, sizeof(long), &g_opencl_ctrl.offset);
     CHECK_CL_ERROR(error);
 
     globalSize[0] = g_opencl_ctrl.globalSize;
