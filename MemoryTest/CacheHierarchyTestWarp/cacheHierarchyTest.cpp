@@ -381,10 +381,10 @@ int main(int argc, char *argv[])
 
 #if 0
     long *currData;
-    for (int i = 0 ; i < g_opencl_ctrl.size ; i ++)
+    for (int i = 0 ; i < g_opencl_ctrl.globalSize ; i ++)
     {
-        currData = ((long *)(hostData)) + i * g_opencl_ctrl.stride;
-        for (int id = 0 ; id < g_opencl_ctrl.stride ; id ++)
+        currData = ((long *)(hostData)) + i * g_opencl_ctrl.stride * g_opencl_ctrl.size;
+        for (int id = 0 ; id < g_opencl_ctrl.stride * g_opencl_ctrl.size ; id ++)
             printf("%lu ", ((long *)(currData))[id]);
         printf("\n");
     }
