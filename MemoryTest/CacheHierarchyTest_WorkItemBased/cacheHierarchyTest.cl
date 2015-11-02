@@ -104,7 +104,7 @@ __kernel void Process(__global ulong* dataArray, long iter, long offset)
         currPtr = (__global ulong *)(*currPtr);
         currPtr = (__global ulong *)(*currPtr);
     }
-    dataArray[get_global_id(0)] = (ulong)(currPtr);
+    dataArray[get_global_id(0) * offset] = (ulong)(currPtr);
 }
 
 // 1D work-item
