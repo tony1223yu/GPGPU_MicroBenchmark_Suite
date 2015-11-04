@@ -291,7 +291,7 @@ void HostDataCreation(void* &data)
     srand(time(NULL));
     data = malloc(g_opencl_ctrl.dataByte);
     
-    for (int i = 0 ; i < g_opencl_ctrl.size * g_opencl_ctrl.stride ; i ++)
+    for (int i = 0 ; i < g_opencl_ctrl.size * g_opencl_ctrl.stride * g_opencl_ctrl.globalSize ; i ++)
         ((long *)(data))[i] = 0;
 }
 
