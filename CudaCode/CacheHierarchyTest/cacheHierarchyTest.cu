@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
 	cudaEvent_t before, start, end;
  	float kernelTime;
     cudaDeviceProp devProp;
-    PAPIWrapper papi_ctrl;
+    //PAPIWrapper papi_ctrl;
 
 
     CommandParser(argc, argv);
@@ -250,7 +250,7 @@ int main(int argc, char* argv[])
     cudaGetDeviceProperties(&devProp, g_cuda_ctrl.device_id);
     cout << "Device selected: " << devProp.name << endl;
      
-    papi_ctrl.AddEvent(2, strdup("cuda:::device:1:inst_executed"), strdup("cuda:::device:1:uncached_global_load_transaction"));
+    //papi_ctrl.AddEvent(2, strdup("cuda:::device:1:inst_executed"), strdup("cuda:::device:1:uncached_global_load_transaction"));
     cudaEventCreate(&before);
     cudaEventCreate(&start);
 	cudaEventCreate(&end);
@@ -262,17 +262,19 @@ int main(int argc, char* argv[])
     dim3 dimBlock(g_cuda_ctrl.localSize);
     
     GeneratePattern <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.size, g_cuda_ctrl.stride, g_cuda_ctrl.interval);
+    cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
+    cout << hex << hostArray[0] << endl;
     cudaEventRecord(before, 0);
     cudaEventSynchronize(before);   
 
-    papi_ctrl.Start();
+    //papi_ctrl.Start();
     cudaEventRecord(start, 0);
 
     Processing  <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.iteration, g_cuda_ctrl.offset, g_cuda_ctrl.interval);
     
     cudaEventRecord(end, 0);
     cudaEventSynchronize(end);   
-    papi_ctrl.Stop();
+    //papi_ctrl.Stop();
     
     cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
 

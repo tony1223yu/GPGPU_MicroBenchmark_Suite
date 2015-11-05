@@ -1,0 +1,380 @@
+ Native Events in Component: cuda
+===============================================================================
+| cuda:::device:0:fb_subp0_read_sectors                                        |
+|            fb subp0 read sectors                                             |
+--------------------------------------------------------------------------------
+| cuda:::device:0:fb_subp1_read_sectors                                        |
+|            fb subp1 read sectors                                             |
+--------------------------------------------------------------------------------
+| cuda:::device:0:fb_subp0_write_sectors                                       |
+|            fb subp0 write sectors                                            |
+--------------------------------------------------------------------------------
+| cuda:::device:0:fb_subp1_write_sectors                                       |
+|            fb subp1 write sectors                                            |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gld_inst_8bit                                                |
+|            gld_inst_8bit                                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gld_inst_16bit                                               |
+|            gld_inst_16bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gld_inst_32bit                                               |
+|            gld_inst_32bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gld_inst_64bit                                               |
+|            gld_inst_64bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gld_inst_128bit                                              |
+|            gld_inst_128bit                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gst_inst_8bit                                                |
+|            gst_inst_8bit                                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gst_inst_16bit                                               |
+|            gst_inst_16bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gst_inst_32bit                                               |
+|            gst_inst_32bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gst_inst_64bit                                               |
+|            gst_inst_64bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:0:gst_inst_128bit                                              |
+|            gst_inst_128bit                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex0_cache_sector_queries                                    |
+|            tex0 cache sector queries                                         |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex1_cache_sector_queries                                    |
+|            tex1 cache sector queries                                         |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex2_cache_sector_queries                                    |
+|            tex2 cache sector queries                                         |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex3_cache_sector_queries                                    |
+|            tex3 cache sector queries                                         |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex0_cache_sector_misses                                     |
+|            tex0 cache sector misses                                          |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex1_cache_sector_misses                                     |
+|            tex1 cache sector misses                                          |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex2_cache_sector_misses                                     |
+|            tex2 cache sector misses                                          |
+--------------------------------------------------------------------------------
+| cuda:::device:1:tex3_cache_sector_misses                                     |
+|            tex3 cache sector misses                                          |
+--------------------------------------------------------------------------------
+| cuda:::device:1:elapsed_cycles_sm                                            |
+|            elapsed_cycles_sm                                                 |
+--------------------------------------------------------------------------------
+| cuda:::device:1:fb_subp0_read_sectors                                        |
+|            fb subp0 read sectors                                             |
+--------------------------------------------------------------------------------
+| cuda:::device:1:fb_subp1_read_sectors                                        |
+|            fb subp1 read sectors                                             |
+--------------------------------------------------------------------------------
+| cuda:::device:1:fb_subp0_write_sectors                                       |
+|            fb subp0 write sectors                                            |
+--------------------------------------------------------------------------------
+| cuda:::device:1:fb_subp1_write_sectors                                       |
+|            fb subp1 write sectors                                            |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_write_sector_misses                                 |
+|            l2 subp0 write sector misses                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_write_sector_misses                                 |
+|            l2 subp1 write sector misses                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_write_sector_misses                                 |
+|            l2 subp2 write sector misses                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_write_sector_misses                                 |
+|            l2 subp3 write sector misses                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_read_sector_misses                                  |
+|            l2 subp0 read sector misses                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_read_sector_misses                                  |
+|            l2 subp1 read sector misses                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_read_sector_misses                                  |
+|            l2 subp2 read sector misses                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_read_sector_misses                                  |
+|            l2 subp3 read sector misses                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_write_l1_sector_queries                             |
+|            l2 subp0 write sector queries                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_write_l1_sector_queries                             |
+|            l2 subp1 write sector queries                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_write_l1_sector_queries                             |
+|            l2 subp2 write sector queries                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_write_l1_sector_queries                             |
+|            l2 subp3 write sector queries                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_read_l1_sector_queries                              |
+|            l2 subp0 read sector queries                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_read_l1_sector_queries                              |
+|            l2 subp1 read sector queries                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_read_l1_sector_queries                              |
+|            l2 subp2 read sector queries                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_read_l1_sector_queries                              |
+|            l2 subp3 read sector queries                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_read_l1_hit_sectors                                 |
+|            l2 subp0 read l1 hit sectors                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_read_l1_hit_sectors                                 |
+|            l2 subp1 read l1 hit sectors                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_read_l1_hit_sectors                                 |
+|            l2 subp2 read l1 hit sectors                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_read_l1_hit_sectors                                 |
+|            l2 subp3 read l1 hit sectors                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_read_tex_sector_queries                             |
+|            l2 subp0 read tex sector queries                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_read_tex_sector_queries                             |
+|            l2 subp1 read tex sector queries                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_read_tex_sector_queries                             |
+|            l2 subp2 read tex sector queries                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_read_tex_sector_queries                             |
+|            l2 subp3 read tex sector queries                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_read_tex_hit_sectors                                |
+|            l2 subp0 read tex hit sectors                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_read_tex_hit_sectors                                |
+|            l2 subp1 read tex hit sectors                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_read_tex_hit_sectors                                |
+|            l2 subp2 read tex hit sectors                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_read_tex_hit_sectors                                |
+|            l2 subp3 read tex hit sectors                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_read_sysmem_sector_queries                          |
+|            l2_subp0_read_sysmem_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_read_sysmem_sector_queries                          |
+|            l2_subp1_read_sysmem_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_read_sysmem_sector_queries                          |
+|            l2_subp2_read_sysmem_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_read_sysmem_sector_queries                          |
+|            l2_subp3_read_sysmem_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_write_sysmem_sector_queries                         |
+|            l2_subp0_write_sysmem_sector_queries                              |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_write_sysmem_sector_queries                         |
+|            l2_subp1_write_sysmem_sector_queries                              |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_write_sysmem_sector_queries                         |
+|            l2_subp2_write_sysmem_sector_queries                              |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_write_sysmem_sector_queries                         |
+|            l2_subp3_write_sysmem_sector_queries                              |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_total_read_sector_queries                           |
+|            l2_subp0_total_read_sector_queries                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_total_read_sector_queries                           |
+|            l2_subp1_total_read_sector_queries                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_total_read_sector_queries                           |
+|            l2_subp2_total_read_sector_queries                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_total_read_sector_queries                           |
+|            l2_subp3_total_read_sector_queries                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp0_total_write_sector_queries                          |
+|            l2_subp0_total_write_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp1_total_write_sector_queries                          |
+|            l2_subp1_total_write_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp2_total_write_sector_queries                          |
+|            l2_subp2_total_write_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l2_subp3_total_write_sector_queries                          |
+|            l2_subp3_total_write_sector_queries                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gld_inst_8bit                                                |
+|            gld_inst_8bit                                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gld_inst_16bit                                               |
+|            gld_inst_16bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gld_inst_32bit                                               |
+|            gld_inst_32bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gld_inst_64bit                                               |
+|            gld_inst_64bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gld_inst_128bit                                              |
+|            gld_inst_128bit                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gst_inst_8bit                                                |
+|            gst_inst_8bit                                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gst_inst_16bit                                               |
+|            gst_inst_16bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gst_inst_32bit                                               |
+|            gst_inst_32bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gst_inst_64bit                                               |
+|            gst_inst_64bit                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gst_inst_128bit                                              |
+|            gst_inst_128bit                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_00                                              |
+|            prof trigger 00                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_01                                              |
+|            prof trigger 01                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_02                                              |
+|            prof trigger 02                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_03                                              |
+|            prof trigger 03                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_04                                              |
+|            prof trigger 04                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_05                                              |
+|            prof trigger 05                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_06                                              |
+|            prof trigger 06                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:prof_trigger_07                                              |
+|            prof trigger 07                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:warps_launched                                               |
+|            warps launched                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:threads_launched                                             |
+|            threads launched                                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:inst_issued1                                                 |
+|            Instructions issued 1                                             |
+--------------------------------------------------------------------------------
+| cuda:::device:1:inst_issued2                                                 |
+|            Instructions issued 2                                             |
+--------------------------------------------------------------------------------
+| cuda:::device:1:inst_executed                                                |
+|            Instructions executed                                             |
+--------------------------------------------------------------------------------
+| cuda:::device:1:shared_load                                                  |
+|            shared load                                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:shared_store                                                 |
+|            shared store                                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:local_load                                                   |
+|            local load                                                        |
+--------------------------------------------------------------------------------
+| cuda:::device:1:local_store                                                  |
+|            local store                                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gld_request                                                  |
+|            gld request                                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gst_request                                                  |
+|            gst request                                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:atom_count                                                   |
+|            atom_count                                                        |
+--------------------------------------------------------------------------------
+| cuda:::device:1:atom_cas_count                                               |
+|            atom_cas_count                                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:gred_count                                                   |
+|            gred_count                                                        |
+--------------------------------------------------------------------------------
+| cuda:::device:1:branch                                                       |
+|            branch                                                            |
+--------------------------------------------------------------------------------
+| cuda:::device:1:divergent_branch                                             |
+|            divergent branch                                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:active_cycles                                                |
+|            active cycles                                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:active_warps                                                 |
+|            active warps                                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:sm_cta_launched                                              |
+|            sm cta launched                                                   |
+--------------------------------------------------------------------------------
+| cuda:::device:1:local_load_transactions                                      |
+|            local_load_transactions                                           |
+--------------------------------------------------------------------------------
+| cuda:::device:1:local_store_transactions                                     |
+|            local_store_transactions                                          |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_shared_load_transactions                                  |
+|            l1_shared_load_transactions                                       |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_shared_store_transactions                                 |
+|            l1_shared_store_transactions                                      |
+--------------------------------------------------------------------------------
+| cuda:::device:1:__l1_global_load_transactions                                |
+|            __l1_global_load_transactions                                     |
+--------------------------------------------------------------------------------
+| cuda:::device:1:__l1_global_store_transactions                               |
+|            __l1_global_store_transactions                                    |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_local_load_hit                                            |
+|            l1 local load hit                                                 |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_local_load_miss                                           |
+|            l1 local load miss                                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_local_store_hit                                           |
+|            l1 local store hit                                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_local_store_miss                                          |
+|            l1 local store miss                                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_global_load_hit                                           |
+|            l1 global load hit                                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:l1_global_load_miss                                          |
+|            l1 global load miss                                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:uncached_global_load_transaction                             |
+|            uncached global load transaction                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:global_store_transaction                                     |
+|            global store transaction                                          |
+--------------------------------------------------------------------------------
+| cuda:::device:1:shared_load_replay                                           |
+|            shared load replay                                                |
+--------------------------------------------------------------------------------
+| cuda:::device:1:shared_store_replay                                          |
+|            shared store replay                                               |
+--------------------------------------------------------------------------------
+| cuda:::device:1:global_ld_mem_divergence_replays                             |
+|            global_ld_mem_divergence_replays                                  |
+--------------------------------------------------------------------------------
+| cuda:::device:1:global_st_mem_divergence_replays                             |
+|            global_st_mem_divergence_replays                                  |
+--------------------------------------------------------------------------------
