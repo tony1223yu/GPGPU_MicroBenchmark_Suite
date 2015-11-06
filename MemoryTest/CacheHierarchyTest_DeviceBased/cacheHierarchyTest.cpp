@@ -145,7 +145,7 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size) * (long)(g_opencl_ctrl.globalSize) / (long)(g_opencl_ctrl.localSize);
+    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size);
     g_opencl_ctrl.offset = (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size);
 
     fprintf(stderr, "Total buffer size: %ld\n", g_opencl_ctrl.dataByte);
@@ -391,13 +391,10 @@ int main(int argc, char *argv[])
 
 #if 0
     long *currData;
-    for (int i = 0 ; i < g_opencl_ctrl.globalSize/g_opencl_ctrl.localSize ; i ++)
-    {
-        currData = ((long *)(hostData)) + i * g_opencl_ctrl.stride * g_opencl_ctrl.size;
-        for (int id = 0 ; id < g_opencl_ctrl.stride * g_opencl_ctrl.size ; id ++)
-            printf("%lu ", ((long *)(currData))[id]);
-        printf("\n");
-    }
+    currData = ((long *)(hostData)) + i * g_opencl_ctrl.stride * g_opencl_ctrl.size;
+    for (int id = 0 ; id < g_opencl_ctrl.stride * g_opencl_ctrl.size ; id ++)
+        printf("%lu ", ((long *)(currData))[id]);
+    printf("\n");
 #endif
 
     /* Event profiling */
