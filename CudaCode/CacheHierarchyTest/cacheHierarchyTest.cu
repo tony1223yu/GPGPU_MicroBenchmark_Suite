@@ -220,7 +220,7 @@ void CommandParser(int argc, char *argv[])
     g_cuda_ctrl.dataByte = sizeof(long) * (long)(g_cuda_ctrl.stride) * (long)(g_cuda_ctrl.size) * (long)(g_cuda_ctrl.globalSize);
     g_cuda_ctrl.offset = (long)(g_cuda_ctrl.stride) * (long)(g_cuda_ctrl.size);
 
-    fprintf(stderr, "Total buffer size: %ld\n", g_cuda_ctrl.dataByte);
+    //fprintf(stderr, "Total buffer size: %ld\n", g_cuda_ctrl.dataByte);
 
     free (short_options);
 }
@@ -245,57 +245,62 @@ int main(int argc, char* argv[])
 
     CommandParser(argc, argv);
 
-    HostDataCreation(hostArray);
-    cudaSetDevice(g_cuda_ctrl.device_id);
-    cudaGetDeviceProperties(&devProp, g_cuda_ctrl.device_id);
-    cout << "Device selected: " << devProp.name << endl;
-     
-    //papi_ctrl.AddEvent(2, strdup("cuda:::device:1:inst_executed"), strdup("cuda:::device:1:uncached_global_load_transaction"));
-    cudaEventCreate(&before);
-    cudaEventCreate(&start);
-	cudaEventCreate(&end);
-    
-    cudaMalloc((void **)&devArray, g_cuda_ctrl.dataByte);
-    cudaMemcpy(devArray, hostArray, g_cuda_ctrl.dataByte, cudaMemcpyHostToDevice);
-
-    dim3 dimGrid(g_cuda_ctrl.globalSize/g_cuda_ctrl.localSize);
-    dim3 dimBlock(g_cuda_ctrl.localSize);
-    
-    GeneratePattern <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.size, g_cuda_ctrl.stride, g_cuda_ctrl.interval);
-    cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
-    cout << hex << hostArray[0] << endl;
-    cudaEventRecord(before, 0);
-    cudaEventSynchronize(before);   
-
-    //papi_ctrl.Start();
-    cudaEventRecord(start, 0);
-
-    Processing  <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.iteration, g_cuda_ctrl.offset, g_cuda_ctrl.interval);
-    
-    cudaEventRecord(end, 0);
-    cudaEventSynchronize(end);   
-    //papi_ctrl.Stop();
-    
-    cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
-
-	cudaEventElapsedTime(&kernelTime, start, end);
-	cout << "Execution Time (s): " << kernelTime / 1000 << endl;
-
-    if (0)
+    for (int i = 0 ; i < 1 ; i ++)
     {
-        long *currArray;
-        for (int i = 0 ; i < g_cuda_ctrl.globalSize/g_cuda_ctrl.localSize ; i ++)
-        {
-            currArray = hostArray + i * g_cuda_ctrl.stride * g_cuda_ctrl.size;
-            for (int j = 0 ; j < g_cuda_ctrl.stride * g_cuda_ctrl.size ; j ++)
-            {
-                cout << currArray[j] << " ";
-            }
-            cout << endl;
-        }
-    }
+        HostDataCreation(hostArray);
+        cudaSetDevice(g_cuda_ctrl.device_id);
+        cudaGetDeviceProperties(&devProp, g_cuda_ctrl.device_id);
+        //cout << "Device selected: " << devProp.name << endl;
 
-    free(hostArray);
-    cudaFree(devArray);
+        //papi_ctrl.AddEvent(2, strdup("cuda:::device:1:inst_executed"), strdup("cuda:::device:1:uncached_global_load_transaction"));
+        cudaEventCreate(&before);
+        cudaEventCreate(&start);
+        cudaEventCreate(&end);
+
+        cudaMalloc((void **)&devArray, g_cuda_ctrl.dataByte);
+        cudaMemcpy(devArray, hostArray, g_cuda_ctrl.dataByte, cudaMemcpyHostToDevice);
+
+        dim3 dimGrid(g_cuda_ctrl.globalSize/g_cuda_ctrl.localSize);
+        dim3 dimBlock(g_cuda_ctrl.localSize);
+
+        GeneratePattern <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.size, g_cuda_ctrl.stride, g_cuda_ctrl.interval);
+        cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
+
+        ////cout << hex << hostArray[0] << endl;
+
+        cudaEventRecord(before, 0);
+        cudaEventSynchronize(before);
+
+        //papi_ctrl.Start();
+        cudaEventRecord(start, 0);
+
+        Processing  <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.iteration, g_cuda_ctrl.offset, g_cuda_ctrl.interval);
+
+        cudaEventRecord(end, 0);
+        cudaEventSynchronize(end); 
+        //papi_ctrl.Stop();
+
+        cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
+
+        cudaEventElapsedTime(&kernelTime, start, end);
+        //cout << "Execution Time (s): " << kernelTime / 1000 << endl;
+
+        if (0)
+        {
+            long *currArray;
+            for (int i = 0 ; i < g_cuda_ctrl.globalSize/g_cuda_ctrl.localSize ; i ++)
+            {
+                currArray = hostArray + i * g_cuda_ctrl.stride * g_cuda_ctrl.size;
+                for (int j = 0 ; j < g_cuda_ctrl.stride * g_cuda_ctrl.size ; j ++)
+                {
+                    cout << currArray[j] << " ";
+                }
+                cout << endl;
+            }
+        }
+
+        free(hostArray);
+        cudaFree(devArray);
+    }
     return 0;
 }
