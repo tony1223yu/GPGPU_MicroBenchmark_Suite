@@ -217,10 +217,10 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_cuda_ctrl.dataByte = sizeof(long) * (long)(g_cuda_ctrl.stride) * (long)(g_cuda_ctrl.size) * (long)(g_cuda_ctrl.globalSize);
+    g_cuda_ctrl.dataByte = sizeof(long) * (long)(g_cuda_ctrl.stride) * (long)(g_cuda_ctrl.size) * (long)(g_cuda_ctrl.globalSize) / (long)(g_cuda_ctrl.localSize);
     g_cuda_ctrl.offset = (long)(g_cuda_ctrl.stride) * (long)(g_cuda_ctrl.size);
 
-    //fprintf(stderr, "Total buffer size: %ld\n", g_cuda_ctrl.dataByte);
+    fprintf(stderr, "Total buffer size: %ld\n", g_cuda_ctrl.dataByte);
 
     free (short_options);
 }
@@ -229,7 +229,7 @@ void HostDataCreation(long* &hostArray)
 {
     hostArray = (long*) malloc (g_cuda_ctrl.dataByte);
 
-    for (int i = 0 ; i < g_cuda_ctrl.size * g_cuda_ctrl.stride * g_cuda_ctrl.globalSize ; i++)
+    for (int i = 0 ; i < g_cuda_ctrl.size * g_cuda_ctrl.stride * g_cuda_ctrl.globalSize / g_cuda_ctrl.localSize ; i++)
         hostArray[i] = 0;
 }
 
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
         cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
 
         cudaEventElapsedTime(&kernelTime, start, end);
-        //cout << "Execution Time (s): " << kernelTime / 1000 << endl;
+        cout << "Execution Time (s): " << kernelTime / 1000 << endl;
 
         if (0)
         {

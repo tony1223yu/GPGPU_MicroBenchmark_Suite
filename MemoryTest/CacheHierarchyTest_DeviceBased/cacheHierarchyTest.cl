@@ -1,6 +1,6 @@
 __kernel void Process(__global ulong* dataArray, long iter, long offset, int interval)
 {
-    __gl$obal ulong* currPtr = dataArray + get_global_id(0) * interval;
+    __global ulong* currPtr = dataArray + get_global_id(0) * interval;
     while (iter -- > 0)
     {
         currPtr = (__global ulong *)(*currPtr);
