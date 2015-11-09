@@ -108,11 +108,11 @@ __kernel void Process(__global ulong* dataArray, long iter, long offset)
 }
 
 // 1D work-item
-__kernel void GeneratePattern(__global ulong* dataArray, int size, int stride)
+__kernel void GeneratePattern(__global ulong* dataArray, int num, int stride)
 {
     int idx = 0;
-    __global ulong* currArray = dataArray + get_global_id(0) * stride * size;
-    for (int i = 0 ; i < size - 1 ; i ++)
+    __global ulong* currArray = dataArray + get_global_id(0) * stride * num;
+    for (int i = 0 ; i < num - 1 ; i ++)
     {
         currArray[idx] = (ulong)(&currArray[idx + stride]);
         idx = idx + stride;

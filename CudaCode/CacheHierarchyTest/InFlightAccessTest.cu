@@ -115,11 +115,11 @@ __global__ void Process_1(long* dataArray, long iter, int interval)
 	dataArray[0 * interval] = (long)(currPtr_0);
 }
 
-__global__ void GeneratePattern_1(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_1(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		idx = idx + stride;
@@ -338,12 +338,12 @@ __global__ void Process_2(long* dataArray, long iter, int interval)
 	dataArray[1 * interval] = (long)(currPtr_1);
 }
 
-__global__ void GeneratePattern_2(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_2(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
 	long* currPtr_1 = dataArray + 1 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -666,13 +666,13 @@ __global__ void Process_3(long* dataArray, long iter, int interval)
 	dataArray[2 * interval] = (long)(currPtr_2);
 }
 
-__global__ void GeneratePattern_3(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_3(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
 	long* currPtr_1 = dataArray + 1 * interval;
 	long* currPtr_2 = dataArray + 2 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -1099,14 +1099,14 @@ __global__ void Process_4(long* dataArray, long iter, int interval)
 	dataArray[3 * interval] = (long)(currPtr_3);
 }
 
-__global__ void GeneratePattern_4(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_4(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
 	long* currPtr_1 = dataArray + 1 * interval;
 	long* currPtr_2 = dataArray + 2 * interval;
 	long* currPtr_3 = dataArray + 3 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -1637,7 +1637,7 @@ __global__ void Process_5(long* dataArray, long iter, int interval)
 	dataArray[4 * interval] = (long)(currPtr_4);
 }
 
-__global__ void GeneratePattern_5(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_5(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -1645,7 +1645,7 @@ __global__ void GeneratePattern_5(long* dataArray, int size, int stride, int int
 	long* currPtr_2 = dataArray + 2 * interval;
 	long* currPtr_3 = dataArray + 3 * interval;
 	long* currPtr_4 = dataArray + 4 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -2280,7 +2280,7 @@ __global__ void Process_6(long* dataArray, long iter, int interval)
 	dataArray[5 * interval] = (long)(currPtr_5);
 }
 
-__global__ void GeneratePattern_6(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_6(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -2289,7 +2289,7 @@ __global__ void GeneratePattern_6(long* dataArray, int size, int stride, int int
 	long* currPtr_3 = dataArray + 3 * interval;
 	long* currPtr_4 = dataArray + 4 * interval;
 	long* currPtr_5 = dataArray + 5 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -3028,7 +3028,7 @@ __global__ void Process_7(long* dataArray, long iter, int interval)
 	dataArray[6 * interval] = (long)(currPtr_6);
 }
 
-__global__ void GeneratePattern_7(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_7(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -3038,7 +3038,7 @@ __global__ void GeneratePattern_7(long* dataArray, int size, int stride, int int
 	long* currPtr_4 = dataArray + 4 * interval;
 	long* currPtr_5 = dataArray + 5 * interval;
 	long* currPtr_6 = dataArray + 6 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -3881,7 +3881,7 @@ __global__ void Process_8(long* dataArray, long iter, int interval)
 	dataArray[7 * interval] = (long)(currPtr_7);
 }
 
-__global__ void GeneratePattern_8(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_8(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -3892,7 +3892,7 @@ __global__ void GeneratePattern_8(long* dataArray, int size, int stride, int int
 	long* currPtr_5 = dataArray + 5 * interval;
 	long* currPtr_6 = dataArray + 6 * interval;
 	long* currPtr_7 = dataArray + 7 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -4839,7 +4839,7 @@ __global__ void Process_9(long* dataArray, long iter, int interval)
 	dataArray[8 * interval] = (long)(currPtr_8);
 }
 
-__global__ void GeneratePattern_9(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_9(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -4851,7 +4851,7 @@ __global__ void GeneratePattern_9(long* dataArray, int size, int stride, int int
 	long* currPtr_6 = dataArray + 6 * interval;
 	long* currPtr_7 = dataArray + 7 * interval;
 	long* currPtr_8 = dataArray + 8 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -5902,7 +5902,7 @@ __global__ void Process_10(long* dataArray, long iter, int interval)
 	dataArray[9 * interval] = (long)(currPtr_9);
 }
 
-__global__ void GeneratePattern_10(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_10(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -5915,7 +5915,7 @@ __global__ void GeneratePattern_10(long* dataArray, int size, int stride, int in
 	long* currPtr_7 = dataArray + 7 * interval;
 	long* currPtr_8 = dataArray + 8 * interval;
 	long* currPtr_9 = dataArray + 9 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -7070,7 +7070,7 @@ __global__ void Process_11(long* dataArray, long iter, int interval)
 	dataArray[10 * interval] = (long)(currPtr_10);
 }
 
-__global__ void GeneratePattern_11(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_11(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -7084,7 +7084,7 @@ __global__ void GeneratePattern_11(long* dataArray, int size, int stride, int in
 	long* currPtr_8 = dataArray + 8 * interval;
 	long* currPtr_9 = dataArray + 9 * interval;
 	long* currPtr_10 = dataArray + 10 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -8343,7 +8343,7 @@ __global__ void Process_12(long* dataArray, long iter, int interval)
 	dataArray[11 * interval] = (long)(currPtr_11);
 }
 
-__global__ void GeneratePattern_12(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_12(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -8358,7 +8358,7 @@ __global__ void GeneratePattern_12(long* dataArray, int size, int stride, int in
 	long* currPtr_9 = dataArray + 9 * interval;
 	long* currPtr_10 = dataArray + 10 * interval;
 	long* currPtr_11 = dataArray + 11 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -9721,7 +9721,7 @@ __global__ void Process_13(long* dataArray, long iter, int interval)
 	dataArray[12 * interval] = (long)(currPtr_12);
 }
 
-__global__ void GeneratePattern_13(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_13(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -9737,7 +9737,7 @@ __global__ void GeneratePattern_13(long* dataArray, int size, int stride, int in
 	long* currPtr_10 = dataArray + 10 * interval;
 	long* currPtr_11 = dataArray + 11 * interval;
 	long* currPtr_12 = dataArray + 12 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -11204,7 +11204,7 @@ __global__ void Process_14(long* dataArray, long iter, int interval)
 	dataArray[13 * interval] = (long)(currPtr_13);
 }
 
-__global__ void GeneratePattern_14(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_14(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -11221,7 +11221,7 @@ __global__ void GeneratePattern_14(long* dataArray, int size, int stride, int in
 	long* currPtr_11 = dataArray + 11 * interval;
 	long* currPtr_12 = dataArray + 12 * interval;
 	long* currPtr_13 = dataArray + 13 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -12792,7 +12792,7 @@ __global__ void Process_15(long* dataArray, long iter, int interval)
 	dataArray[14 * interval] = (long)(currPtr_14);
 }
 
-__global__ void GeneratePattern_15(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_15(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -12810,7 +12810,7 @@ __global__ void GeneratePattern_15(long* dataArray, int size, int stride, int in
 	long* currPtr_12 = dataArray + 12 * interval;
 	long* currPtr_13 = dataArray + 13 * interval;
 	long* currPtr_14 = dataArray + 14 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -14485,7 +14485,7 @@ __global__ void Process_16(long* dataArray, long iter, int interval)
 	dataArray[15 * interval] = (long)(currPtr_15);
 }
 
-__global__ void GeneratePattern_16(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern_16(long* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
 	long* currPtr_0 = dataArray + 0 * interval;
@@ -14504,7 +14504,7 @@ __global__ void GeneratePattern_16(long* dataArray, int size, int stride, int in
 	long* currPtr_13 = dataArray + 13 * interval;
 	long* currPtr_14 = dataArray + 14 * interval;
 	long* currPtr_15 = dataArray + 15 * interval;
-	for (int i = 0 ; i < size - 1 ; i ++)
+	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (long)(&currPtr_0[idx + stride]);
 		currPtr_1[idx] = (long)(&currPtr_1[idx + stride]);
@@ -14564,13 +14564,13 @@ struct CUDA_Ctrl
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:s:S:i:o:g:l:i:v:");
+    char* short_options = strdup("p:d:s:n:i:o:g:l:i:v:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
         {"deviceID", required_argument, NULL, 'd'},
         {"iteration", required_argument, NULL, 'i'},
-        {"size", required_argument, NULL, 'S'},
+        {"number", required_argument, NULL, 'n'},
         {"stride", required_argument, NULL, 's'},
         {"interval", required_argument, NULL, 'v'},
         {"globalSize", required_argument, NULL, 'g'},
@@ -14602,7 +14602,7 @@ void CommandParser(int argc, char *argv[])
                 g_cuda_ctrl.interval = atoi(optarg);
                 break;
 
-            case 'S':
+            case 'n':
                 g_cuda_ctrl.size = atoi(optarg);
                 break;
 

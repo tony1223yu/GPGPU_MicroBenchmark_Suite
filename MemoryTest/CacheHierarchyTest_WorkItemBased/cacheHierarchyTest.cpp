@@ -71,13 +71,13 @@ void PrintTimingInfo(FILE* fptr)
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:s:S:i:o:g:l:");
+    char* short_options = strdup("p:d:s:n:i:o:g:l:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
         {"deviceID", required_argument, NULL, 'd'},
         {"iteration", required_argument, NULL, 'i'},
-        {"size", required_argument, NULL, 'S'},
+        {"number", required_argument, NULL, 'n'},
         {"stride", required_argument, NULL, 's'},
         {"powerLogFile", required_argument, NULL, 'o'},
         {"globalSize", required_argument, NULL, 'g'},
@@ -109,7 +109,7 @@ void CommandParser(int argc, char *argv[])
                 sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
                 break;
             
-            case 'S':
+            case 'n':
                 g_opencl_ctrl.size = atoi(optarg);
                 break;
 

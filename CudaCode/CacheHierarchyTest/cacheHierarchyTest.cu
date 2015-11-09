@@ -114,11 +114,11 @@ __global__ void Processing(long* dataArray, long iter, long offset, int interval
     }
     dataArray[blockIdx.x * offset + threadIdx.x * interval] = (long)(currArray);
 }
-__global__ void GeneratePattern(long* dataArray, int size, int stride, int interval)
+__global__ void GeneratePattern(long* dataArray, int num, int stride, int interval)
 {
     int idx = 0;
-    long* currArray = dataArray + blockIdx.x * stride * size + threadIdx.x * interval;
-    for (int i = 0 ; i < size - 1 ; i ++)
+    long* currArray = dataArray + blockIdx.x * stride * num + threadIdx.x * interval;
+    for (int i = 0 ; i < num - 1 ; i ++)
     {
         currArray[idx] = (long)(&currArray[idx + stride]);
         idx = idx + stride;
@@ -149,13 +149,13 @@ struct CUDA_Ctrl
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:s:S:i:o:g:l:i:v:");
+    char* short_options = strdup("p:d:s:n:i:o:g:l:i:v:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
         {"deviceID", required_argument, NULL, 'd'},
         {"iteration", required_argument, NULL, 'i'},
-        {"size", required_argument, NULL, 'S'},
+        {"number", required_argument, NULL, 'n'},
         {"stride", required_argument, NULL, 's'},
         {"interval", required_argument, NULL, 'v'},
         {"globalSize", required_argument, NULL, 'g'},
@@ -187,7 +187,7 @@ void CommandParser(int argc, char *argv[])
                 g_cuda_ctrl.interval = atoi(optarg);
                 break;
 
-            case 'S':
+            case 'n':
                 g_cuda_ctrl.size = atoi(optarg);
                 break;
 
