@@ -14677,7 +14677,7 @@ int main(int argc, char* argv[])
         dim3 dimGrid(g_cuda_ctrl.globalSize/g_cuda_ctrl.localSize);
         dim3 dimBlock(g_cuda_ctrl.localSize);
 
-        GeneratePattern_8 <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.size, g_cuda_ctrl.stride, g_cuda_ctrl.interval);
+        GeneratePattern_5 <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.size, g_cuda_ctrl.stride, g_cuda_ctrl.interval);
         cudaMemcpy(hostArray, devArray, g_cuda_ctrl.dataByte, cudaMemcpyDeviceToHost);
 
         ////cout << hex << hostArray[0] << endl;
@@ -14688,7 +14688,7 @@ int main(int argc, char* argv[])
         //papi_ctrl.Start();
         cudaEventRecord(start, 0);
 
-        Process_8 <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.iteration, g_cuda_ctrl.interval);
+        Process_5 <<<dimGrid, dimBlock>>>(devArray, g_cuda_ctrl.iteration, g_cuda_ctrl.interval);
 
         cudaEventRecord(end, 0);
         cudaEventSynchronize(end); 
