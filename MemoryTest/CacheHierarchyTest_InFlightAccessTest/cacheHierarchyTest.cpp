@@ -17,6 +17,7 @@
 
 
 /* Macros */
+//#define USE_CL_2_0_API
 #define CL_FILE_NAME "cacheHierarchyTest.cl"
 #define PTX_FILE_NAME "cacheHierarchyTest.ptx"
 #define KERNEL_1 "GeneratePattern"
@@ -58,7 +59,7 @@ struct OpenCL_Ctrl
 
 } g_opencl_ctrl;
 
-void PrintTimingInfo(FILE* fptr)
+unsigned long long PrintTimingInfo(FILE* fptr)
 {
     struct timeval current;
     unsigned long long curr_time;
@@ -67,6 +68,7 @@ void PrintTimingInfo(FILE* fptr)
     curr_time = current.tv_sec * 1000 + current.tv_usec / 1000;
 
     fprintf(fptr, "%llu\n", curr_time);
+    return (current.tv_sec * 1000000 + current.tv_usec);
 }
 
 
@@ -102,6 +104,8 @@ void CommandParser(int argc, char *argv[])
         {
             case 'g':
                 g_opencl_ctrl.globalSize = atoi(optarg);
+                if (g_opencl_ctrl.globalSize > 1)
+                    //fprintf(stderr, "Only one work-item should be assigned in this test\n");
                 break;
 
             case 'l':
@@ -150,7 +154,7 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size);
+    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size) * (long)(g_opencl_ctrl.globalSize);
     g_opencl_ctrl.offset = (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size);
 
     sprintf(g_opencl_ctrl.kernel1, "%s_%d", KERNEL_1, g_opencl_ctrl.kernelNum);
@@ -281,7 +285,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         exit(1);
     }
 
-#if 1
+#if 0
     {
         size_t binarySize;
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binarySize, NULL);
@@ -323,6 +327,7 @@ int main(int argc, char *argv[])
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
     FILE* fptr;
+    unsigned long long start, end;
 
     void* hostData = NULL;
 
@@ -338,7 +343,16 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     /* Create command queue */
-    command_queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &error);
+#ifdef USE_CL_2_0_API
+    {
+        cl_queue_properties property[] = {CL_QUEUE_PROPERTIES, CL_QUEUE_PROFILING_ENABLE, 0};
+        command_queue = clCreateCommandQueueWithProperties(context, device, property, &error);
+    }
+#else
+    {
+        command_queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &error);
+    }
+#endif
     CHECK_CL_ERROR(error);
 
     /* Create program */
@@ -371,7 +385,11 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clSetKernelArg(kernel2, 1, sizeof(long), &g_opencl_ctrl.iteration);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel2, 2, sizeof(int), &g_opencl_ctrl.interval);
+    error = clSetKernelArg(kernel2, 2, sizeof(int), &g_opencl_ctrl.size);
+    CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel2, 3, sizeof(int), &g_opencl_ctrl.stride);
+    CHECK_CL_ERROR(error);
+    error = clSetKernelArg(kernel2, 4, sizeof(int), &g_opencl_ctrl.interval);
     CHECK_CL_ERROR(error);
 
     globalSize[0] = g_opencl_ctrl.globalSize;
@@ -397,10 +415,13 @@ int main(int argc, char *argv[])
 
 #if 0
     long *currData;
-    currData = ((long *)(hostData)) + i * g_opencl_ctrl.stride * g_opencl_ctrl.size;
-    for (int id = 0 ; id < g_opencl_ctrl.stride * g_opencl_ctrl.size ; id ++)
-        printf("%lu ", ((long *)(currData))[id]);
-    printf("\n");
+    for (int i = 0 ; i < g_opencl_ctrl.globalSize ; i ++)
+    {
+        currData = ((long *)(hostData)) + i * g_opencl_ctrl.stride * g_opencl_ctrl.size;
+        for (int id = 0 ; id < g_opencl_ctrl.stride * g_opencl_ctrl.size ; id ++)
+            printf("%lu ", ((long *)(currData))[id]);
+        printf("\n");
+    }
 #endif
 
     /* Event profiling */
@@ -408,8 +429,8 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stderr, "\n['%s' execution time] %lu ns\n", g_opencl_ctrl.kernel2, (endTime - startTime));
-    fprintf(stdout, "%lu\n", (endTime - startTime));
+    fprintf(stderr, "\n['%s' execution time] %llu ns\n", g_opencl_ctrl.kernel2, (end - start));
+    fprintf(stdout, "%llu\n", (end - start) * 1000);
 
     /* Read the output */
 

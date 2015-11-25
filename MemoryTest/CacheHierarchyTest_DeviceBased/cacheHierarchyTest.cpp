@@ -17,15 +17,12 @@
 
 
 /* Macros */
+//#define USE_CL_2_0_API
 #define CL_FILE_NAME "cacheHierarchyTest.cl"
 #define PTX_FILE_NAME "cacheHierarchyTest.ptx"
 #define KERNEL_1 "GeneratePattern"
 #define KERNEL_2 "Process"
 #define POWER_LOG_FILE_LEN 300
-
-//#define BUFFER_MAX_SIZE 1073741824 /* 1GB */
-#define BUFFER_MAX_SIZE 1048576 /* 1GB */
-#define KERNEL_FLUSH "FlushCache"
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
         do                                                                                                                          \
@@ -58,7 +55,7 @@ struct OpenCL_Ctrl
 
 } g_opencl_ctrl;
 
-void PrintTimingInfo(FILE* fptr)
+unsigned long long PrintTimingInfo(FILE* fptr)
 {
     struct timeval current;
     unsigned long long curr_time;
@@ -67,6 +64,7 @@ void PrintTimingInfo(FILE* fptr)
     curr_time = current.tv_sec * 1000 + current.tv_usec / 1000;
 
     fprintf(fptr, "%llu\n", curr_time);
+    return (current.tv_sec * 1000000 + current.tv_usec);
 }
 
 
@@ -273,7 +271,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         exit(1);
     }
 
-#if 1
+#if 0
     {
         size_t binarySize;
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binarySize, NULL);
@@ -315,6 +313,7 @@ int main(int argc, char *argv[])
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
     FILE* fptr;
+    unsigned long long start, end;
 
     void* hostData = NULL;
 
@@ -330,7 +329,16 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     /* Create command queue */
-    command_queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &error);
+#ifdef USE_CL_2_0_API
+    {
+        cl_queue_properties property[] = {CL_QUEUE_PROPERTIES, CL_QUEUE_PROFILING_ENABLE, 0};
+        command_queue = clCreateCommandQueueWithProperties(context, device, property, &error);
+    }
+#else
+    {
+        command_queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &error);
+    }
+#endif
     CHECK_CL_ERROR(error);
 
     /* Create program */
@@ -376,14 +384,14 @@ int main(int argc, char *argv[])
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
     
-    PrintTimingInfo(fptr);
+    start = PrintTimingInfo(fptr);
 
     error = clEnqueueNDRangeKernel(command_queue, kernel2, 1, NULL, globalSize, localSize, 0, NULL, &event);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
 
-    PrintTimingInfo(fptr);
+    end = PrintTimingInfo(fptr);
     fclose(fptr);
 
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
@@ -402,8 +410,8 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stderr, "\n['Process' execution time] %lu ns\n", (endTime - startTime));
-    fprintf(stdout, "%lu\n", (endTime - startTime));
+    fprintf(stderr, "\n['Process' execution time] %llu ns\n", (end - start));
+    fprintf(stdout, "%llu\n", (end - start) * 1000);
 
     /* Read the output */
 

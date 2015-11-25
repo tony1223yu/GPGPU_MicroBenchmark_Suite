@@ -1,6 +1,6 @@
-__kernel void Process_1(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_1(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -110,7 +110,7 @@ __kernel void Process_1(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_1(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -119,10 +119,10 @@ __kernel void GeneratePattern_1(__global ulong* dataArray, int num, int stride, 
 	currPtr_0[idx] = (ulong)currPtr_0;
 }
 
-__kernel void Process_2(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_2(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -333,8 +333,8 @@ __kernel void Process_2(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_2(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -345,11 +345,11 @@ __kernel void GeneratePattern_2(__global ulong* dataArray, int num, int stride, 
 	currPtr_1[idx] = (ulong)currPtr_1;
 }
 
-__kernel void Process_3(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_3(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -661,9 +661,9 @@ __kernel void Process_3(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_3(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -676,12 +676,12 @@ __kernel void GeneratePattern_3(__global ulong* dataArray, int num, int stride, 
 	currPtr_2[idx] = (ulong)currPtr_2;
 }
 
-__kernel void Process_4(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_4(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -1094,10 +1094,10 @@ __kernel void Process_4(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_4(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -1112,13 +1112,13 @@ __kernel void GeneratePattern_4(__global ulong* dataArray, int num, int stride, 
 	currPtr_3[idx] = (ulong)currPtr_3;
 }
 
-__kernel void Process_5(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_5(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -1632,11 +1632,11 @@ __kernel void Process_5(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_5(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -1653,14 +1653,14 @@ __kernel void GeneratePattern_5(__global ulong* dataArray, int num, int stride, 
 	currPtr_4[idx] = (ulong)currPtr_4;
 }
 
-__kernel void Process_6(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_6(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -2275,12 +2275,12 @@ __kernel void Process_6(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_6(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -2299,15 +2299,15 @@ __kernel void GeneratePattern_6(__global ulong* dataArray, int num, int stride, 
 	currPtr_5[idx] = (ulong)currPtr_5;
 }
 
-__kernel void Process_7(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_7(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -3023,13 +3023,13 @@ __kernel void Process_7(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_7(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -3050,16 +3050,16 @@ __kernel void GeneratePattern_7(__global ulong* dataArray, int num, int stride, 
 	currPtr_6[idx] = (ulong)currPtr_6;
 }
 
-__kernel void Process_8(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_8(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -3876,14 +3876,14 @@ __kernel void Process_8(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_8(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -3906,17 +3906,17 @@ __kernel void GeneratePattern_8(__global ulong* dataArray, int num, int stride, 
 	currPtr_7[idx] = (ulong)currPtr_7;
 }
 
-__kernel void Process_9(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_9(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -4834,15 +4834,15 @@ __kernel void Process_9(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_9(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -4867,18 +4867,18 @@ __kernel void GeneratePattern_9(__global ulong* dataArray, int num, int stride, 
 	currPtr_8[idx] = (ulong)currPtr_8;
 }
 
-__kernel void Process_10(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_10(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -5897,16 +5897,16 @@ __kernel void Process_10(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_10(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -5933,19 +5933,19 @@ __kernel void GeneratePattern_10(__global ulong* dataArray, int num, int stride,
 	currPtr_9[idx] = (ulong)currPtr_9;
 }
 
-__kernel void Process_11(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_11(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -7065,17 +7065,17 @@ __kernel void Process_11(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_11(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -7104,20 +7104,20 @@ __kernel void GeneratePattern_11(__global ulong* dataArray, int num, int stride,
 	currPtr_10[idx] = (ulong)currPtr_10;
 }
 
-__kernel void Process_12(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_12(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -8338,18 +8338,18 @@ __kernel void Process_12(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_12(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -8380,21 +8380,21 @@ __kernel void GeneratePattern_12(__global ulong* dataArray, int num, int stride,
 	currPtr_11[idx] = (ulong)currPtr_11;
 }
 
-__kernel void Process_13(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_13(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -9716,19 +9716,19 @@ __kernel void Process_13(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_13(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -9761,22 +9761,22 @@ __kernel void GeneratePattern_13(__global ulong* dataArray, int num, int stride,
 	currPtr_12[idx] = (ulong)currPtr_12;
 }
 
-__kernel void Process_14(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_14(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
-	__global ulong* currPtr_13 = dataArray + 13 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_13 = dataArray + 13 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -11199,20 +11199,20 @@ __kernel void Process_14(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_14(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
-	__global ulong* currPtr_13 = dataArray + 13 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_13 = dataArray + 13 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -11247,23 +11247,23 @@ __kernel void GeneratePattern_14(__global ulong* dataArray, int num, int stride,
 	currPtr_13[idx] = (ulong)currPtr_13;
 }
 
-__kernel void Process_15(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_15(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
-	__global ulong* currPtr_13 = dataArray + 13 * interval;
-	__global ulong* currPtr_14 = dataArray + 14 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_13 = dataArray + 13 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_14 = dataArray + 14 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -12787,21 +12787,21 @@ __kernel void Process_15(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_15(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
-	__global ulong* currPtr_13 = dataArray + 13 * interval;
-	__global ulong* currPtr_14 = dataArray + 14 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_13 = dataArray + 13 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_14 = dataArray + 14 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
@@ -12838,24 +12838,24 @@ __kernel void GeneratePattern_15(__global ulong* dataArray, int num, int stride,
 	currPtr_14[idx] = (ulong)currPtr_14;
 }
 
-__kernel void Process_16(__global ulong* dataArray, long iter, int interval)
+__kernel void Process_16(__global ulong* dataArray, long iter, int num, int stride, int interval)
 {
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
-	__global ulong* currPtr_13 = dataArray + 13 * interval;
-	__global ulong* currPtr_14 = dataArray + 14 * interval;
-	__global ulong* currPtr_15 = dataArray + 15 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_13 = dataArray + 13 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_14 = dataArray + 14 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_15 = dataArray + 15 * interval + get_global_id(0) * num * stride;
 	while (iter -- > 0)
 	{
 		currPtr_0 = (__global ulong*)(*currPtr_0);
@@ -14480,22 +14480,22 @@ __kernel void Process_16(__global ulong* dataArray, long iter, int interval)
 __kernel void GeneratePattern_16(__global ulong* dataArray, int num, int stride, int interval)
 {
 	int idx = 0;
-	__global ulong* currPtr_0 = dataArray + 0 * interval;
-	__global ulong* currPtr_1 = dataArray + 1 * interval;
-	__global ulong* currPtr_2 = dataArray + 2 * interval;
-	__global ulong* currPtr_3 = dataArray + 3 * interval;
-	__global ulong* currPtr_4 = dataArray + 4 * interval;
-	__global ulong* currPtr_5 = dataArray + 5 * interval;
-	__global ulong* currPtr_6 = dataArray + 6 * interval;
-	__global ulong* currPtr_7 = dataArray + 7 * interval;
-	__global ulong* currPtr_8 = dataArray + 8 * interval;
-	__global ulong* currPtr_9 = dataArray + 9 * interval;
-	__global ulong* currPtr_10 = dataArray + 10 * interval;
-	__global ulong* currPtr_11 = dataArray + 11 * interval;
-	__global ulong* currPtr_12 = dataArray + 12 * interval;
-	__global ulong* currPtr_13 = dataArray + 13 * interval;
-	__global ulong* currPtr_14 = dataArray + 14 * interval;
-	__global ulong* currPtr_15 = dataArray + 15 * interval;
+	__global ulong* currPtr_0 = dataArray + 0 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_1 = dataArray + 1 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_2 = dataArray + 2 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_3 = dataArray + 3 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_4 = dataArray + 4 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_5 = dataArray + 5 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_6 = dataArray + 6 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_7 = dataArray + 7 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_8 = dataArray + 8 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_9 = dataArray + 9 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_10 = dataArray + 10 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_11 = dataArray + 11 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_12 = dataArray + 12 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_13 = dataArray + 13 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_14 = dataArray + 14 * interval + get_global_id(0) * num * stride;
+	__global ulong* currPtr_15 = dataArray + 15 * interval + get_global_id(0) * num * stride;
 	for (int i = 0 ; i < num - 1 ; i ++)
 	{
 		currPtr_0[idx] = (ulong)(&currPtr_0[idx + stride]);
