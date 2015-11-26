@@ -18,7 +18,7 @@
 
 /* Macros */
 #define CL_FILE_NAME "buffer_address.cl"
-#define PTX_FILE_NAME "buffer_address.ptx"
+#define BINARY_FILE_NAME "buffer_address.bin"
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
         do                                                                                                                          \
@@ -200,7 +200,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARIES, binarySize, &binary, NULL);
         CHECK_CL_ERROR(error);
 
-        FILE *fptr = fopen(PTX_FILE_NAME, "w");
+        FILE *fptr = fopen(BINARY_FILE_NAME, "w");
         fprintf(fptr, "%s", binary);
         fclose(fptr);
     }

@@ -19,7 +19,7 @@
 /* Macros */
 //#define USE_CL_2_0_API
 #define CL_FILE_NAME "cacheHierarchyTest.cl"
-#define PTX_FILE_NAME "cacheHierarchyTest.ptx"
+#define BINARY_FILE_NAME "cacheHierarchyTest.bin"
 #define KERNEL_1 "GeneratePattern"
 #define KERNEL_2 "Process"
 #define POWER_LOG_FILE_LEN 300
@@ -281,7 +281,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARIES, binarySize, &binary, NULL);
         CHECK_CL_ERROR(error);
 
-        FILE *fptr = fopen(PTX_FILE_NAME, "w");
+        FILE *fptr = fopen(BINARY_FILE_NAME, "w");
         fprintf(fptr, "%s", binary);
         fclose(fptr);
     }
@@ -410,7 +410,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stderr, "\n['Process' execution time] %llu ns\n", (end - start));
+    fprintf(stderr, "\n['Process' execution time] %llu ns\n", (end - start) * 1000);
     fprintf(stdout, "%llu\n", (end - start) * 1000);
 
     /* Read the output */

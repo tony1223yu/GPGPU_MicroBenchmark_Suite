@@ -17,8 +17,9 @@
 
 
 /* Macros */
+//#define USE_CL_2_0_API
 #define CL_FILE_NAME "arith_utilization.cl"
-#define PTX_FILE_NAME "arith_utilization.ptx"
+#define BINARY_FILE_NAME "arith_utilization.bin"
 #define DATA_SIZE 160
 #define INTERVAL 10
 #define POWER_LOG_FILE_LEN 200
@@ -37,6 +38,7 @@
 enum DATA_TYPE
 {
     TYPE_INT = 0,
+    TYPE_FLOAT = 1,
     TYPE_DOUBLE
 };
 
@@ -45,17 +47,16 @@ struct OpenCL_Ctrl
 {
     int platform_id;
     int device_id;
-    int dataByteInt;
-    int dataByteFloat;
-    int dataByteDouble;
+    DATA_TYPE dataType;
+    int dataByte;
     int global_size;
     int local_size;
-    int interval;
     long iteration;
+    int interval;
     char *kernelName;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), global_size(1024), local_size(32), iteration(1000), kernelName(NULL), interval(INTERVAL) {sprintf(powerFile, "KernelExecution.log");}
+    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL), interval(INTERVAL) {sprintf(powerFile, "KernelExecution.log");}
     ~OpenCL_Ctrl()
     {
         if (kernelName)
@@ -77,11 +78,12 @@ void PrintTimingInfo(FILE* fptr)
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:i:g:l:k:o:");
+    char* short_options = strdup("p:d:t:i:g:l:k:o:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
         {"deviceID", required_argument, NULL, 'd'},
+        {"type", required_argument, NULL, 't'},
         {"iteration", required_argument, NULL, 'i'},
         {"globalSize", required_argument, NULL, 'g'},
         {"localSize", required_argument, NULL, 'l'},
@@ -130,6 +132,26 @@ void CommandParser(int argc, char *argv[])
                 g_opencl_ctrl.iteration = atol(optarg);
                 break;
 
+            case 't':
+                {
+                    int type = atoi(optarg);
+                    switch(type)
+                    {
+                        case TYPE_INT:
+                            g_opencl_ctrl.dataType = TYPE_INT;
+                            break;
+                        case TYPE_FLOAT:
+                            g_opencl_ctrl.dataType = TYPE_FLOAT;
+                            break;
+                        case TYPE_DOUBLE:
+                            g_opencl_ctrl.dataType = TYPE_DOUBLE;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+
             case '?':
                 fprintf(stderr, "Unknown option -%c\n", optopt);
                 break;
@@ -146,9 +168,20 @@ void CommandParser(int argc, char *argv[])
         exit(1);
     }
 
-    g_opencl_ctrl.dataByteInt = DATA_SIZE * sizeof(int) * g_opencl_ctrl.global_size;
-    g_opencl_ctrl.dataByteFloat = DATA_SIZE * sizeof(float) * g_opencl_ctrl.global_size;
-    g_opencl_ctrl.dataByteDouble = DATA_SIZE * sizeof(double) * g_opencl_ctrl.global_size;
+    switch(g_opencl_ctrl.dataType)
+    {
+        case TYPE_INT:
+            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(int) * g_opencl_ctrl.global_size;
+            break;
+        case TYPE_FLOAT:
+            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(float) * g_opencl_ctrl.global_size;
+            break;
+        case TYPE_DOUBLE:
+            g_opencl_ctrl.dataByte = DATA_SIZE * sizeof(double) * g_opencl_ctrl.global_size;
+            break;
+        default:
+            break;
+    }
 
     free (short_options);
 }
@@ -222,7 +255,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
 {
     FILE *fptr;
     size_t programSize;
-    unsigned char *programSource;
+    char *programSource;
     cl_int error, binaryError;
 
     fptr = fopen(fileName, "r");
@@ -237,7 +270,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     programSize = ftell(fptr);
     rewind(fptr);
 
-    programSource = (unsigned char *)malloc(sizeof(unsigned char) * (programSize + 1));
+    programSource = (char *)malloc(sizeof(char) * (programSize + 1));
     programSource[programSize] = '\0';
     fread(programSource, sizeof(unsigned char), programSize, fptr);
     fclose(fptr);
@@ -274,7 +307,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARIES, binarySize, &binary, NULL);
         CHECK_CL_ERROR(error);
 
-        FILE *fptr = fopen(PTX_FILE_NAME, "w");
+        FILE *fptr = fopen(BINARY_FILE_NAME, "w");
         fprintf(fptr, "%s", binary);
         fclose(fptr);
     }
@@ -283,40 +316,47 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     free(fileName);
 }
 
-void HostDataCreation(void* &dataInt, void* &dataFloat, void* &dataDouble)
+void HostDataCreation(void* &data)
 {
     srand(time(NULL));
-    dataInt = malloc(g_opencl_ctrl.dataByteInt);
-    dataFloat = malloc(g_opencl_ctrl.dataByteFloat);
-    dataDouble = malloc(g_opencl_ctrl.dataByteDouble);
+    data = malloc(g_opencl_ctrl.dataByte);
+    switch(g_opencl_ctrl.dataType)
     {
-        int *tmp;
-        tmp = (int *)dataInt;
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-        {
-            tmp[i] = (rand() % INT_MAX);
-            tmp[i] += (tmp[i] % 2) + 1;
-        }
-    }
-    {
-        float *tmp;
-        tmp = (float *)dataFloat;
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-        {
-            tmp[i] = ((float)(rand()) / RAND_MAX) * 1e5;
-            if (i % 2 == 0)
-                tmp[i] *= -1;
-        }
-    }
-    {
-        double *tmp;
-        tmp = (double *)dataDouble;
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-        {
-            tmp[i] = ((double)(rand()) / RAND_MAX) * 1e100;
-            if (i % 2 == 0)
-                tmp[i] *= -1;
-        }
+        case TYPE_INT:
+            {
+                int *tmp;
+                tmp = (int *)data;
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                {
+                    tmp[i] = (rand() % INT_MAX);
+                    tmp[i] += (tmp[i] % 2) + 1;
+                }
+            }
+            break;
+         case TYPE_FLOAT:
+            {
+                float *tmp;
+                tmp = (float *)data;
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                {
+                    tmp[i] = ((float)(rand()) / RAND_MAX) * 1e5;
+                    if (i % 2 == 0)
+                        tmp[i] *= -1;
+                }
+            }
+           break;
+         case TYPE_DOUBLE:
+            {
+                double *tmp;
+                tmp = (double *)data;
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                {
+                    tmp[i] = ((double)(rand()) / RAND_MAX) * 1e100;
+                    if (i % 2 == 0)
+                        tmp[i] *= -1;
+                }
+            }
+           break;
     }
 }
 
@@ -328,20 +368,19 @@ int main(int argc, char *argv[])
     cl_command_queue command_queue;
     cl_program program;
     cl_kernel kernel;
-    cl_mem bufferInt, bufferFloat, bufferDouble;
+    cl_mem buffer;
     cl_int error;
     cl_event event;
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
     FILE* fptr;
+    unsigned long long start, end;
 
-    void* hostDataInt = NULL;
-    void* hostDataFloat = NULL;
-    void* hostDataDouble = NULL;
+    void* hostData = NULL;
 
     /* Parse options */
     CommandParser(argc, argv);
-    HostDataCreation(hostDataInt, hostDataFloat, hostDataDouble);
+    HostDataCreation(hostData);
 
     GetPlatformAndDevice(platform, device);
     fptr = fopen(g_opencl_ctrl.powerFile, "w");
@@ -351,7 +390,16 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     /* Create command queue */
-    command_queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &error);
+#ifdef USE_CL_2_0_API
+    {
+        cl_queue_properties property[] = {CL_QUEUE_PROPERTIES, CL_QUEUE_PROFILING_ENABLE, 0};
+        command_queue = clCreateCommandQueueWithProperties(context, device, property, &error);
+    }
+#else
+    {
+        command_queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &error);
+    }
+#endif
     CHECK_CL_ERROR(error);
 
     /* Create program */
@@ -363,47 +411,49 @@ int main(int argc, char *argv[])
 
     error = clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(size_t), &warpSize, NULL);
     CHECK_CL_ERROR(error);
+    fprintf(stderr, "Preferred work group size: %lu\n", warpSize);
 
 #if 0
     fprintf(stderr, "\nData before process:\n");
+    switch (g_opencl_ctrl.dataType)
     {
-        int *intptr = (int *)(hostDataInt);
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-            fprintf(stderr, "%d ", intptr[i]);
-        fprintf(stderr, "\n");
-    }
-    {
-        float *fltptr = (float *)(hostDataFloat);
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-            fprintf(stderr, "%f ", fltptr[i]);
-        fprintf(stderr, "\n");
-    }
-    {
-        double *dblptr = (double *)(hostDataDouble);
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-            fprintf(stderr, "%lf ", dblptr[i]);
-        fprintf(stderr, "\n");
+        case TYPE_INT:
+            {
+                int *intptr = (int *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                    fprintf(stderr, "%d ", intptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
+        case TYPE_FLOAT:
+            {
+                float *fltptr = (float *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                    fprintf(stderr, "%f ", fltptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
+       case TYPE_DOUBLE:
+            {
+                double *dblptr = (double *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                    fprintf(stderr, "%lf ", dblptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
     }
 #endif
 
     /* Create buffers */
-    bufferInt = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByteInt, hostDataInt, &error);
-    CHECK_CL_ERROR(error);
-    bufferFloat = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByteFloat, hostDataFloat, &error);
-    CHECK_CL_ERROR(error);
-    bufferDouble = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByteDouble, hostDataDouble, &error);
+    buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.dataByte, hostData, &error);
     CHECK_CL_ERROR(error);
 
     /* Execute kernels */
-    error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &bufferInt);
+    error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &bufferFloat);
+    error = clSetKernelArg(kernel, 1, sizeof(long), &g_opencl_ctrl.iteration);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 2, sizeof(cl_mem), &bufferDouble);
-    CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 3, sizeof(long), &g_opencl_ctrl.iteration);
-    CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 4, sizeof(int), &g_opencl_ctrl.interval);
+    error = clSetKernelArg(kernel, 2, sizeof(int), &g_opencl_ctrl.interval);
     CHECK_CL_ERROR(error);
 
     PrintTimingInfo(fptr);
@@ -418,57 +468,58 @@ int main(int argc, char *argv[])
     PrintTimingInfo(fptr);
     fclose(fptr);
 
-    error = clEnqueueReadBuffer(command_queue, bufferInt, CL_TRUE, 0, g_opencl_ctrl.dataByteInt, hostDataInt, 0, NULL, NULL);
-    CHECK_CL_ERROR(error);
-    error = clEnqueueReadBuffer(command_queue, bufferFloat, CL_TRUE, 0, g_opencl_ctrl.dataByteFloat, hostDataFloat, 0, NULL, NULL);
-    CHECK_CL_ERROR(error);
-    error = clEnqueueReadBuffer(command_queue, bufferDouble, CL_TRUE, 0, g_opencl_ctrl.dataByteDouble, hostDataDouble, 0, NULL, NULL);
+    error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
 #if 0
     fprintf(stderr, "\nData after process:\n");
+    switch (g_opencl_ctrl.dataType)
     {
-        int *intptr = (int *)(hostDataInt);
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-            fprintf(stderr, "%d ", intptr[i]);
-        fprintf(stderr, "\n");
-    }
-    {
-        float *fltptr = (float *)(hostDataFloat);
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-            fprintf(stderr, "%f ", fltptr[i]);
-        fprintf(stderr, "\n");
-    }
-    {
-        double *dblptr = (double *)(hostDataDouble);
-        for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
-            fprintf(stderr, "%lf ", dblptr[i]);
-        fprintf(stderr, "\n");
+        case TYPE_INT:
+            {
+                int *intptr = (int *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                    fprintf(stderr, "%d ", intptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
+        case TYPE_FLOAT:
+            {
+                float *fltptr = (float *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                    fprintf(stderr, "%f ", fltptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
+       case TYPE_DOUBLE:
+            {
+                double *dblptr = (double *)(hostData);
+                for (int i = 0 ; i < DATA_SIZE * g_opencl_ctrl.global_size ; i ++)
+                    fprintf(stderr, "%lf ", dblptr[i]);
+                fprintf(stderr, "\n");
+            }
+            break;
     }
 #endif
-    
+
     /* Event profiling */
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(startTime), &startTime, NULL);
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stderr, "\n['%s' execution time] %llu ns\n", g_opencl_ctrl.kernelName, (endTime - startTime));
-    fprintf(stdout, "%llu\n", (endTime - startTime));
+    fprintf(stderr, "\n['%s' execution time] %llu ns\n", g_opencl_ctrl.kernelName, (end - start) * 1000);
+    fprintf(stdout, "%llu\n", (end - start) * 1000);
 
     /* Read the output */
 
     /* Release object */
     clReleaseKernel(kernel);
-    clReleaseMemObject(bufferInt);
-    clReleaseMemObject(bufferFloat);
-    clReleaseMemObject(bufferDouble);
+    clReleaseMemObject(buffer);
     clReleaseEvent(event);
     clReleaseProgram(program);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
-    free(hostDataInt);
-    free(hostDataFloat);
-    free(hostDataDouble);
+    free(hostData);
 
     return 0;
 }

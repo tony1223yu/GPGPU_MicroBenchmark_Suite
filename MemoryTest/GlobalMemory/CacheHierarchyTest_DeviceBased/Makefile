@@ -1,4 +1,4 @@
-include ../../common/make.config
+include ../../../common/make.config
 
 all:
 	g++ cacheHierarchyTest.cpp ${OPENCL_LIB} -o cacheHierarchyTest

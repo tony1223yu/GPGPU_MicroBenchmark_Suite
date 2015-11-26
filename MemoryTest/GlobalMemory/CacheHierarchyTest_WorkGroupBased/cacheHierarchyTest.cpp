@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stderr, "\n['Process' execution time] %llu ns\n", (end - start));
+    fprintf(stderr, "\n['Process' execution time] %llu ns\n", (end - start) * 1000);
     fprintf(stdout, "%llu\n", (end - start) * 1000);
 
     /* Read the output */

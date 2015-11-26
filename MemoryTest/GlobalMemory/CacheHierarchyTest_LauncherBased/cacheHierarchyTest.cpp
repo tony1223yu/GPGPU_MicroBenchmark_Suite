@@ -20,7 +20,7 @@
 #define DISPATCH_SIZE 32
 //#define USE_CL_2_0_API
 #define CL_FILE_NAME "cacheHierarchyTest.cl"
-#define PTX_FILE_NAME "cacheHierarchyTest.ptx"
+#define BINARY_FILE_NAME "cacheHierarchyTest.bin"
 #define KERNEL_1 "GeneratePattern"
 #define KERNEL_2 "Process"
 #define POWER_LOG_FILE_LEN 300
@@ -48,10 +48,11 @@ struct OpenCL_Ctrl
     int interval;
     long offset;
     int globalSize;
+    int launcherSlice;
     int localSize;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1), globalSize(1), localSize(1), offset(1), interval(1) {sprintf(powerFile, "KernelExecution.log");} 
+    OpenCL_Ctrl() : platform_id(0), device_id(0), size(1), stride(1), iteration(1), globalSize(1), localSize(1), offset(1), interval(1), launcherSlice(1) {sprintf(powerFile, "KernelExecution.log");} 
     ~OpenCL_Ctrl() {}
 
 } g_opencl_ctrl;
@@ -71,7 +72,7 @@ unsigned long long PrintTimingInfo(FILE* fptr)
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:s:n:i:o:g:l:i:v:");
+    char* short_options = strdup("p:d:s:n:i:o:g:l:i:v:w:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
@@ -83,6 +84,7 @@ void CommandParser(int argc, char *argv[])
         {"powerLogFile", required_argument, NULL, 'o'},
         {"globalSize", required_argument, NULL, 'g'},
         {"localSize", required_argument, NULL, 'l'},
+        {"launcherSlice", required_argument, NULL, 'w'},
         /* option end */
         {0, 0, 0, 0}
     };
@@ -108,6 +110,10 @@ void CommandParser(int argc, char *argv[])
 
             case 'o':
                 sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
+                break;
+
+            case 'w':
+                g_opencl_ctrl.launcherSlice = atoi(optarg);
                 break;
 
             case 'v':
@@ -231,7 +237,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     FILE *fptr;
     size_t programSize;
     unsigned char *programSource;
-    char option[50];
+    char option[150];
     cl_int error, binaryError;
 
     fptr = fopen(fileName, "r");
@@ -256,7 +262,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    sprintf(option, "-cl-opt-disable -D DISPATCH_SIZE=%d", DISPATCH_SIZE);
+    sprintf(option, "-cl-opt-disable -D DISPATCH_SIZE=%d -D SLICE=%d", DISPATCH_SIZE, g_opencl_ctrl.launcherSlice);
     error = clBuildProgram(target_program, 1, &device, option, NULL, NULL);
     if (error < 0)
     {
@@ -284,7 +290,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARIES, binarySize, &binary, NULL);
         CHECK_CL_ERROR(error);
 
-        FILE *fptr = fopen(PTX_FILE_NAME, "w");
+        FILE *fptr = fopen(BINARY_FILE_NAME, "w");
         fprintf(fptr, "%s", binary);
         fclose(fptr);
     }
@@ -408,7 +414,7 @@ int main(int argc, char *argv[])
         currData = ((long *)(hostData)) + i * g_opencl_ctrl.stride * g_opencl_ctrl.size;
         for (int id = 0 ; id < g_opencl_ctrl.stride * g_opencl_ctrl.size ; id ++)
             printf("%lu ", ((long *)(currData))[id]);
-        printf("\n");
+        printf("\n\n");
     }
 #endif
 
@@ -417,7 +423,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
     error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
     CHECK_CL_ERROR(error);
-    fprintf(stderr, "\n['Process' execution time] %llu ns\n", (end - start));
+    fprintf(stderr, "\n['Process' execution time] %llu ns\n", (end - start) * 1000);
     fprintf(stdout, "%llu\n", (end - start) * 1000);
 
     /* Read the output */

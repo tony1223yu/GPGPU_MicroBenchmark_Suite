@@ -1,4 +1,4 @@
-include ../../common/make.config
+include ../../../common/make.config
 
 all:
 	g++ buffer_address.cpp ${OPENCL_LIB} -o buffer_address

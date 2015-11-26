@@ -1,4 +1,4 @@
-include ../../../../common/make.config
+include ../../common/make.config
 
 all:
 	g++ arith_utilization.cpp ${OPENCL_LIB} -o arith_utilization
