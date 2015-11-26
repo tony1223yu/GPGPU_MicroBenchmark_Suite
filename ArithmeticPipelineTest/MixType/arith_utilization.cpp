@@ -64,7 +64,7 @@ struct OpenCL_Ctrl
 
 } g_opencl_ctrl;
 
-void PrintTimingInfo(FILE* fptr)
+unsigned long long PrintTimingInfo(FILE* fptr)
 {
     struct timeval current;
     unsigned long long curr_time;
@@ -73,6 +73,7 @@ void PrintTimingInfo(FILE* fptr)
     curr_time = current.tv_sec * 1000 + current.tv_usec / 1000;
 
     fprintf(fptr, "%llu\n", curr_time);
+    return current.tv_sec * 1000000 + current.tv_usec;
 }
 
 void CommandParser(int argc, char *argv[])
