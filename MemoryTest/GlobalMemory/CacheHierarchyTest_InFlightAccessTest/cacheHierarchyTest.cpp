@@ -400,14 +400,14 @@ int main(int argc, char *argv[])
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
     
-    PrintTimingInfo(fptr);
+    start = PrintTimingInfo(fptr);
 
     error = clEnqueueNDRangeKernel(command_queue, kernel2, 1, NULL, globalSize, localSize, 0, NULL, &event);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
 
-    PrintTimingInfo(fptr);
+    end = PrintTimingInfo(fptr);
     fclose(fptr);
 
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);

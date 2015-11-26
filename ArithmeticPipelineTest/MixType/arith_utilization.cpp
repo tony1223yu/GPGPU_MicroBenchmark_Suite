@@ -416,7 +416,7 @@ int main(int argc, char *argv[])
     error = clSetKernelArg(kernel, 4, sizeof(int), &g_opencl_ctrl.interval);
     CHECK_CL_ERROR(error);
 
-    PrintTimingInfo(fptr);
+    start = PrintTimingInfo(fptr);
 
     globalSize[0] = g_opencl_ctrl.global_size;
     localSize[0] = g_opencl_ctrl.local_size;
@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
 
-    PrintTimingInfo(fptr);
+    end = PrintTimingInfo(fptr);
     fclose(fptr);
 
     error = clEnqueueReadBuffer(command_queue, bufferInt, CL_TRUE, 0, g_opencl_ctrl.dataByteInt, hostDataInt, 0, NULL, NULL);
