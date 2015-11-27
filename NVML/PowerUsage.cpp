@@ -5,16 +5,6 @@
 #include <nvml.h>
 #include <sys/time.h>
 
-/**
- * Option value should be tightly stick to the character
- *
- * -t<time>  : power usage query interval in msec
- * -T<time>  : total time in sec
- * -o<file>  : output file name
- * -u        : show power usage
- * -l        : show power limit
- */
-
 #define MAX_FILE_LEN 200
 
 typedef struct GlobalCtrl
@@ -167,8 +157,9 @@ int main(int argc, char *argv[])
 
             // Start grab power/utilization info
             {
+                int sampleInterval = ctrl.intervalTime * 1000;
                 struct timeval startTime, curTime;
-                unsigned long long start_utime, cur_utime, pre_utime;
+                unsigned long long start_utime, cur_utime;
                 unsigned int curPower, curFreq, curTemp;
                 nvmlPstates_t perfState;
                 nvmlUtilization_t curUtil;
@@ -176,7 +167,6 @@ int main(int argc, char *argv[])
 
                 gettimeofday(&startTime, NULL);
                 start_utime = startTime.tv_sec * 1000 + startTime.tv_usec / 1000;
-                pre_utime = start_utime;
 
                 printf("start_time: %llu msec\n", start_utime);
                 while (1)
@@ -185,33 +175,29 @@ int main(int argc, char *argv[])
                     cur_utime = curTime.tv_sec * 1000 + curTime.tv_usec / 1000;
 
                     // Sample
-                    if ((cur_utime - pre_utime) > ctrl.intervalTime)
-                    {
-                        //printf("sample!", cur_utime);
-                        pre_utime += ctrl.intervalTime;
 
-                        error = nvmlDeviceGetPowerUsage(device, &curPower);
-                        CheckNVMLError(error, strdup("Unable to read current power"));
+                    error = nvmlDeviceGetPowerUsage(device, &curPower);
+                    CheckNVMLError(error, strdup("Unable to read current power"));
 
-                        error = nvmlDeviceGetUtilizationRates(device, &curUtil);
-                        CheckNVMLError(error, strdup("Unable to read current utilization"));
+                    error = nvmlDeviceGetUtilizationRates(device, &curUtil);
+                    CheckNVMLError(error, strdup("Unable to read current utilization"));
 
-                        error = nvmlDeviceGetPerformanceState(device, &perfState);
-                        CheckNVMLError(error, strdup("Unable to get performance state"));
+                    error = nvmlDeviceGetPerformanceState(device, &perfState);
+                    CheckNVMLError(error, strdup("Unable to get performance state"));
 
-                        error = nvmlDeviceGetClockInfo(device, NVML_CLOCK_SM, &curFreq);
-                        CheckNVMLError(error, strdup("Unable to get clock frequency"));
+                    error = nvmlDeviceGetClockInfo(device, NVML_CLOCK_SM, &curFreq);
+                    CheckNVMLError(error, strdup("Unable to get clock frequency"));
 
-                        error = nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &curTemp);
-                        CheckNVMLError(error, strdup("Unable to get GPU temperature"));
+                    error = nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &curTemp);
+                    CheckNVMLError(error, strdup("Unable to get GPU temperature"));
 
-                        fprintf(fp, "%llu %7u %3u %3u %3u %5u %3u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState, curFreq, curTemp);
-                        //printf("Power = %u milliwatts.\n", curPower);
-                    }
+                    fprintf(fp, "%llu %7u %3u %3u %3u %5u %3u\n", cur_utime, curPower, curUtil.gpu, curUtil.memory, perfState, curFreq, curTemp);
 
                     // Grab end
                     if ((cur_utime - start_utime) > (ctrl.totalTime * 1000))
                         break;
+                    
+                    usleep(sampleinterval);
                 }
                 printf("end_time: %llu msec\n", cur_utime);
                 fclose(fp);

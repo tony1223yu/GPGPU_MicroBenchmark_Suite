@@ -229,6 +229,9 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
 
     {
         cl_uint vectorSize;
+        size_t groupSize;
+        size_t itemSize[3];
+
         error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, sizeof(vectorSize), &vectorSize, NULL);
         CHECK_CL_ERROR(error);
         fprintf(stderr, "Preferred char vector width : %u\n", vectorSize);
@@ -244,6 +247,14 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
         error = clGetDeviceInfo(target_device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, sizeof(vectorSize), &vectorSize, NULL);
         CHECK_CL_ERROR(error);
         fprintf(stderr, "Preferred double vector width : %u\n", vectorSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(groupSize), &groupSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Maximum work group size : %lu\n", groupSize);
+
+        error = clGetDeviceInfo(target_device, CL_DEVICE_MAX_WORK_ITEM_SIZES, sizeof(itemSize), &itemSize, NULL);
+        CHECK_CL_ERROR(error);
+        fprintf(stderr, "Maximum work item size : %lu, %lu, %lu\n", itemSize[0], itemSize[1], itemSize[2]);
     }
 
     /* Free the space */
