@@ -1,7 +1,18 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%union
+{
+    char *lexeme;
+};
+
 %token KERNEL GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
 %token UCHAR USHORT UINT ULONG INT_V UINT_V CHAR_V UCHAR_V SHORT_V USHORT_V LONG_V ULONG_V FLOAT_V DOUBLE_V
 
-%token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
+%token <lexeme> IDENTIFIER
+%token CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
@@ -13,6 +24,8 @@
 %token STRUCT UNION ENUM ELLIPSIS
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+
+%type <lexeme> direct_declarator declarator 
 
 %start translation_unit
 %%
@@ -72,15 +85,15 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
+	| multiplicative_expression '*' cast_expression {printf("Mul operation\n");}
+	| multiplicative_expression '/' cast_expression {printf("Div operation\n");}
+	| multiplicative_expression '%' cast_expression {printf("Mod operation\n");}
 	;
 
 additive_expression
 	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
+	| additive_expression '+' multiplicative_expression {printf("Add operation\n");}
+	| additive_expression '-' multiplicative_expression {printf("Sub operation\n");}
 	;
 
 shift_expression
@@ -310,7 +323,7 @@ declarator
 
 
 direct_declarator
-	: IDENTIFIER
+	: IDENTIFIER {$$ = $1;}
 	| '(' declarator ')'
 	| direct_declarator '[' type_qualifier_list assignment_expression ']'
 	| direct_declarator '[' type_qualifier_list ']'
@@ -320,8 +333,8 @@ direct_declarator
 	| direct_declarator '[' type_qualifier_list '*' ']'
 	| direct_declarator '[' '*' ']'
 	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list ')'
+	| direct_declarator '(' parameter_type_list ')' {$$ = $1;}
+	| direct_declarator '(' identifier_list ')' {$$ = $1;}
 	| direct_declarator '(' ')'
 	;
 
@@ -453,12 +466,12 @@ selection_statement
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
-	| FOR '(' declaration expression_statement ')' statement
-	| FOR '(' declaration expression_statement expression ')' statement
+	: WHILE '(' expression ')' {printf("===== WHILE LOOP START\n");} statement {printf("===== WHILE LOOP END\n");}
+	| DO statement WHILE '(' expression ')' ';' {printf("===== DO WHILE LOOP\n");}
+	| FOR '(' expression_statement expression_statement ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
+	| FOR '(' expression_statement expression_statement expression ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
+	| FOR '(' declaration expression_statement ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
+	| FOR '(' declaration expression_statement expression ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
 	;
 
 jump_statement
@@ -480,8 +493,8 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
+	: declaration_specifiers declarator declaration_list {printf("========== FUNCTION \'%s\' START\n", $2);} compound_statement {printf("========== FUNCTION \'%s\' END\n\n", $2);}
+    | declaration_specifiers declarator {printf("========== FUNCTION \'%s\' START\n", $2);} compound_statement {printf("========== FUNCTION \'%s\' END\n\n", $2);}
 	;
 
 declaration_list
@@ -491,7 +504,6 @@ declaration_list
 
 
 %%
-#include <stdio.h>
 
 extern char yytext[];
 extern int column;
