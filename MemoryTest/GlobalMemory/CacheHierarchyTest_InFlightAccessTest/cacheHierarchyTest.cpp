@@ -154,7 +154,7 @@ void CommandParser(int argc, char *argv[])
         }
     }
 
-    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size) * (long)(g_opencl_ctrl.globalSize);
+    g_opencl_ctrl.dataByte = sizeof(cl_ulong) * (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size) * (long)(g_opencl_ctrl.globalSize) / (long)(g_opencl_ctrl.localSize);
     g_opencl_ctrl.offset = (long)(g_opencl_ctrl.stride) * (long)(g_opencl_ctrl.size);
 
     sprintf(g_opencl_ctrl.kernel1, "%s_%d", KERNEL_1, g_opencl_ctrl.kernelNum);
