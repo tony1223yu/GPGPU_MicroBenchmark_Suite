@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "kernelParser.h"
 extern int  yyparse();
+extern void initial();
 extern FILE *yyin;
 
 int main(int argc, char *argv[])
@@ -18,6 +20,7 @@ int main(int argc, char *argv[])
     }
 
     yyin=fp;
+    initial();
     yyparse();
     fclose(fp);
 }

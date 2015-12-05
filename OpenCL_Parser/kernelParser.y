@@ -1,12 +1,136 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "kernelParser.h"
+
+void initial()
+{
+    prog = NULL;
+    curFunction_h = NULL;
+    curFunction_t = NULL;
+    curSTMTGroup_h = NULL;
+    curSTMTGroup_t = NULL;
+}
+
+PROGRAM* CreateProgram(FUNCTION* func_head, FUNCTION* func_tail)
+{
+    PROGRAM* tmp;
+    FUNCTION* iter;
+
+    tmp = (PROGRAM*)malloc(sizeof(PROGRAM));
+    tmp->function_head = func_head;
+    tmp->function_tail = func_tail;
+
+    for (iter = func_head ; iter != NULL ; iter = iter->next)
+    {
+        iter->parentProgram = tmp;
+    }
+
+    return tmp;
+}
+
+void CreateFunction(char *name, STMT_GROUP* group_head, STMT_GROUP* group_tail)
+{
+    FUNCTION* tmp;
+    STMT_GROUP* iter;
+    STMT_GROUP* iter_sib;
+
+    fprintf(stderr, "[OpenCL Parser] Add function %s\n", name);
+
+    tmp = (FUNCTION*)malloc(sizeof(FUNCTION));
+    tmp->functionName = name;
+    tmp->stmt_group_head = group_head;
+    tmp->stmt_group_tail = group_tail;
+    tmp->next = NULL;
+    tmp->parentProgram = NULL;
+
+    for (iter = group_head ; iter != NULL ; iter = iter->next)
+    {
+        iter_sib = iter->sibling;
+        while (iter_sib != NULL)
+        {
+            iter_sib->parentFunction = tmp;
+            iter_sib = iter_sib->sibling;
+        }
+        iter->parentFunction = tmp;
+    }
+
+    if (curFunction_h == NULL)
+    {
+        curFunction_h = tmp;
+        curFunction_t = tmp;
+    }
+    else
+    {
+        curFunction_t->next = tmp;
+        curFunction_t = tmp;
+    }
+
+    curSTMTGroup_h = NULL;
+    curSTMTGroup_t = NULL;
+}
+
+void CreateEmptySTMTGroup()
+{
+    STMT_GROUP* tmp;
+    STMT* iter;
+
+    fprintf(stderr, "[OpenCL Parser] Create empty STMT group\n");
+
+    tmp = (STMT_GROUP*)malloc(sizeof(STMT_GROUP));
+    tmp->stmt_head = NULL;
+    tmp->stmt_tail = NULL;
+    tmp->stmtID = 0;
+    /* TODO iteration and workitemCount */
+    tmp->next = NULL;
+    tmp->sibling = NULL;
+    tmp->parentFunction = NULL;
+
+    if (curSTMTGroup_h == NULL)
+    {
+        curSTMTGroup_h = tmp;
+        curSTMTGroup_t = tmp;
+    }
+    else
+    {
+        curSTMTGroup_t->next = tmp;
+        curSTMTGroup_t = tmp;
+    }
+}
+
+void CreateSTMT(STMT_TYPE type)
+{
+    STMT* tmp;
+    fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
+    tmp = (STMT*)malloc(sizeof(STMT));
+    tmp->id = curSTMTGroup_t->stmtID ++;
+    tmp->type = type;
+    tmp->parentGroup = NULL;
+    tmp->issue_dep = NULL;
+    tmp->structural_dep = NULL;
+    tmp->data_dep = NULL;
+    tmp->next = NULL;
+    
+    if (curSTMTGroup_t->stmt_head == NULL)
+    {
+        curSTMTGroup_t->stmt_head = tmp;
+        curSTMTGroup_t->stmt_tail = tmp;
+    }
+    else
+    {
+        curSTMTGroup_t->stmt_tail->next = tmp;
+        curSTMTGroup_t->stmt_tail = tmp;
+    }
+    tmp->parentGroup = curSTMTGroup_t;
+}
+
 %}
 
 %union
 {
+    void *ptr;
     char *lexeme;
-};
+}
 
 %token KERNEL GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
 %token UCHAR USHORT UINT ULONG INT_V UINT_V CHAR_V UCHAR_V SHORT_V USHORT_V LONG_V ULONG_V FLOAT_V DOUBLE_V
@@ -25,10 +149,14 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <lexeme> direct_declarator declarator 
+%type <lexeme> declarator direct_declarator
 
-%start translation_unit
+%start program_unit
 %%
+
+program_unit
+    : translation_unit {prog = CreateProgram(curFunction_h, curFunction_t);}
+    ;
 
 primary_expression
 	: IDENTIFIER
@@ -85,15 +213,15 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression
-	| multiplicative_expression '*' cast_expression {printf("Mul operation\n");}
-	| multiplicative_expression '/' cast_expression {printf("Div operation\n");}
-	| multiplicative_expression '%' cast_expression {printf("Mod operation\n");}
+	| multiplicative_expression '*' cast_expression {CreateSTMT(MULTIPLICATION);}
+	| multiplicative_expression '/' cast_expression {CreateSTMT(DIVISION);}
+	| multiplicative_expression '%' cast_expression {CreateSTMT(MODULAR);}
 	;
 
 additive_expression
 	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression {printf("Add operation\n");}
-	| additive_expression '-' multiplicative_expression {printf("Sub operation\n");}
+	| additive_expression '+' multiplicative_expression {CreateSTMT(ADDITION);}
+	| additive_expression '-' multiplicative_expression {CreateSTMT(SUBTRACTION);}
 	;
 
 shift_expression
@@ -317,25 +445,25 @@ function_specifier
 	;
 
 declarator
-	: pointer direct_declarator
-	| direct_declarator
+	: pointer direct_declarator {$$ = $2;}
+	| direct_declarator {$$ = $1;}
 	;
 
 
 direct_declarator
 	: IDENTIFIER {$$ = $1;}
-	| '(' declarator ')'
-	| direct_declarator '[' type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list ']'
-	| direct_declarator '[' assignment_expression ']'
-	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list '*' ']'
-	| direct_declarator '[' '*' ']'
-	| direct_declarator '[' ']'
+	| '(' declarator ')' {$$ = $2;}
+	| direct_declarator '[' type_qualifier_list assignment_expression ']' {$$ = $1;}
+	| direct_declarator '[' type_qualifier_list ']' {$$ = $1;}
+	| direct_declarator '[' assignment_expression ']' {$$ = $1;}
+	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' {$$ = $1;}
+	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' {$$ = $1;}
+	| direct_declarator '[' type_qualifier_list '*' ']' {$$ = $1;}
+	| direct_declarator '[' '*' ']' {$$ = $1;}
+	| direct_declarator '[' ']' {$$ = $1;}
 	| direct_declarator '(' parameter_type_list ')' {$$ = $1;}
 	| direct_declarator '(' identifier_list ')' {$$ = $1;}
-	| direct_declarator '(' ')'
+	| direct_declarator '(' ')' {$$ = $1;}
 	;
 
 pointer
@@ -441,7 +569,7 @@ labeled_statement
 
 compound_statement
 	: '{' '}'
-	| '{' block_item_list '}'
+    | '{' block_item_list '}'
 	;
 
 block_item_list
@@ -466,12 +594,12 @@ selection_statement
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' {printf("===== WHILE LOOP START\n");} statement {printf("===== WHILE LOOP END\n");}
-	| DO statement WHILE '(' expression ')' ';' {printf("===== DO WHILE LOOP\n");}
-	| FOR '(' expression_statement expression_statement ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
-	| FOR '(' expression_statement expression_statement expression ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
-	| FOR '(' declaration expression_statement ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
-	| FOR '(' declaration expression_statement expression ')' {printf("===== FOR LOOP START\n");} statement {printf("===== FOR LOOP END\n");}
+	: WHILE '(' expression ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
+	| DO {CreateEmptySTMTGroup();} statement WHILE '(' expression ')' ';' {CreateEmptySTMTGroup();}
+	| FOR '(' expression_statement expression_statement ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
+	| FOR '(' expression_statement expression_statement expression ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
+	| FOR '(' declaration expression_statement ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
+	| FOR '(' declaration expression_statement expression ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
 	;
 
 jump_statement
@@ -493,8 +621,14 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list {printf("========== FUNCTION \'%s\' START\n", $2);} compound_statement {printf("========== FUNCTION \'%s\' END\n\n", $2);}
-    | declaration_specifiers declarator {printf("========== FUNCTION \'%s\' START\n", $2);} compound_statement {printf("========== FUNCTION \'%s\' END\n\n", $2);}
+	: declaration_specifiers declarator declaration_list {CreateEmptySTMTGroup();} compound_statement
+    {
+        CreateFunction($2, curSTMTGroup_h, curSTMTGroup_t);
+    }
+    | declaration_specifiers declarator {CreateEmptySTMTGroup();} compound_statement
+    {
+        CreateFunction($2, curSTMTGroup_h, curSTMTGroup_t);
+    }
 	;
 
 declaration_list
@@ -504,6 +638,7 @@ declaration_list
 
 
 %%
+#include <stdio.h>
 
 extern char yytext[];
 extern int column;

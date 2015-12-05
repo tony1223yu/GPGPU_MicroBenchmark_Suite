@@ -13,6 +13,7 @@ VEC         (2|4|8|16)
 
 /* L?\"(\\.|[^\\"\n])*\"	{ printf("string : \"%s\"\n", yytext); count(); return(STRING_LITERAL); } */
 void count(void);
+void comment(void);
 %}
 
 %%
