@@ -8,8 +8,30 @@ void initial()
     prog = NULL;
     curFunction_h = NULL;
     curFunction_t = NULL;
-    curSTMTGroup_h = NULL;
-    curSTMTGroup_t = NULL;
+}
+
+void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency)
+{
+    DEP* tmp;
+    tmp = (DEP*)malloc(sizeof(DEP));
+    tmp->op = dependOP;
+    tmp->latency = latency;
+
+    switch(type)
+    {
+        case ISSUE_DEP:
+            currOP->issue_dep = tmp;
+            break;
+        case STRUCTURAL_DEP:
+            currOP->structural_dep = tmp;
+            break;
+        case DATA_DEP:
+            currOP->data_dep = tmp;
+            break;
+        default:
+            fprintf(stderr, "Unknown type of dependency\n");
+            break;
+    }
 }
 
 PROGRAM* CreateProgram(FUNCTION* func_head, FUNCTION* func_tail)
@@ -29,6 +51,7 @@ PROGRAM* CreateProgram(FUNCTION* func_head, FUNCTION* func_tail)
     return tmp;
 }
 
+/*
 void CreateFunction(char *name, STMT_GROUP* group_head, STMT_GROUP* group_tail)
 {
     FUNCTION* tmp;
@@ -69,59 +92,240 @@ void CreateFunction(char *name, STMT_GROUP* group_head, STMT_GROUP* group_tail)
     curSTMTGroup_h = NULL;
     curSTMTGroup_t = NULL;
 }
+*/
 
-void CreateEmptySTMTGroup()
+Operation* CreateOP(OP_TYPE type)
 {
-    STMT_GROUP* tmp;
-    STMT* iter;
-
-    fprintf(stderr, "[OpenCL Parser] Create empty STMT group\n");
-
-    tmp = (STMT_GROUP*)malloc(sizeof(STMT_GROUP));
-    tmp->stmt_head = NULL;
-    tmp->stmt_tail = NULL;
-    tmp->stmtID = 0;
-    /* TODO iteration and workitemCount */
-    tmp->next = NULL;
-    tmp->sibling = NULL;
-    tmp->parentFunction = NULL;
-
-    if (curSTMTGroup_h == NULL)
-    {
-        curSTMTGroup_h = tmp;
-        curSTMTGroup_t = tmp;
-    }
-    else
-    {
-        curSTMTGroup_t->next = tmp;
-        curSTMTGroup_t = tmp;
-    }
-}
-
-void CreateSTMT(STMT_TYPE type)
-{
-    STMT* tmp;
-    fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
-    tmp = (STMT*)malloc(sizeof(STMT));
-    tmp->id = curSTMTGroup_t->stmtID ++;
+    Operation* tmp;
+    //fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
+    tmp = (Operation*)malloc(sizeof(Operation));
     tmp->type = type;
-    tmp->parentGroup = NULL;
     tmp->issue_dep = NULL;
     tmp->structural_dep = NULL;
     tmp->data_dep = NULL;
     tmp->next = NULL;
-    
-    if (curSTMTGroup_t->stmt_head == NULL)
+    return tmp;
+}
+
+void GetStatementTypeName(Statement* stmt, char* output)
+{
+    switch(stmt -> type)
     {
-        curSTMTGroup_t->stmt_head = tmp;
-        curSTMTGroup_t->stmt_tail = tmp;
+        case EXPRESSION_STMT:
+            sprintf(output, "%s", "EXPRESSION");
+            break;
+        case SELECTION_STMT:
+            sprintf(output, "%s", "SELECTION");
+            break;
+        case ITERATION_STMT:
+            sprintf(output, "%s", "ITERATION");
+            break;
+    }
+}
+
+void GetOperationTypeName(Operation* op, char* output)
+{
+    switch(op -> type)
+    {
+        case ADDITION:
+            sprintf(output, "%s", "Add");
+            break;
+        case SUBTRACTION:
+            sprintf(output, "%s", "Sub");
+            break;
+        case MULTIPLICATION:
+            sprintf(output, "%s", "Mul");
+            break;
+        case DIVISION:
+            sprintf(output, "%s", "Div");
+            break;
+        case MODULAR:
+            sprintf(output, "%s", "Modular");
+            break;
+        case MEMORY:
+            sprintf(output, "%s", "Memory");
+            break;
+    }
+}
+
+void DebugSTMTList(STMT_List* stmt_list)
+{
+    char opType[30];
+    char stmtType[30];
+    if (stmt_list != NULL && stmt_list->stmt_head != NULL)
+    {
+        Statement* iterStmt = stmt_list->stmt_head;
+        Operation* iterOP;
+        while (iterStmt != NULL)
+        {
+            if (iterStmt->type == EXPRESSION_STMT)
+            {
+                GetStatementTypeName(iterStmt, stmtType);
+                printf(" [ STMT TYPE %s ]\n", stmtType);
+                iterOP = iterStmt->op_list->op_head;
+                while (iterOP != NULL)
+                {
+                    GetOperationTypeName(iterOP, opType);
+                    printf("%s -> ", opType);
+                    iterOP = iterOP->next;
+                }
+                printf("NULL\n");
+            }
+            else if (iterStmt->type == ITERATION_STMT)    // recursive call for ITERATION_STMT and SELECTION_STMT
+            {
+                GetStatementTypeName(iterStmt, stmtType);
+                printf(" [ STMT TYPE %s ]\n", stmtType);
+                DebugSTMTList(iterStmt->stmt_list);
+            }
+            else if (iterStmt->type == SELECTION_STMT)
+            {
+                // TODO
+            }
+
+            iterStmt = iterStmt->next;
+        }
     }
     else
     {
-        curSTMTGroup_t->stmt_tail->next = tmp;
-        curSTMTGroup_t->stmt_tail = tmp;
+        printf("STMT is NULL\n");
     }
-    tmp->parentGroup = curSTMTGroup_t;
+}
+
+void DebugOPList(OP_List* list)
+{
+    if (list != NULL)
+    {
+        Operation* tmp = list->op_head;
+        while(tmp)
+        {
+            printf("%d -> ", tmp->type);
+            tmp = tmp->next;
+        }
+        printf("\n");
+    }
+    else
+    {
+        printf("List is NULL\n");
+    }
+}
+
+STMT_List* CreateSTMTList(Statement* newSTMT)
+{
+    if (newSTMT == NULL)
+        return NULL;
+
+    STMT_List* tmp;
+    tmp = (STMT_List*)malloc(sizeof(STMT_List));
+
+    tmp->stmt_head = newSTMT;
+    tmp->stmt_tail = newSTMT;
+    return tmp;
+}
+
+
+STMT_List* AddToSTMTList(STMT_List* prev, STMT_List* curr)
+{
+    if (curr == NULL) return prev;
+    if (prev == NULL) return curr;
+
+    //printf("in AddToSTMTList, prev = %p, new = %p, type = %d\n", prev, curr, curr->stmt_head->type);
+    if (prev->stmt_tail->type == EXPRESSION_STMT && curr->stmt_head->type == EXPRESSION_STMT)
+    {
+        prev->stmt_tail->op_list->op_tail->next = curr->stmt_head->op_list->op_head;
+        MakeDependency(curr->stmt_head->op_list->op_head, prev->stmt_tail->op_list->op_tail->next, ISSUE_DEP, 1);
+        prev->stmt_tail->op_list->op_tail = curr->stmt_head->op_list->op_tail;
+        if (curr->stmt_tail == curr->stmt_head)
+            curr->stmt_tail = curr->stmt_tail->next;
+        curr->stmt_head = curr->stmt_head->next;
+        prev->stmt_tail->next = curr->stmt_head;
+        if (curr->stmt_tail != NULL)
+            prev->stmt_tail = curr->stmt_tail;
+        
+        free(curr);
+        return prev;
+    }
+    else
+    {
+        prev->stmt_tail->next = curr->stmt_head;
+        prev->stmt_tail = curr->stmt_tail;
+        free(curr);
+        return prev;
+    }
+}
+
+Statement* CreateSTMT(void* ptr, STMT_TYPE type)
+{
+    if (ptr == NULL)
+        return NULL;
+
+    Statement* tmp;
+    tmp = (Statement*)malloc(sizeof(Statement));
+    tmp->type = type;
+    tmp->opID = 0;
+    tmp->stmt_list = NULL;
+    tmp->op_list = NULL;
+
+    if (type == ITERATION_STMT || type == SELECTION_STMT) // already a stmt
+    {
+        tmp->stmt_list = (STMT_List*)(ptr);
+    }
+    else if (type == EXPRESSION_STMT)
+    {
+        tmp->op_list = (OP_List*)(ptr);
+    }
+    return tmp;
+}
+
+OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
+{
+    if ((left == NULL) && (right == NULL))
+    {
+        OP_List* tmp = NULL;
+        if (newOP != NULL)
+        {
+            tmp = (OP_List*)malloc(sizeof(OP_List));
+            tmp->op_head = newOP;
+            tmp->op_tail = newOP;
+        }
+        return tmp;
+    }
+    else if (right == NULL)
+    {
+        if (newOP != NULL)
+        {
+            MakeDependency(newOP, left->op_tail, ISSUE_DEP, 1);        
+            left->op_tail->next = newOP;
+            left->op_tail = newOP;
+        }
+        return left;
+    }
+    else if (left == NULL)
+    {
+        if (newOP != NULL)
+        {
+            MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);        
+            right->op_tail->next = newOP;
+            right->op_tail = newOP;
+        }
+        return right;
+    }
+    else // merge two list
+    {
+        MakeDependency(right->op_head, left->op_tail, ISSUE_DEP, 1);
+        left->op_tail->next = right->op_head;
+        if (newOP != NULL)
+        {
+            MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);
+            right->op_tail->next = newOP;
+            left->op_tail = newOP;
+        }
+        else
+        {
+            left->op_tail = right->op_tail;
+        }
+        free (right);
+        return left;
+    }
 }
 
 %}
@@ -129,13 +333,12 @@ void CreateSTMT(STMT_TYPE type)
 %union
 {
     void *ptr;
-    char *lexeme;
 }
 
 %token KERNEL GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
 %token UCHAR USHORT UINT ULONG INT_V UINT_V CHAR_V UCHAR_V SHORT_V USHORT_V LONG_V ULONG_V FLOAT_V DOUBLE_V
 
-%token <lexeme> IDENTIFIER
+%token <ptr> IDENTIFIER
 %token CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -149,38 +352,39 @@ void CreateSTMT(STMT_TYPE type)
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <lexeme> declarator direct_declarator
+%type <ptr> declarator direct_declarator /* For char* */
+%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression assignment_operator expression expression_statement selection_statement iteration_statement statement block_item block_item_list compound_statement
 
 %start program_unit
 %%
 
 program_unit
-    : translation_unit {prog = CreateProgram(curFunction_h, curFunction_t);}
+    : translation_unit
     ;
 
 primary_expression
-	: IDENTIFIER
-	| CONSTANT
-	| STRING_LITERAL
-	| '(' expression ')'
-    | GLOBAL_ID_FUNC
-    | GLOBAL_SIZE_FUNC
-    | LOCAL_ID_FUNC
-    | LOCAL_SIZE_FUNC
+	: IDENTIFIER {$$ = NULL;}
+	| CONSTANT {$$ = NULL;}
+	| STRING_LITERAL {$$ = NULL;}
+	| '(' expression ')' {$$ = $2;}
+    | GLOBAL_ID_FUNC {$$ = NULL;}
+    | GLOBAL_SIZE_FUNC {$$ = NULL;}
+    | LOCAL_ID_FUNC {$$ = NULL;}
+    | LOCAL_SIZE_FUNC {$$ = NULL;}
 	;
 
 /* function call here */
 postfix_expression
-	: primary_expression
-	| postfix_expression '[' expression ']'
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' IDENTIFIER
-	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
-	| '(' type_name ')' '{' initializer_list '}'
-	| '(' type_name ')' '{' initializer_list ',' '}'
+	: primary_expression {$$ = $1;}
+	| postfix_expression '[' expression ']' {$$ = AddToOPList($1, $3, CreateOP(MEMORY));}
+	| postfix_expression '(' ')' {$$ = $1;} /* TODO: function call */
+	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
+	| postfix_expression '.' IDENTIFIER {$$ = $1;}
+	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;}
+	| postfix_expression INC_OP {$$ = $1;}
+	| postfix_expression DEC_OP {$$ = $1;}
+	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;}
+	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;}
 	;
 
 argument_expression_list
@@ -189,12 +393,12 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression
-	| INC_OP unary_expression
-	| DEC_OP unary_expression
-	| unary_operator cast_expression
-	| SIZEOF unary_expression
-	| SIZEOF '(' type_name ')'
+	: postfix_expression {$$ = $1;}
+	| INC_OP unary_expression {$$ = $2;}
+	| DEC_OP unary_expression {$$ = $2;}
+	| unary_operator cast_expression {$$ = $2;}
+	| SIZEOF unary_expression {$$ = $2;}
+	| SIZEOF '(' type_name ')' {$$ = NULL;}
 	;
 
 unary_operator
@@ -207,95 +411,95 @@ unary_operator
 	;
 
 cast_expression
-	: unary_expression
-	| '(' type_name ')' cast_expression
+	: unary_expression {$$ = $1;}
+	| '(' type_name ')' cast_expression {$$ = $4;}
 	;
 
 multiplicative_expression
-	: cast_expression
-	| multiplicative_expression '*' cast_expression {CreateSTMT(MULTIPLICATION);}
-	| multiplicative_expression '/' cast_expression {CreateSTMT(DIVISION);}
-	| multiplicative_expression '%' cast_expression {CreateSTMT(MODULAR);}
+	: cast_expression {$$ = $1;}
+	| multiplicative_expression '*' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MULTIPLICATION));}
+	| multiplicative_expression '/' cast_expression {$$ = AddToOPList($1, $3, CreateOP(DIVISION));}
+	| multiplicative_expression '%' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MODULAR));}
 	;
 
 additive_expression
-	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression {CreateSTMT(ADDITION);}
-	| additive_expression '-' multiplicative_expression {CreateSTMT(SUBTRACTION);}
+	: multiplicative_expression {$$ = $1;}
+	| additive_expression '+' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(ADDITION));}
+	| additive_expression '-' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(SUBTRACTION));}
 	;
 
 shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+	: additive_expression {$$ = $1;}
+	| shift_expression LEFT_OP additive_expression {$$ = AddToOPList($1, $3, NULL);}
+	| shift_expression RIGHT_OP additive_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 relational_expression
-	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	: shift_expression {$$ = $1;}
+	| relational_expression '<' shift_expression {$$ = AddToOPList($1, $3, NULL);}
+	| relational_expression '>' shift_expression {$$ = AddToOPList($1, $3, NULL);}
+	| relational_expression LE_OP shift_expression {$$ = AddToOPList($1, $3, NULL);}
+	| relational_expression GE_OP shift_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	: relational_expression {$$ = $1;}
+	| equality_expression EQ_OP relational_expression {$$ = AddToOPList($1, $3, NULL);}
+	| equality_expression NE_OP relational_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 and_expression
-	: equality_expression
-	| and_expression '&' equality_expression
+	: equality_expression {$$ = $1;}
+	| and_expression '&' equality_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 exclusive_or_expression
-	: and_expression
-	| exclusive_or_expression '^' and_expression
+	: and_expression {$$ = $1;}
+	| exclusive_or_expression '^' and_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 inclusive_or_expression
-	: exclusive_or_expression
-	| inclusive_or_expression '|' exclusive_or_expression
+	: exclusive_or_expression {$$ = $1;}
+	| inclusive_or_expression '|' exclusive_or_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression AND_OP inclusive_or_expression
+	: inclusive_or_expression {$$ = $1;}
+	| logical_and_expression AND_OP inclusive_or_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
+	: logical_and_expression {$$ = $1;}
+	| logical_or_expression OR_OP logical_and_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 conditional_expression
-	: logical_or_expression
-	| logical_or_expression '?' expression ':' conditional_expression
+	: logical_or_expression {$$ = $1;}
+	| logical_or_expression '?' expression ':' conditional_expression {$$ = $1;} /* TODO: check the actual execution flow */
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression {$$ = $1;}
+	| unary_expression assignment_operator assignment_expression {$$ = AddToOPList($3, $1, $2);}
 	;
 
 assignment_operator
-	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	: '=' {$$ = NULL;}
+	| MUL_ASSIGN {$$ = CreateOP(MULTIPLICATION);}
+	| DIV_ASSIGN {$$ = CreateOP(DIVISION);}
+	| MOD_ASSIGN {$$ = CreateOP(MODULAR);}
+	| ADD_ASSIGN {$$ = CreateOP(ADDITION);}
+	| SUB_ASSIGN {$$ = CreateOP(SUBTRACTION);}
+	| LEFT_ASSIGN {$$ = NULL;}
+	| RIGHT_ASSIGN {$$ = NULL;}
+	| AND_ASSIGN {$$ = NULL;}
+	| XOR_ASSIGN {$$ = NULL;}
+	| OR_ASSIGN {$$ = NULL;}
 	;
 
 expression
-	: assignment_expression
-	| expression ',' assignment_expression
+	: assignment_expression {$$ = $1;}
+	| expression ',' assignment_expression {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 constant_expression
@@ -553,12 +757,12 @@ designator
 	;
 
 statement
-	: labeled_statement
-	| compound_statement
-	| expression_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
+	: labeled_statement {$$ = NULL;}
+	| compound_statement {$$ = $1;}  // Should not be a statement, return STMT_List*
+	| expression_statement {$$ = CreateSTMTList(CreateSTMT($1, EXPRESSION_STMT));}
+	| selection_statement {$$ = NULL;}
+	| iteration_statement {$$ = $1;} // Statement contains Stmt_List
+	| jump_statement {$$ = NULL;}
 	;
 
 labeled_statement
@@ -568,38 +772,38 @@ labeled_statement
 	;
 
 compound_statement
-	: '{' '}'
-    | '{' block_item_list '}'
+	: '{' '}' {$$ = NULL;}
+    | '{' block_item_list '}' {$$ = $2;}
 	;
 
 block_item_list
-	: block_item
-	| block_item_list block_item
+	: block_item {$$ = $1;}
+	| block_item_list block_item {$$ = AddToSTMTList($1, $2);}
 	;
 
 block_item
-	: declaration
-	| statement
+	: declaration {$$ = NULL;} /* TODO: expressions in declaration */
+	| statement {$$ = $1;}
 	;
 
 expression_statement
-	: ';'
-	| expression ';'
+	: ';' {$$ = NULL;}
+	| expression ';' {$$ = $1;}
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement
-	| SWITCH '(' expression ')' statement
+	: IF '(' expression ')' statement {$$ = $5;}
+	| IF '(' expression ')' statement ELSE statement {$$ = $5;}
+	| SWITCH '(' expression ')' statement {$$ = $5;}
 	;
 
-iteration_statement
-	: WHILE '(' expression ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
-	| DO {CreateEmptySTMTGroup();} statement WHILE '(' expression ')' ';' {CreateEmptySTMTGroup();}
-	| FOR '(' expression_statement expression_statement ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
-	| FOR '(' expression_statement expression_statement expression ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
-	| FOR '(' declaration expression_statement ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
-	| FOR '(' declaration expression_statement expression ')' {CreateEmptySTMTGroup();} statement {CreateEmptySTMTGroup();}
+iteration_statement /* TODO: Add the expression of loop condition and steps into the STMTList */
+	: WHILE '(' expression ')' statement {$$ = CreateSTMTList(CreateSTMT($5, ITERATION_STMT));}
+	| DO statement WHILE '(' expression ')' ';' {$$ = CreateSTMTList(CreateSTMT($5, ITERATION_STMT));}
+	| FOR '(' expression_statement expression_statement ')' statement {$$ = CreateSTMTList(CreateSTMT($6, ITERATION_STMT));} 
+	| FOR '(' expression_statement expression_statement expression ')' statement {$$ = CreateSTMTList(CreateSTMT($7, ITERATION_STMT));} 
+	| FOR '(' declaration expression_statement ')' statement {$$ = CreateSTMTList(CreateSTMT($6, ITERATION_STMT));} 
+	| FOR '(' declaration expression_statement expression ')' statement {$$ = CreateSTMTList(CreateSTMT($7, ITERATION_STMT));} 
 	;
 
 jump_statement
@@ -621,13 +825,13 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list {CreateEmptySTMTGroup();} compound_statement
+	: declaration_specifiers declarator declaration_list compound_statement
     {
-        CreateFunction($2, curSTMTGroup_h, curSTMTGroup_t);
+        DebugSTMTList($4);
     }
-    | declaration_specifiers declarator {CreateEmptySTMTGroup();} compound_statement
+    | declaration_specifiers declarator compound_statement
     {
-        CreateFunction($2, curSTMTGroup_h, curSTMTGroup_t);
+        DebugSTMTList($3);
     }
 	;
 

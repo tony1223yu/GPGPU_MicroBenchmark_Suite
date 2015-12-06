@@ -2,19 +2,35 @@
 #define __OPENCL_PARSER_H__
 
 typedef struct DEP DEP;
-typedef struct STMT STMT;
-typedef struct STMT_GROUP STMT_GROUP;
+typedef struct Operation Operation;
+typedef struct STMT_List STMT_List;
 typedef struct FUNCTION FUNCTION;
 typedef struct PROGRAM PROGRAM;
+typedef struct Statement Statement;
+typedef struct OP_List OP_List;
+typedef enum OP_TYPE OP_TYPE;
 typedef enum STMT_TYPE STMT_TYPE;
-
+typedef enum DEP_TYPE DEP_TYPE;
 
 PROGRAM* prog;
 FUNCTION *curFunction_h, *curFunction_t;
-STMT_GROUP *curSTMTGroup_h, *curSTMTGroup_t;
-STMT *curSTMT_h, *curSTMT_t;
+Operation *prevOP;
+
+enum DEP_TYPE
+{
+    ISSUE_DEP = 0,
+    STRUCTURAL_DEP,
+    DATA_DEP
+};
 
 enum STMT_TYPE
+{
+    EXPRESSION_STMT = 0,
+    SELECTION_STMT,
+    ITERATION_STMT
+};
+
+enum OP_TYPE
 {
     INT_ADDITION = 0,
     INT_MULTIPLICATION,
@@ -31,20 +47,38 @@ enum STMT_TYPE
     SUBTRACTION,
     MULTIPLICATION,
     DIVISION,
-    MODULAR
+    MODULAR,
+    MEMORY
 };
 
 struct DEP
 {
-    STMT* stmt;
+    Operation* op;
     unsigned long long int latency;
 };
 
-struct STMT
+
+struct OP_List
+{
+    Operation* op_head;
+    Operation* op_tail;
+};
+
+
+struct Statement
+{
+    /* TODO: Use union to include three types of pointers? EXPRESSION_STMT, ITERATION_STMT, SELECTION_STMT */
+    OP_List* op_list;
+    STMT_List* stmt_list;
+    STMT_TYPE type;
+    int opID;
+    Statement* next;
+};
+
+struct Operation
 {
     int id; // ID of current statement
-    STMT_TYPE type;
-    STMT_GROUP* parentGroup;
+    OP_TYPE type;
 /*
     union
     {
@@ -56,27 +90,19 @@ struct STMT
     DEP* issue_dep; // pointer to the stmt that current stmt need to wait becuase of issue dependency
     DEP* structural_dep; // pointer to the stmt that current stmt need to wait becuase of structural dependency
     DEP* data_dep; // pointer to the stmt that current stmt need to wait becuase of data dependency
-    STMT *next; // pointer to next stmt with ID equals to (id+1)
+    Operation *next; // pointer to next stmt with ID equals to (id+1)
 };
 
-struct STMT_GROUP
+struct STMT_List
 {
-    FUNCTION* parentFunction;
-    STMT* stmt_head;
-    STMT* stmt_tail;
-    unsigned long long int iterationTime;
-    unsigned long long int workitemCount;
-    STMT_GROUP* next;
-    STMT_GROUP* sibling;
-    int stmtID;
+    Statement* stmt_head;
+    Statement* stmt_tail;
 };
 
 struct FUNCTION
 {
     char* functionName;
     PROGRAM* parentProgram;
-    STMT_GROUP* stmt_group_head;
-    STMT_GROUP* stmt_group_tail;
     FUNCTION* next;
 };
 

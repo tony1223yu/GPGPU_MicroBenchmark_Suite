@@ -186,7 +186,7 @@ void count(void)
 		else
 			column++;
 
-	//ECHO
+	//ECHO;
 }
 
 
@@ -205,8 +205,8 @@ int check_type(void)
 *	it actually will only return IDENTIFIER
 */
 
-    yylval.lexeme = strdup(yytext);
-    if (!yylval.lexeme)
+    yylval.ptr = strdup(yytext);
+    if (!yylval.ptr)
     {
         fprintf(stderr, "out of memory\n");
         exit(1);
