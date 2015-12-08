@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
     HostDataCreation(hostData);
 
     GetPlatformAndDevice(platform, device);
-    fptr = fopen(g_opencl_ctrl.powerFile, "w");
+    fptr = fopen(g_opencl_ctrl.powerFile, "a");
 
     /* Create context */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &error);
