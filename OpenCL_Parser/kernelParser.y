@@ -381,8 +381,8 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '.' IDENTIFIER {$$ = $1;}
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;}
-	| postfix_expression INC_OP {$$ = $1;}
-	| postfix_expression DEC_OP {$$ = $1;}
+	| postfix_expression INC_OP {$$ = AddToOPList(NULL, $1, CreateOP(ADDITION));} /* TODO: Add to the end of the stmt */
+	| postfix_expression DEC_OP {$$ = AddToOPList(NULL, $1, CreateOP(SUBTRACTION));} /* TODO: Add to the end of the stmt */
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;}
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;}
 	;
@@ -394,8 +394,8 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression {$$ = $1;}
-	| INC_OP unary_expression {$$ = $2;}
-	| DEC_OP unary_expression {$$ = $2;}
+	| INC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(ADDITION));}
+	| DEC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(SUBTRACTION));}
 	| unary_operator cast_expression {$$ = $2;}
 	| SIZEOF unary_expression {$$ = $2;}
 	| SIZEOF '(' type_name ')' {$$ = NULL;}
@@ -801,9 +801,19 @@ iteration_statement /* TODO: Add the expression of loop condition and steps into
 	: WHILE '(' expression ')' statement {$$ = CreateSTMTList(CreateSTMT($5, ITERATION_STMT));}
 	| DO statement WHILE '(' expression ')' ';' {$$ = CreateSTMTList(CreateSTMT($5, ITERATION_STMT));}
 	| FOR '(' expression_statement expression_statement ')' statement {$$ = CreateSTMTList(CreateSTMT($6, ITERATION_STMT));} 
-	| FOR '(' expression_statement expression_statement expression ')' statement {$$ = CreateSTMTList(CreateSTMT($7, ITERATION_STMT));} 
+	| FOR '(' expression_statement expression_statement expression ')' statement
+    {
+        STMT_List* step = $7;
+        step = AddToSTMTList(step, CreateSTMTList(CreateSTMT($5, EXPRESSION_STMT)));
+        $$ = CreateSTMTList(CreateSTMT($7, ITERATION_STMT));
+    }
 	| FOR '(' declaration expression_statement ')' statement {$$ = CreateSTMTList(CreateSTMT($6, ITERATION_STMT));} 
-	| FOR '(' declaration expression_statement expression ')' statement {$$ = CreateSTMTList(CreateSTMT($7, ITERATION_STMT));} 
+	| FOR '(' declaration expression_statement expression ')' statement
+    {
+        STMT_List* step = $7;
+        step = AddToSTMTList(step, CreateSTMTList(CreateSTMT($5, EXPRESSION_STMT)));
+        $$ = CreateSTMTList(CreateSTMT(step, ITERATION_STMT));
+    } 
 	;
 
 jump_statement

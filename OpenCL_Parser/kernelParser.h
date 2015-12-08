@@ -57,7 +57,7 @@ struct DEP
     unsigned long long int latency;
 };
 
-
+/* Add post-statement operation? */
 struct OP_List
 {
     Operation* op_head;
@@ -65,6 +65,7 @@ struct OP_List
 };
 
 
+/* Add pre-statement expression? */
 struct Statement
 {
     /* TODO: Use union to include three types of pointers? EXPRESSION_STMT, ITERATION_STMT, SELECTION_STMT */
