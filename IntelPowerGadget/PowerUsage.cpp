@@ -6,16 +6,6 @@
 
 #include <IntelPowerGadget/EnergyLib.h>
 
-/**
- * Option value should be tightly stick to the character
- *
- * -t<time>  : power usage query interval in msec
- * -T<time>  : total time in sec
- * -o<file>  : output file name
- * -u        : show power usage
- * -l        : show power limit
- */
-
 #define MAX_FILE_LEN 200
 
 typedef struct GlobalCtrl
