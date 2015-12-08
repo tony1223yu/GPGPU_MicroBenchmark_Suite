@@ -9,9 +9,8 @@ __kernel void MatrixMultiplication_int(__global int *matrixA, __global int *matr
     sum = 0;
     for (int i = 0 ; i < matrixWidth / localSize ; i ++)
     {
-        localB[lx * localSize + ly] = matrixB[(i * localSize + lx) * matrixSize + y];
         sum = localB[lx * localSize + ly];
-        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_GLOBAL_MEM_FENCE);
 
         for (int j = 0 ; j < localSize ; j ++)
         {
@@ -34,7 +33,6 @@ __kernel void MatrixMultiplication_float(__global float *matrixA, __global float
     for (int i = 0 ; i < matrixWidth / localSize ; i ++)
     {
         localB[lx * localSize + ly] = matrixB[(i * localSize + lx) * matrixSize + y];
-        sum = localB[lx * localSize + ly];
         barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 
         for (int j = 0 ; j < localSize ; j ++)
@@ -58,7 +56,6 @@ __kernel void MatrixMultiplication_double(__global double *matrixA, __global dou
     for (int i = 0 ; i < matrixWidth / localSize ; i ++)
     {
         localB[lx * localSize + ly] = matrixB[(i * localSize + lx) * matrixSize + y];
-        sum = localB[lx * localSize + ly];
         barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 
         for (int j = 0 ; j < localSize ; j ++)

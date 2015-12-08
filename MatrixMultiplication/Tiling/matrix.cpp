@@ -191,6 +191,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     cl_uint count;
     cl_int error;
     size_t length;
+    size_t size;
 
     char *queryString;
 
@@ -432,12 +433,11 @@ int main(int argc, char *argv[])
 
     globalSize[0] = g_opencl_ctrl.dataSizeW;
     globalSize[1] = g_opencl_ctrl.dataSizeH;
-    localSize[0] = localSize[1] = g_opencl_ctrl.localSize;
-
-    printf("local size: %d\n", g_opencl_ctrl.localSize);
+    localSize[0] = g_opencl_ctrl.localSize;
+    localSize[1] = g_opencl_ctrl.localSize;
 
     PrintTimingInfo(g_fptr);
-    error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, NULL, 0, NULL, NULL);
+    error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
@@ -479,7 +479,7 @@ int main(int argc, char *argv[])
                     for (int i = 0 ; i < g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW ; i ++)
                         if (cpuOutputMatrix[i] != tmpO[i])
                         {
-                            printf("result mismatch! @ %d (%d, %d)\n", i, cpuOutputMatrix[i], tmpO[i]);
+                            printf("result mismatch! (%d, %d)\n", cpuOutputMatrix[i], tmpO[i]);
                             check = false;
                             break;
                         }
