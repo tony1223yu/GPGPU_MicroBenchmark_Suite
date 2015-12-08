@@ -19,13 +19,24 @@
 #define GPU_POWER 44
 #define GPU_FREQ 47
 
+typedef enum ProfileTarget
+{
+    CPU = 0,
+    GPU,
+    All
+} ProfileTarget;
+
 typedef struct GlobalCtrl
 {
     int intervalTime;
     int totalTime;
     char outputFile[MAX_FILE_LEN];
+    int *profileCounter;
+    int nProfileCounter;
+    ProfileTarget targetDevice;
 
-    GlobalCtrl(): intervalTime(200), totalTime(10) {sprintf(outputFile, "PowerUsageOutput.log");}
+    GlobalCtrl(): intervalTime(200), totalTime(10), targetDevice(All) {sprintf(outputFile, "PowerUsageOutput.log");}
+    ~GlobalCtrl() {delete [] profileCounter;}
 } GlobalCtrl;
 
 bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
@@ -33,7 +44,7 @@ bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
     int cmd;
     while(1)
     {
-        cmd = getopt(argc, argv, "t:o:T:");
+        cmd = getopt(argc, argv, "t:o:T:D:");
         if (cmd == -1)
             break;
 
@@ -52,12 +63,56 @@ bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
                 sprintf(ctrl->outputFile, "%s", optarg);
                 break;
 
+            case 'D':
+                if (strcmp("CPU", optarg) == 0)
+                    ctrl->targetDevice = CPU;
+                else if (strcmp("GPU", optarg) == 0)
+                    ctrl->targetDevice = GPU;
+                else if (strcmp("All", optarg) == 0)
+                    ctrl->targetDevice = All;
+                else
+                    fprintf(stderr, "Unsupported argument, use All as default\n");
+                break;
+
             default:
                 printf("Error: Unknown argument: %s\n", optarg);
                 return false;
                 break;
         }
     }
+
+    switch (ctrl->targetDevice)
+    {
+        case CPU:
+            ctrl->nProfileCounter = 6;
+            ctrl->profileCounter = new int[ctrl->nProfileCounter];
+            ctrl->profileCounter[0] = CPU_CU0_POWER;
+            ctrl->profileCounter[1] = CPU_CU1_POWER;
+            ctrl->profileCounter[2] = CPU_CORE0_FREQ;
+            ctrl->profileCounter[3] = CPU_CORE1_FREQ;
+            ctrl->profileCounter[4] = CPU_CORE2_FREQ;
+            ctrl->profileCounter[5] = CPU_CORE3_FREQ;
+            break;
+        case GPU:
+            ctrl->nProfileCounter = 2;
+            ctrl->profileCounter = new int[ctrl->nProfileCounter];
+            ctrl->profileCounter[0] = GPU_POWER;
+            ctrl->profileCounter[1] = GPU_FREQ;
+            break;
+        case All:
+            ctrl->nProfileCounter = 8;
+            ctrl->profileCounter = new int[ctrl->nProfileCounter];
+            ctrl->profileCounter[0] = CPU_CU0_POWER;
+            ctrl->profileCounter[1] = CPU_CU1_POWER;
+            ctrl->profileCounter[2] = CPU_CORE0_FREQ;
+            ctrl->profileCounter[3] = CPU_CORE1_FREQ;
+            ctrl->profileCounter[4] = CPU_CORE2_FREQ;
+            ctrl->profileCounter[5] = CPU_CORE3_FREQ;
+            ctrl->profileCounter[6] = GPU_POWER;
+            ctrl->profileCounter[7] = GPU_FREQ;
+            break;
+    }
+
     return true;
 }
 
@@ -90,12 +145,22 @@ int main(int argc, char *argv[])
             error = AMDTPwrProfileInitialize(AMDT_PWR_PROFILE_MODE_ONLINE);
             CheckAMDTError(error, strdup("Unable to initialize AMDT driver"));
 
-            error = AMDTPwrEnableAllCounters();
-            CheckAMDTError(error, strdup("Unable to enable AMDT counter"));
+            //error = AMDTPwrSetSampleValueOption(AMDT_PWR_SAMPLE_VALUE_LIST);
+            error = AMDTPwrSetSampleValueOption(AMDT_PWR_SAMPLE_VALUE_INSTANTANEOUS);
+            CheckAMDTError(error, strdup("Unable to set sample value option"));
+
+            for (int i = 0 ; i < ctrl.nProfileCounter ; i ++)
+            {
+                error = AMDTPwrEnableCounter(ctrl.profileCounter[i]);
+                CheckAMDTError(error, strdup("Unable to enable AMDT counter"));
+            }
 
             error = AMDTPwrGetMinimalTimerSamplingPeriod(&minSampleTime);
             CheckAMDTError(error, strdup("Unable to get minimal sampling period"));
-            
+ 
+            error = AMDTPwrSetTimerSamplingPeriod(minSampleTime * 5);
+            CheckAMDTError(error, strdup("Unable to set sampling rate"));
+           
             printf("minimal sampling period %d ms\n", minSampleTime);
         }
 
@@ -110,9 +175,6 @@ int main(int argc, char *argv[])
 
                 FILE *fp = fopen(ctrl.outputFile, "w");
 
-                error = AMDTPwrSetTimerSamplingPeriod(ctrl.intervalTime);
-                CheckAMDTError(error, strdup("Unable to set sampling rate"));
-
                 error = AMDTPwrStartProfiling();
                 CheckAMDTError(error, strdup("Unable to start profiling"));
 
@@ -122,7 +184,7 @@ int main(int argc, char *argv[])
                 printf("start_time: %llu msec\n", start_utime);
                 while (1)
                 {
-                    usleep(ctrl.intervalTime * 2000);
+                    usleep(ctrl.intervalTime * 1000);
                     
                     gettimeofday(&curTime, NULL);
                     cur_utime = curTime.tv_sec * 1000 + curTime.tv_usec / 1000;
