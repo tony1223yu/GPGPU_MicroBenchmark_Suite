@@ -11,6 +11,32 @@
 
 using namespace std;
 
+template <typename T>
+void ShowCLDeviceNumberInfo(cl_device_id device, cl_device_info param, const char *name)
+{
+    T *result;
+    size_t num;
+    cl_int err;
+
+    err = clGetDeviceInfo(device, param, 0, NULL, &num);
+    if (err < 0)
+    {
+        printf("Couldn't get platform info : %d\n", err);
+        exit(1);
+    }
+
+    result = new T[ num/sizeof(T) ];
+
+    err = clGetDeviceInfo(device, param, num, result, NULL);
+    printf("\t%s: ", name);
+
+    for (int i = 0 ; i < num / sizeof(T) ; i ++)
+        printf("%llu ", (unsigned long long int)(result[i]));
+
+    printf("\n");
+    delete [] result;
+}
+
 void ShowCLDeviceStringInfo(cl_device_id device, cl_device_info param, const char *name)
 {
     char *result;
@@ -75,6 +101,9 @@ void GetCLDeviceInfo(cl_device_id device, int index)
     printf("\n");
 
     ShowCLDeviceStringInfo(device, CL_DEVICE_NAME, "Name");
+    ShowCLDeviceNumberInfo <cl_uint> (device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, "Work item dim");
+    ShowCLDeviceNumberInfo <size_t> (device, CL_DEVICE_MAX_WORK_ITEM_SIZES, "Work item size");
+    ShowCLDeviceNumberInfo <size_t> (device, CL_DEVICE_MAX_WORK_GROUP_SIZE, "Work group size");
     ShowCLDeviceStringInfo(device, CL_DEVICE_VENDOR, "Vendor");
     ShowCLDeviceStringInfo(device, CL_DEVICE_VERSION, "Device Version");
     ShowCLDeviceStringInfo(device, CL_DRIVER_VERSION, "Driver Version");
