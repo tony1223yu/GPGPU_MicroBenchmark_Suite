@@ -11,13 +11,13 @@ __kernel void MatrixMultiplication_int(__global int *matrixA, __global int *matr
     {
         localA[lx * localSize + ly] = matrixA[x * matrixSize + i * localSize + ly];
         localB[lx * localSize + ly] = matrixB[(i * localSize + lx) * matrixSize + y];
-        barrier(CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
 
         for (int j = 0 ; j < localSize ; j ++)
         {
             sum += localA[lx * localSize + j] * localB[j * localSize + ly];
         }
-        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
     }
     output[x * matrixSize + y] = sum;
 }
@@ -35,13 +35,13 @@ __kernel void MatrixMultiplication_float(__global float *matrixA, __global float
     {
         localA[lx * localSize + ly] = matrixA[x * matrixSize + i * localSize + ly];
         localB[lx * localSize + ly] = matrixB[(i * localSize + lx) * matrixSize + y];
-        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
 
         for (int j = 0 ; j < localSize ; j ++)
         {
             sum += localA[lx * localSize + j] * localB[j * localSize + ly];
         }
-        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
     }
     output[x * matrixSize + y] = sum;
 }
@@ -59,13 +59,13 @@ __kernel void MatrixMultiplication_double(__global double *matrixA, __global dou
     {
         localA[lx * localSize + ly] = matrixA[x * matrixSize + i * localSize + ly];
         localB[lx * localSize + ly] = matrixB[(i * localSize + lx) * matrixSize + y];
-        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
 
         for (int j = 0 ; j < localSize ; j ++)
         {
             sum += localA[lx * localSize + j] * localB[j * localSize + ly];
         }
-        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
     }
     output[x * matrixSize + y] = sum;
 }
