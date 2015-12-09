@@ -152,31 +152,31 @@ void CommandParser(int argc, char *argv[])
     }
 
     /* Print the setting */
-    fprintf(stdout, "Matrix dimension: %d, %d\n", g_opencl_ctrl.dataSizeH, g_opencl_ctrl.dataSizeW);
-    fprintf(stdout, "Matrix element type: ");
+    fprintf(stderr, "Matrix dimension: %d, %d\n", g_opencl_ctrl.dataSizeH, g_opencl_ctrl.dataSizeW);
+    fprintf(stderr, "Matrix element type: ");
     switch(g_opencl_ctrl.dataType)
     {
         case TYPE_INT:
-            fprintf(stdout, "integer\n");
+            fprintf(stderr, "integer\n");
             g_opencl_ctrl.inputByteA = g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeM * sizeof(int);
             g_opencl_ctrl.inputByteB = g_opencl_ctrl.dataSizeW * g_opencl_ctrl.dataSizeM * sizeof(int);
             g_opencl_ctrl.outputByte = g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW * sizeof(int);
             break;
         case TYPE_FLOAT:
-            fprintf(stdout, "float\n");
+            fprintf(stderr, "float\n");
             g_opencl_ctrl.inputByteA = g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeM * sizeof(float);
             g_opencl_ctrl.inputByteB = g_opencl_ctrl.dataSizeW * g_opencl_ctrl.dataSizeM * sizeof(float);
             g_opencl_ctrl.outputByte = g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW * sizeof(float);
             break;
         case TYPE_DOUBLE:
-            fprintf(stdout, "double\n");
+            fprintf(stderr, "double\n");
             g_opencl_ctrl.inputByteA = g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeM * sizeof(double);
             g_opencl_ctrl.inputByteB = g_opencl_ctrl.dataSizeW * g_opencl_ctrl.dataSizeM * sizeof(double);
             g_opencl_ctrl.outputByte = g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW * sizeof(double);
             break;
     }
-    printf("inputByte = %d %d\n", g_opencl_ctrl.inputByteA, g_opencl_ctrl.inputByteB);
-    printf("outputByte = %d\n", g_opencl_ctrl.outputByte);
+    fprintf(stderr, "inputByte = %d %d\n", g_opencl_ctrl.inputByteA, g_opencl_ctrl.inputByteB);
+    fprintf(stderr, "outputByte = %d\n", g_opencl_ctrl.outputByte);
 }
 
 void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & target_device)
@@ -217,7 +217,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
 
     queryString = (char *)malloc(sizeof(char) * length);
     clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
-    fprintf(stdout, "Device selected: '%s'\n", queryString);
+    fprintf(stderr, "Device selected: '%s'\n", queryString);
 
     /* Free the space */
     free(platforms);
@@ -266,7 +266,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         error = clGetProgramBuildInfo(target_program, device, CL_PROGRAM_BUILD_LOG, logSize + 1, programBuildLog, NULL);
         CHECK_CL_ERROR(error);
 
-        fprintf(stdout, "%s\n", programBuildLog);
+        fprintf(stderr, "%s\n", programBuildLog);
         free(programBuildLog);
         exit(1);
     }
@@ -469,15 +469,15 @@ int main(int argc, char *argv[])
                     for (int i = 0 ; i < g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW ; i ++)
                         if (cpuOutputMatrix[i] != tmpO[i])
                         {
-                            printf("result mismatch! @ %d (%d, %d)\n", i, cpuOutputMatrix[i], tmpO[i]);
+                            fprintf(stderr, "result mismatch! @ %d (%d, %d)\n", i, cpuOutputMatrix[i], tmpO[i]);
                             check = false;
                     //        break;
                         }
 
                     if (check)
-                        printf("result correct :)\n");
+                        fprintf(stderr, "result correct :)\n");
                     else
-                        printf("result incorrect :(\n");
+                        fprintf(stderr, "result incorrect :(\n");
                 }
                 break;
 
@@ -504,15 +504,15 @@ int main(int argc, char *argv[])
                     for (int i = 0 ; i < g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW ; i ++)
                         if (fabs(cpuOutputMatrix[i] - tmpO[i]) > 1e-6)
                         {
-                            printf("result mismatch! (%f, %f)\n", cpuOutputMatrix[i], tmpO[i]);
+                            fprintf(stderr, "result mismatch! (%f, %f)\n", cpuOutputMatrix[i], tmpO[i]);
                             check = false;
                             break;
                         }
 
                     if (check)
-                        printf("result correct :)\n");
+                        fprintf(stderr, "result correct :)\n");
                     else
-                        printf("result incorrect :(\n");
+                        fprintf(stderr, "result incorrect :(\n");
                 }
                 break;
 
@@ -539,15 +539,15 @@ int main(int argc, char *argv[])
                     for (int i = 0 ; i < g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW ; i ++)
                         if (fabs(cpuOutputMatrix[i] - tmpO[i]) > 1e-6)
                         {
-                            fprintf(stdout, "result mismatch! (%lf, %lf)\n", cpuOutputMatrix[i], tmpO[i]);
+                            fprintf(stderr, "result mismatch! (%lf, %lf)\n", cpuOutputMatrix[i], tmpO[i]);
                             check = false;
                             break;
                         }
 
                     if (check)
-                        fprintf(stdout, "result correct :)\n");
+                        fprintf(stderr, "result correct :)\n");
                     else
-                        fprintf(stdout, "result incorrect :(\n");
+                        fprintf(stderr, "result incorrect :(\n");
                 }
                 break;
         }
@@ -571,10 +571,11 @@ int main(int argc, char *argv[])
         start = startTime.tv_sec * 1000000 + startTime.tv_usec;
         end = endTime.tv_sec * 1000000 + endTime.tv_usec;
 
-        fprintf(stdout, "Kernel execution time: %llu ms\n", (end - start) / 1000);
+        fprintf(stderr, "Kernel execution time: %llu ms\n", (end - start) / 1000);
+        fprintf(stdout, "%llu\n", (end - start) * 1000);
     }
 
-    fprintf(stdout, "DONE.\n");
+    fprintf(stderr, "DONE.\n");
 
     return 0;
 }
