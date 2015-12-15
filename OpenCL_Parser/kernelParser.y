@@ -359,7 +359,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
 %type <ptr> declarator direct_declarator /* For char* */
-%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression assignment_operator expression expression_statement selection_statement iteration_statement statement block_item block_item_list compound_statement
+%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression unary_operator conditional_expression assignment_expression assignment_operator expression expression_statement selection_statement iteration_statement statement block_item block_item_list compound_statement
 
 %start program_unit
 %%
@@ -402,18 +402,18 @@ unary_expression
 	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(ADDITION));}
 	| DEC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(SUBTRACTION));}
-	| unary_operator cast_expression {$$ = $2;}
+	| unary_operator cast_expression {$$ = AddToOPList(NULL, $2, $1);}
 	| SIZEOF unary_expression {$$ = $2;}
 	| SIZEOF '(' type_name ')' {$$ = NULL;}
 	;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
+	: '&' {$$ = NULL;}
+	| '*' {$$ = CreateOP(MEMORY);}
+	| '+' {$$ = NULL;}
+	| '-' {$$ = NULL;}
+	| '~' {$$ = NULL;}
+	| '!' {$$ = NULL;}
 	;
 
 cast_expression
@@ -852,11 +852,15 @@ external_declaration
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
     {
-        DebugSTMTList($4, 0);
+        printf("[FUNCTION NAME \'%s\' START]\n", (char*)($2));
+        DebugSTMTList($4, 1);
+        printf("[FUNCTION NAME \'%s\' END]\n\n", (char*)($2));
     }
     | declaration_specifiers declarator compound_statement
     {
-        DebugSTMTList($3, 0);
+        printf("[FUNCTION NAME \'%s\' START]\n", (char*)($2));
+        DebugSTMTList($3, 1);
+        printf("[FUNCTION NAME \'%s\' END]\n\n", (char*)($2));
     }
 	;
 
