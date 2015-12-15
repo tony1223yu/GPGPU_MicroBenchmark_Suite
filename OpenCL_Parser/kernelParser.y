@@ -120,6 +120,12 @@ void GetStatementTypeName(Statement* stmt, char* output)
         case ITERATION_STMT:
             sprintf(output, "%s", "ITERATION");
             break;
+        case IF_STMT:
+            sprintf(output, "%s", "IF");
+            break;
+        case ELSE_STMT:
+            sprintf(output, "%s", "ELSE");
+            break;
     }
 }
 
@@ -148,20 +154,24 @@ void GetOperationTypeName(Operation* op, char* output)
     }
 }
 
-void DebugSTMTList(STMT_List* stmt_list)
+void DebugSTMTList(STMT_List* stmt_list, int order)
 {
     char opType[30];
     char stmtType[30];
+    int i;
     if (stmt_list != NULL && stmt_list->stmt_head != NULL)
     {
         Statement* iterStmt = stmt_list->stmt_head;
         Operation* iterOP;
         while (iterStmt != NULL)
         {
+            for (i = 0 ; i < order ; i ++)
+                printf("\t");
+
             if (iterStmt->type == EXPRESSION_STMT)
             {
-                GetStatementTypeName(iterStmt, stmtType);
-                printf(" [ STMT TYPE %s ]\n", stmtType);
+                //GetStatementTypeName(iterStmt, stmtType);
+                //printf("[ STMT TYPE %s ]\n", stmtType);
                 iterOP = iterStmt->op_list->op_head;
                 while (iterOP != NULL)
                 {
@@ -171,15 +181,11 @@ void DebugSTMTList(STMT_List* stmt_list)
                 }
                 printf("NULL\n");
             }
-            else if (iterStmt->type == ITERATION_STMT)    // recursive call for ITERATION_STMT and SELECTION_STMT
+            else                 // recursive call for ITERATION_STMT, SELECTION_STMT, IF_STMT and ELSE_STMT
             {
                 GetStatementTypeName(iterStmt, stmtType);
-                printf(" [ STMT TYPE %s ]\n", stmtType);
-                DebugSTMTList(iterStmt->stmt_list);
-            }
-            else if (iterStmt->type == SELECTION_STMT)
-            {
-                // TODO
+                printf("[ STMT TYPE %s ]\n", stmtType);
+                DebugSTMTList(iterStmt->stmt_list, order + 1);
             }
 
             iterStmt = iterStmt->next;
@@ -228,7 +234,6 @@ STMT_List* AddToSTMTList(STMT_List* prev, STMT_List* curr)
     if (curr == NULL) return prev;
     if (prev == NULL) return curr;
 
-    //printf("in AddToSTMTList, prev = %p, new = %p, type = %d\n", prev, curr, curr->stmt_head->type);
     if (prev->stmt_tail->type == EXPRESSION_STMT && curr->stmt_head->type == EXPRESSION_STMT)
     {
         prev->stmt_tail->op_list->op_tail->next = curr->stmt_head->op_list->op_head;
@@ -265,14 +270,15 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
     tmp->stmt_list = NULL;
     tmp->op_list = NULL;
 
-    if (type == ITERATION_STMT || type == SELECTION_STMT) // already a stmt
-    {
-        tmp->stmt_list = (STMT_List*)(ptr);
-    }
-    else if (type == EXPRESSION_STMT)
+    if (type == EXPRESSION_STMT)
     {
         tmp->op_list = (OP_List*)(ptr);
     }
+    else                        // ITERATION_STMT, SELECTION_STMT, IF_STMT and ELSE_STMT
+    {
+        tmp->stmt_list = (STMT_List*)(ptr);
+    }
+
     return tmp;
 }
 
@@ -760,7 +766,7 @@ statement
 	: labeled_statement {$$ = NULL;}
 	| compound_statement {$$ = $1;}  // Should not be a statement, return STMT_List*
 	| expression_statement {$$ = CreateSTMTList(CreateSTMT($1, EXPRESSION_STMT));}
-	| selection_statement {$$ = NULL;}
+	| selection_statement {$$ = $1;}
 	| iteration_statement {$$ = $1;} // Statement contains Stmt_List
 	| jump_statement {$$ = NULL;}
 	;
@@ -792,8 +798,17 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement {$$ = $5;}
-	| IF '(' expression ')' statement ELSE statement {$$ = $5;}
+	: IF '(' expression ')' statement
+    {
+        STMT_List* tmp = CreateSTMTList(CreateSTMT($5, IF_STMT));
+        $$ = CreateSTMTList(CreateSTMT(tmp, SELECTION_STMT));
+    }
+	| IF '(' expression ')' statement ELSE statement 
+    {
+        STMT_List* tmp = CreateSTMTList(CreateSTMT($5, IF_STMT));
+        tmp = AddToSTMTList(tmp, CreateSTMTList((CreateSTMT($7, ELSE_STMT))));
+        $$ = CreateSTMTList(CreateSTMT(tmp, SELECTION_STMT));
+    }
 	| SWITCH '(' expression ')' statement {$$ = $5;}
 	;
 
@@ -805,7 +820,7 @@ iteration_statement /* TODO: Add the expression of loop condition and steps into
     {
         STMT_List* step = $7;
         step = AddToSTMTList(step, CreateSTMTList(CreateSTMT($5, EXPRESSION_STMT)));
-        $$ = CreateSTMTList(CreateSTMT($7, ITERATION_STMT));
+        $$ = CreateSTMTList(CreateSTMT(step, ITERATION_STMT));
     }
 	| FOR '(' declaration expression_statement ')' statement {$$ = CreateSTMTList(CreateSTMT($6, ITERATION_STMT));} 
 	| FOR '(' declaration expression_statement expression ')' statement
@@ -837,11 +852,11 @@ external_declaration
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
     {
-        DebugSTMTList($4);
+        DebugSTMTList($4, 0);
     }
     | declaration_specifiers declarator compound_statement
     {
-        DebugSTMTList($3);
+        DebugSTMTList($3, 0);
     }
 	;
 
