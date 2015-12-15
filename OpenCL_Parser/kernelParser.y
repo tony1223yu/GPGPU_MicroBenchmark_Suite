@@ -358,8 +358,14 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <ptr> declarator direct_declarator /* For char* */
-%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression unary_operator conditional_expression assignment_expression assignment_operator expression expression_statement selection_statement iteration_statement statement block_item block_item_list compound_statement
+/* TYPE: (char*) */
+%type <ptr> declarator direct_declarator
+
+/* TYPE: (OP_List*) */
+%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression unary_operator conditional_expression assignment_expression assignment_operator expression expression_statement declaration init_declarator_list init_declarator initializer initializer_list
+
+/* TYPE: (STMT_List*) */
+%type <ptr> selection_statement iteration_statement statement block_item block_item_list compound_statement
 
 %start program_unit
 %%
@@ -513,8 +519,8 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';'
+	: declaration_specifiers ';' {$$ = NULL;}
+	| declaration_specifiers init_declarator_list ';' {$$ = $2;}
 	;
 
 declaration_specifiers
@@ -531,13 +537,13 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator {$$ = $1;}
+	| init_declarator_list ',' init_declarator {$$ = AddToOPList($1, $3, NULL);}
 	;
 
 init_declarator
-	: declarator
-	| declarator '=' initializer
+	: declarator {$$ = NULL;}
+	| declarator '=' initializer {$$ = $3;}
 	;
 
 storage_class_specifier
@@ -736,16 +742,16 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression
-	| '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
+	: assignment_expression {$$ = $1;}
+	| '{' initializer_list '}' {$$ = $2;}
+	| '{' initializer_list ',' '}' {$$ = $2;}
 	;
 
 initializer_list
-	: initializer
-	| designation initializer
-	| initializer_list ',' initializer
-	| initializer_list ',' designation initializer
+	: initializer {$$ = $1;}
+	| designation initializer {$$ = $2;}
+	| initializer_list ',' initializer {$$ = AddToOPList($1, $3, NULL);}
+	| initializer_list ',' designation initializer {$$ = AddToOPList($1, $4, NULL);}
 	;
 
 designation
@@ -783,12 +789,18 @@ compound_statement
 	;
 
 block_item_list
-	: block_item {$$ = $1;}
-	| block_item_list block_item {$$ = AddToSTMTList($1, $2);}
+	: block_item 
+    {
+        $$ = $1;
+    }
+	| block_item_list block_item 
+    {
+        $$ = AddToSTMTList($1, $2);
+    }
 	;
 
 block_item
-	: declaration {$$ = NULL;} /* TODO: expressions in declaration */
+    : declaration {$$ = CreateSTMTList(CreateSTMT($1, EXPRESSION_STMT));} /* TODO: expressions in declaration */
 	| statement {$$ = $1;}
 	;
 
@@ -801,13 +813,17 @@ selection_statement
 	: IF '(' expression ')' statement
     {
         STMT_List* tmp = CreateSTMTList(CreateSTMT($5, IF_STMT));
-        $$ = CreateSTMTList(CreateSTMT(tmp, SELECTION_STMT));
+        tmp = CreateSTMTList(CreateSTMT(tmp, SELECTION_STMT));
+        STMT_List* exp = CreateSTMTList(CreateSTMT($3, EXPRESSION_STMT));
+        $$ = AddToSTMTList(exp, tmp);
     }
 	| IF '(' expression ')' statement ELSE statement 
     {
         STMT_List* tmp = CreateSTMTList(CreateSTMT($5, IF_STMT));
         tmp = AddToSTMTList(tmp, CreateSTMTList((CreateSTMT($7, ELSE_STMT))));
-        $$ = CreateSTMTList(CreateSTMT(tmp, SELECTION_STMT));
+        tmp = CreateSTMTList(CreateSTMT(tmp, SELECTION_STMT));
+        STMT_List* exp = CreateSTMTList(CreateSTMT($3, EXPRESSION_STMT));
+        $$ = AddToSTMTList(exp, tmp);
     }
 	| SWITCH '(' expression ')' statement {$$ = $5;}
 	;
@@ -815,19 +831,41 @@ selection_statement
 iteration_statement /* TODO: Add the expression of loop condition and steps into the STMTList */
 	: WHILE '(' expression ')' statement {$$ = CreateSTMTList(CreateSTMT($5, ITERATION_STMT));}
 	| DO statement WHILE '(' expression ')' ';' {$$ = CreateSTMTList(CreateSTMT($5, ITERATION_STMT));}
-	| FOR '(' expression_statement expression_statement ')' statement {$$ = CreateSTMTList(CreateSTMT($6, ITERATION_STMT));} 
+	| FOR '(' expression_statement expression_statement ')' statement 
+    {
+        STMT_List* tmp = $6;
+        tmp = AddToSTMTList(tmp, CreateSTMTList(CreateSTMT($4, EXPRESSION_STMT)));
+        tmp = CreateSTMTList(CreateSTMT(tmp, ITERATION_STMT));
+        STMT_List* exp = CreateSTMTList(CreateSTMT($3, EXPRESSION_STMT));
+        $$ = AddToSTMTList(exp, tmp);
+
+    } 
 	| FOR '(' expression_statement expression_statement expression ')' statement
     {
-        STMT_List* step = $7;
-        step = AddToSTMTList(step, CreateSTMTList(CreateSTMT($5, EXPRESSION_STMT)));
-        $$ = CreateSTMTList(CreateSTMT(step, ITERATION_STMT));
+        STMT_List* tmp = $7;
+        tmp = AddToSTMTList(tmp, CreateSTMTList(CreateSTMT($5, EXPRESSION_STMT)));
+        tmp = AddToSTMTList(tmp, CreateSTMTList(CreateSTMT($4, EXPRESSION_STMT)));
+        tmp = CreateSTMTList(CreateSTMT(tmp, ITERATION_STMT));
+        STMT_List* exp = CreateSTMTList(CreateSTMT($3, EXPRESSION_STMT));
+        $$ = AddToSTMTList(exp, tmp);
+
     }
-	| FOR '(' declaration expression_statement ')' statement {$$ = CreateSTMTList(CreateSTMT($6, ITERATION_STMT));} 
+	| FOR '(' declaration expression_statement ')' statement 
+    {
+        STMT_List* tmp = $6;
+        tmp = AddToSTMTList(tmp, CreateSTMTList(CreateSTMT($4, EXPRESSION_STMT)));
+        tmp = CreateSTMTList(CreateSTMT(tmp, ITERATION_STMT)); 
+        STMT_List* exp = CreateSTMTList(CreateSTMT($3, EXPRESSION_STMT));
+        $$ = AddToSTMTList(exp, tmp);
+    }
 	| FOR '(' declaration expression_statement expression ')' statement
     {
-        STMT_List* step = $7;
-        step = AddToSTMTList(step, CreateSTMTList(CreateSTMT($5, EXPRESSION_STMT)));
-        $$ = CreateSTMTList(CreateSTMT(step, ITERATION_STMT));
+        STMT_List* tmp = $7;
+        tmp = AddToSTMTList(tmp, CreateSTMTList(CreateSTMT($5, EXPRESSION_STMT)));
+        tmp = AddToSTMTList(tmp, CreateSTMTList(CreateSTMT($4, EXPRESSION_STMT)));
+        tmp = CreateSTMTList(CreateSTMT(tmp, ITERATION_STMT));
+        STMT_List* exp = CreateSTMTList(CreateSTMT($3, EXPRESSION_STMT));
+        $$ = AddToSTMTList(exp, tmp);
     } 
 	;
 
