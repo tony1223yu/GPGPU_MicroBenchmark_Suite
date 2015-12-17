@@ -64,6 +64,7 @@ struct OP_List
 {
     Operation* op_head;
     Operation* op_tail;
+    OP_List* post_stmt_op_list;
 };
 
 
@@ -82,13 +83,6 @@ struct Operation
 {
     int id; // ID of current statement
     OP_TYPE type;
-/*
-    union
-    {
-        COMPUTE_INSTRUCTION compute_inst;
-        MEMORY_INSTRUCTION memory_inst;
-    } description;
-*/
 
     DEP* issue_dep; // pointer to the stmt that current stmt need to wait becuase of issue dependency
     DEP* structural_dep; // pointer to the stmt that current stmt need to wait becuase of structural dependency

@@ -3,6 +3,19 @@
 #include <stdlib.h>
 #include "kernelParser.h"
 
+void initial();
+void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency);
+PROGRAM* CreateProgram(FUNCTION* func_head, FUNCTION* func_tail);
+Operation* CreateOP(OP_TYPE type);
+void GetStatementTypeName(Statement* stmt, char* output);
+void DebugSTMTList(STMT_List* stmt_list, int order);
+void DebugOPList(OP_List* list);
+STMT_List* CreateSTMTList(Statement* newSTMT);
+STMT_List* AddToSTMTList(STMT_List* prev, STMT_List* curr);
+Statement* CreateSTMT(void* ptr, STMT_TYPE type);
+OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP);
+OP_List* AddPostStmtOP(OP_List* left, Operation* newOP);
+
 void initial()
 {
     prog = NULL;
@@ -272,7 +285,9 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
 
     if (type == EXPRESSION_STMT)
     {
-        tmp->op_list = (OP_List*)(ptr);
+        OP_List* list = (OP_List*)(ptr);
+        list = AddToOPList(list, list->post_stmt_op_list, NULL);
+        tmp->op_list = list;
     }
     else                        // ITERATION_STMT, SELECTION_STMT, IF_STMT and ELSE_STMT
     {
@@ -292,6 +307,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
             tmp = (OP_List*)malloc(sizeof(OP_List));
             tmp->op_head = newOP;
             tmp->op_tail = newOP;
+            tmp->post_stmt_op_list = NULL;
         }
         return tmp;
     }
@@ -299,9 +315,17 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
     {
         if (newOP != NULL)
         {
-            MakeDependency(newOP, left->op_tail, ISSUE_DEP, 1);        
-            left->op_tail->next = newOP;
-            left->op_tail = newOP;
+            if (left->op_head != NULL)
+            {
+                MakeDependency(newOP, left->op_tail, ISSUE_DEP, 1);        
+                left->op_tail->next = newOP;
+                left->op_tail = newOP;
+            }
+            else
+            {
+                left->op_head = newOP;
+                left->op_tail = newOP;
+            }
         }
         return left;
     }
@@ -309,27 +333,89 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
     {
         if (newOP != NULL)
         {
-            MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);        
-            right->op_tail->next = newOP;
-            right->op_tail = newOP;
+            if (right->op_head != NULL)
+            {
+                MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);        
+                right->op_tail->next = newOP;
+                right->op_tail = newOP;
+            }
+            else
+            {
+                right->op_head = newOP;
+                right->op_tail = newOP;
+            }
         }
         return right;
     }
     else // merge two list
     {
-        MakeDependency(right->op_head, left->op_tail, ISSUE_DEP, 1);
-        left->op_tail->next = right->op_head;
-        if (newOP != NULL)
+        if ((left->op_head != NULL) && (right->op_head != NULL))
         {
-            MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);
-            right->op_tail->next = newOP;
-            left->op_tail = newOP;
+            MakeDependency(right->op_head, left->op_tail, ISSUE_DEP, 1);
+            left->op_tail->next = right->op_head;
+            if (newOP != NULL)
+            {
+                MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);
+                right->op_tail->next = newOP;
+                left->op_tail = newOP;
+            }
+            else
+            {
+                left->op_tail = right->op_tail;
+            }
+            left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
+            free (right);
+            return left;
+        }
+        else if (left->op_head == NULL)
+        {
+            right->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
+            if (newOP != NULL)
+            {
+                MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);
+                right->op_tail->next = newOP;
+                right->op_tail = newOP;
+            }
+            return right;
+        }
+        else if (right->op_head == NULL)
+        {
+            left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
+            if (newOP != NULL)
+            {
+                MakeDependency(newOP, left->op_tail, ISSUE_DEP, 1);
+                left->op_tail->next = newOP;
+                left->op_tail = newOP;
+            }
+            return left;
         }
         else
         {
-            left->op_tail = right->op_tail;
+            left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
+            if (newOP != NULL)
+            {
+                left->op_head = newOP;
+                left->op_tail = newOP;
+            }
+            return left;
         }
-        free (right);
+    }
+}
+
+OP_List* AddPostStmtOP(OP_List* left, Operation* newOP)
+{
+    if (left == NULL)
+    {
+        OP_List* tmp;
+        tmp = (OP_List*)malloc(sizeof(OP_List));
+        tmp->op_head = NULL;
+        tmp->op_tail = NULL;
+        tmp->post_stmt_op_list = AddToOPList(tmp->post_stmt_op_list, NULL, newOP);
+        return tmp;
+    }
+    else
+    {
+        left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, NULL, newOP);
         return left;
     }
 }
@@ -393,8 +479,8 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '.' IDENTIFIER {$$ = $1;}
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;}
-	| postfix_expression INC_OP {$$ = AddToOPList(NULL, $1, CreateOP(ADDITION));} /* TODO: Add to the end of the stmt */
-	| postfix_expression DEC_OP {$$ = AddToOPList(NULL, $1, CreateOP(SUBTRACTION));} /* TODO: Add to the end of the stmt */
+	| postfix_expression INC_OP {$$ = AddPostStmtOP($1, CreateOP(ADDITION));}
+	| postfix_expression DEC_OP {$$ = AddPostStmtOP($1, CreateOP(SUBTRACTION));}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;}
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;}
 	;
