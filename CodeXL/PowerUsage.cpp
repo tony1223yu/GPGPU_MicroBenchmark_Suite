@@ -121,6 +121,7 @@ inline void CheckAMDTError(AMDTResult error, char *msg)
     if (AMDT_STATUS_OK != error)
     {
         printf("Error: %s: %u\n", msg, error);
+        AMDTPwrProfileClose();
         free(msg);
         exit(1);
     }
@@ -217,6 +218,9 @@ int main(int argc, char *argv[])
                 }
                 printf("end_time: %llu msec\n", cur_utime);
                 fclose(fp);
+
+                AMDTPwrProfileClose();
+                CheckAMDTError(error, strdup("Unable to stop profiling"));
             }
         }
     }
