@@ -6,7 +6,7 @@
 void initial();
 void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency);
 PROGRAM* CreateProgram(FUNCTION* func_head, FUNCTION* func_tail);
-Operation* CreateOP(OP_TYPE type);
+Operation* CreateOP(OP_KIND kind);
 void GetStatementTypeName(Statement* stmt, char* output);
 void DebugSTMTList(STMT_List* stmt_list, int order);
 void DebugOPList(OP_List* list);
@@ -19,8 +19,6 @@ OP_List* AddPostStmtOP(OP_List* left, Operation* newOP);
 void initial()
 {
     prog = NULL;
-    curFunction_h = NULL;
-    curFunction_t = NULL;
 }
 
 void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency)
@@ -107,12 +105,12 @@ void CreateFunction(char *name, STMT_GROUP* group_head, STMT_GROUP* group_tail)
 }
 */
 
-Operation* CreateOP(OP_TYPE type)
+Operation* CreateOP(OP_KIND kind)
 {
     Operation* tmp;
     //fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
     tmp = (Operation*)malloc(sizeof(Operation));
-    tmp->type = type;
+    tmp->kind = kind;
     tmp->issue_dep = NULL;
     tmp->structural_dep = NULL;
     tmp->data_dep = NULL;
@@ -144,24 +142,24 @@ void GetStatementTypeName(Statement* stmt, char* output)
 
 void GetOperationTypeName(Operation* op, char* output)
 {
-    switch(op -> type)
+    switch(op -> kind)
     {
-        case ADDITION:
+        case ADDITION_OP:
             sprintf(output, "%s", "Add");
             break;
-        case SUBTRACTION:
+        case SUBTRACTION_OP:
             sprintf(output, "%s", "Sub");
             break;
-        case MULTIPLICATION:
+        case MULTIPLICATION_OP:
             sprintf(output, "%s", "Mul");
             break;
-        case DIVISION:
+        case DIVISION_OP:
             sprintf(output, "%s", "Div");
             break;
-        case MODULAR:
+        case MODULAR_OP:
             sprintf(output, "%s", "Modular");
             break;
-        case MEMORY:
+        case MEMORY_OP:
             sprintf(output, "%s", "Memory");
             break;
     }
@@ -474,13 +472,13 @@ primary_expression
 /* function call here */
 postfix_expression
 	: primary_expression {$$ = $1;}
-	| postfix_expression '[' expression ']' {$$ = AddToOPList($1, $3, CreateOP(MEMORY));}
+	| postfix_expression '[' expression ']' {$$ = AddToOPList($1, $3, CreateOP(MEMORY_OP));}
 	| postfix_expression '(' ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '.' IDENTIFIER {$$ = $1;}
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;}
-	| postfix_expression INC_OP {$$ = AddPostStmtOP($1, CreateOP(ADDITION));}
-	| postfix_expression DEC_OP {$$ = AddPostStmtOP($1, CreateOP(SUBTRACTION));}
+	| postfix_expression INC_OP {$$ = AddPostStmtOP($1, CreateOP(ADDITION_OP));}
+	| postfix_expression DEC_OP {$$ = AddPostStmtOP($1, CreateOP(SUBTRACTION_OP));}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;}
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;}
 	;
@@ -492,8 +490,8 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression {$$ = $1;}
-	| INC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(ADDITION));}
-	| DEC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(SUBTRACTION));}
+	| INC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(ADDITION_OP));}
+	| DEC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(SUBTRACTION_OP));}
 	| unary_operator cast_expression {$$ = AddToOPList(NULL, $2, $1);}
 	| SIZEOF unary_expression {$$ = $2;}
 	| SIZEOF '(' type_name ')' {$$ = NULL;}
@@ -501,7 +499,7 @@ unary_expression
 
 unary_operator
 	: '&' {$$ = NULL;}
-	| '*' {$$ = CreateOP(MEMORY);}
+	| '*' {$$ = CreateOP(MEMORY_OP);}
 	| '+' {$$ = NULL;}
 	| '-' {$$ = NULL;}
 	| '~' {$$ = NULL;}
@@ -515,15 +513,15 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression {$$ = $1;}
-	| multiplicative_expression '*' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MULTIPLICATION));}
-	| multiplicative_expression '/' cast_expression {$$ = AddToOPList($1, $3, CreateOP(DIVISION));}
-	| multiplicative_expression '%' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MODULAR));}
+	| multiplicative_expression '*' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MULTIPLICATION_OP));}
+	| multiplicative_expression '/' cast_expression {$$ = AddToOPList($1, $3, CreateOP(DIVISION_OP));}
+	| multiplicative_expression '%' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MODULAR_OP));}
 	;
 
 additive_expression
 	: multiplicative_expression {$$ = $1;}
-	| additive_expression '+' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(ADDITION));}
-	| additive_expression '-' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(SUBTRACTION));}
+	| additive_expression '+' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(ADDITION_OP));}
+	| additive_expression '-' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(SUBTRACTION_OP));}
 	;
 
 shift_expression
@@ -583,11 +581,11 @@ assignment_expression
 
 assignment_operator
 	: '=' {$$ = NULL;}
-	| MUL_ASSIGN {$$ = CreateOP(MULTIPLICATION);}
-	| DIV_ASSIGN {$$ = CreateOP(DIVISION);}
-	| MOD_ASSIGN {$$ = CreateOP(MODULAR);}
-	| ADD_ASSIGN {$$ = CreateOP(ADDITION);}
-	| SUB_ASSIGN {$$ = CreateOP(SUBTRACTION);}
+	| MUL_ASSIGN {$$ = CreateOP(MULTIPLICATION_OP);}
+	| DIV_ASSIGN {$$ = CreateOP(DIVISION_OP);}
+	| MOD_ASSIGN {$$ = CreateOP(MODULAR_OP);}
+	| ADD_ASSIGN {$$ = CreateOP(ADDITION_OP);}
+	| SUB_ASSIGN {$$ = CreateOP(SUBTRACTION_OP);}
 	| LEFT_ASSIGN {$$ = NULL;}
 	| RIGHT_ASSIGN {$$ = NULL;}
 	| AND_ASSIGN {$$ = NULL;}

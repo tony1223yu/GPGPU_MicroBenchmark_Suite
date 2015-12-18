@@ -9,12 +9,11 @@ typedef struct PROGRAM PROGRAM;
 typedef struct Statement Statement;
 typedef struct OP_List OP_List;
 typedef enum OP_TYPE OP_TYPE;
+typedef enum OP_KIND OP_KIND;
 typedef enum STMT_TYPE STMT_TYPE;
 typedef enum DEP_TYPE DEP_TYPE;
 
 PROGRAM* prog;
-FUNCTION *curFunction_h, *curFunction_t;
-Operation *prevOP;
 
 enum DEP_TYPE
 {
@@ -34,23 +33,17 @@ enum STMT_TYPE
 
 enum OP_TYPE
 {
-    INT_ADDITION = 0,
-    INT_MULTIPLICATION,
-    INT_DIVISION,
-    FLOAT_ADDITION,
-    FLOAT_MULTIPLICATION,
-    FLOAT_DIVISION,
-    DOUBLE_ADDITION,
-    DOUBLE_MULTIPLICATION,
-    DOUBLE_DIVISION,
-    MEMORY_LOAD,
-    MEMORY_STORE,
-    ADDITION = 1000,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    MODULAR,
-    MEMORY
+    INT_TYPE = 0
+};
+
+enum OP_KIND
+{
+    ADDITION_OP = 0,
+    SUBTRACTION_OP,
+    MULTIPLICATION_OP,
+    DIVISION_OP,
+    MODULAR_OP,
+    MEMORY_OP
 };
 
 struct DEP
@@ -82,6 +75,7 @@ struct Statement
 struct Operation
 {
     int id; // ID of current statement
+    OP_KIND kind;
     OP_TYPE type;
 
     DEP* issue_dep; // pointer to the stmt that current stmt need to wait becuase of issue dependency
