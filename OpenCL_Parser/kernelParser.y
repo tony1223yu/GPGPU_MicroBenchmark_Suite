@@ -111,6 +111,7 @@ Operation* CreateOP(OP_KIND kind)
     //fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
     tmp = (Operation*)malloc(sizeof(Operation));
     tmp->kind = kind;
+    tmp->type = NONE_TYPE;
     tmp->issue_dep = NULL;
     tmp->structural_dep = NULL;
     tmp->data_dep = NULL;
@@ -295,6 +296,7 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
     return tmp;
 }
 
+//TODO type
 OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
 {
     if ((left == NULL) && (right == NULL))

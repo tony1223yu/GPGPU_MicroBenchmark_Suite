@@ -33,7 +33,57 @@ enum STMT_TYPE
 
 enum OP_TYPE
 {
-    INT_TYPE = 0
+    NONE_TYPE = 0,
+    CHAR_TYPE,
+    CHAR2_TYPE,
+    CHAR4_TYPE,
+    CHAR8_TYPE,
+    CHAR16_TYPE,
+    UCHAR_TYPE,
+    UCHAR2_TYPE,
+    UCHAR4_TYPE,
+    UCHAR8_TYPE,
+    UCHAR16_TYPE,
+    SHORT_TYPE,
+    SHORT2_TYPE,
+    SHORT4_TYPE,
+    SHORT8_TYPE,
+    SHORT16_TYPE,
+    USHORT_TYPE,
+    USHORT2_TYPE,
+    USHORT4_TYPE,
+    USHORT8_TYPE,
+    USHORT16_TYPE,
+    INT_TYPE,
+    INT2_TYPE,
+    INT4_TYPE,
+    INT8_TYPE,
+    INT16_TYPE,
+    UINT_TYPE,
+    UINT2_TYPE,
+    UINT4_TYPE,
+    UINT8_TYPE,
+    UINT16_TYPE,
+    LONG_TYPE,
+    LONG2_TYPE,
+    LONG4_TYPE,
+    LONG8_TYPE,
+    LONG16_TYPE,
+    ULONG_TYPE,
+    ULONG2_TYPE,
+    ULONG4_TYPE,
+    ULONG8_TYPE,
+    ULONG16_TYPE,
+    FLOAT_TYPE,
+    FLOAT2_TYPE,
+    FLOAT4_TYPE,
+    FLOAT8_TYPE,
+    FLOAT16_TYPE,
+    DOUBLE_TYPE,
+    DOUBLE2_TYPE,
+    DOUBLE4_TYPE,
+    DOUBLE8_TYPE,
+    DOUBLE16_TYPE,
 };
 
 enum OP_KIND
@@ -58,6 +108,7 @@ struct OP_List
     Operation* op_head;
     Operation* op_tail;
     OP_List* post_stmt_op_list;
+    OP_TYPE curr_type;
 };
 
 
