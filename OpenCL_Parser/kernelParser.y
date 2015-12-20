@@ -2,23 +2,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "kernelParser.h"
+#include "symbolTable.h"
 
 void initial();
-void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency);
-PROGRAM* CreateProgram(FUNCTION* func_head, FUNCTION* func_tail);
-Operation* CreateOP(OP_KIND kind);
-void GetStatementTypeName(Statement* stmt, char* output);
-void DebugSTMTList(STMT_List* stmt_list, int order);
-void DebugOPList(OP_List* list);
-STMT_List* CreateSTMTList(Statement* newSTMT);
-STMT_List* AddToSTMTList(STMT_List* prev, STMT_List* curr);
-Statement* CreateSTMT(void* ptr, STMT_TYPE type);
-OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP);
-OP_List* AddPostStmtOP(OP_List* left, Operation* newOP);
+void MakeDependency(Operation*, Operation*, DEP_TYPE, unsigned long long int);
+PROGRAM* CreateProgram(FUNCTION*, FUNCTION*);
+void ReleaseOP(Operation*);
+Operation* CreateOP(OP_KIND);
+void GetStatementTypeName(Statement*, char*);
+void ReleaseSTMTList(STMT_List*);
+void DebugSTMTList(STMT_List*, int);
+void DebugOPList(OP_List*);
+STMT_List* CreateSTMTList(Statement*);
+STMT_List* AddToSTMTList(STMT_List*, STMT_List*);
+void ReleaseSTMT(Statement*);
+Statement* CreateSTMT(void*, STMT_TYPE);
+void ReleaseOPList(OP_List*);
+OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
+OP_List* AddPostStmtOP(OP_List*, Operation*);
+
+extern PROGRAM* prog;
+extern SymbolTable* symTable;
 
 void initial()
 {
     prog = NULL;
+    symTable = NULL;
 }
 
 void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency)
@@ -117,6 +126,19 @@ Operation* CreateOP(OP_KIND kind)
     tmp->data_dep = NULL;
     tmp->next = NULL;
     return tmp;
+}
+
+void ReleaseOP(Operation* op)
+{
+    if (!op) return;
+    if (op->issue_dep)
+        free (op->issue_dep);
+    if (op->structural_dep)
+        free (op->structural_dep);
+    if (op->data_dep)
+        free (op->data_dep);
+
+    free (op);
 }
 
 void GetStatementTypeName(Statement* stmt, char* output)
@@ -227,9 +249,27 @@ void DebugOPList(OP_List* list)
     }
 }
 
+void ReleaseSTMTList(STMT_List* stmt_list)
+{
+    Statement* curr;
+    Statement* next;
+    if (!stmt_list) return;
+    if (!stmt_list->stmt_head) return;
+    
+    curr = stmt_list->stmt_head;
+    next = stmt_list->stmt_head->next;
+    while (curr)
+    {
+        ReleaseSTMT(curr);
+        curr = next;
+        if (next)
+            next = next->next;
+    }
+}
+
 STMT_List* CreateSTMTList(Statement* newSTMT)
 {
-    if (newSTMT == NULL)
+    if (!newSTMT)
         return NULL;
 
     STMT_List* tmp;
@@ -270,6 +310,18 @@ STMT_List* AddToSTMTList(STMT_List* prev, STMT_List* curr)
     }
 }
 
+void ReleaseSTMT(Statement* stmt)
+{
+    if (!stmt) return;
+
+    if (stmt->stmt_list)
+        ReleaseSTMTList(stmt->stmt_list);
+    if (stmt->op_list)
+        ReleaseOPList(stmt->op_list);
+
+    free (stmt);
+}
+
 Statement* CreateSTMT(void* ptr, STMT_TYPE type)
 {
     if (ptr == NULL)
@@ -286,6 +338,7 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
     {
         OP_List* list = (OP_List*)(ptr);
         list = AddToOPList(list, list->post_stmt_op_list, NULL);
+        list->post_stmt_op_list = NULL;
         tmp->op_list = list;
     }
     else                        // ITERATION_STMT, SELECTION_STMT, IF_STMT and ELSE_STMT
@@ -294,6 +347,25 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
     }
 
     return tmp;
+}
+
+void ReleaseOPList(OP_List* op_list)
+{
+    Operation* curr;
+    Operation* next;
+    if (!op_list) return; 
+    if (!op_list->op_head) return;
+
+    curr = op_list->op_head;
+    next = op_list->op_head->next;
+
+    while (curr)
+    {
+        ReleaseOP(curr);
+        curr = next;
+        if (next)
+            next = next->next;
+    }
 }
 
 //TODO type
@@ -978,12 +1050,14 @@ function_definition
     {
         printf("[FUNCTION NAME \'%s\' START]\n", (char*)($2));
         DebugSTMTList($4, 1);
+        ReleaseSTMTList($4);
         printf("[FUNCTION NAME \'%s\' END]\n\n", (char*)($2));
     }
     | declaration_specifiers declarator compound_statement
     {
         printf("[FUNCTION NAME \'%s\' START]\n", (char*)($2));
         DebugSTMTList($3, 1);
+        ReleaseSTMTList($3);
         printf("[FUNCTION NAME \'%s\' END]\n\n", (char*)($2));
     }
 	;

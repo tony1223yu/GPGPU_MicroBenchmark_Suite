@@ -4,6 +4,7 @@
 extern int  yyparse();
 extern void initial();
 extern FILE *yyin;
+extern PROGRAM* prog;
 
 int main(int argc, char *argv[])
 {
@@ -23,4 +24,6 @@ int main(int argc, char *argv[])
     initial();
     yyparse();
     fclose(fp);
+
+    //ReleaseParseResult(prog);
 }
