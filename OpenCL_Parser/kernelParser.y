@@ -20,6 +20,8 @@ Statement* CreateSTMT(void*, STMT_TYPE);
 void ReleaseOPList(OP_List*);
 OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
 OP_List* AddPostStmtOP(OP_List*, Operation*);
+Decl_Node* AddDeclNode(Decl_Node*, Decl_Node*);
+Decl_Node* MakeDeclNode(Identifier*, OP_List*);
 
 extern PROGRAM* prog;
 extern SymbolTable* symTable;
@@ -678,7 +680,10 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' {$$ = NULL;}
-	| declaration_specifiers init_declarator_list ';' {$$ = $2;}
+	| declaration_specifiers init_declarator_list ';' 
+    {
+        $$ = $2;
+    }
 	;
 
 declaration_specifiers

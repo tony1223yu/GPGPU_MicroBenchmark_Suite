@@ -8,6 +8,9 @@ typedef struct FUNCTION FUNCTION;
 typedef struct PROGRAM PROGRAM;
 typedef struct Statement Statement;
 typedef struct OP_List OP_List;
+typedef struct Identifier Identifier;
+typedef struct Identifier_List Identifier_List;
+typedef struct Decl_Node Decl_Node;
 typedef enum OP_TYPE OP_TYPE;
 typedef enum OP_KIND OP_KIND;
 typedef enum STMT_TYPE STMT_TYPE;
@@ -102,6 +105,18 @@ struct DEP
     unsigned long long int latency;
 };
 
+struct Identifier
+{
+    char* name;
+    Identifier* next;
+};
+
+struct Identifier_List
+{
+    Identifier* head;
+    Identifier* tail;
+};
+
 /* Add post-statement operation? */
 struct OP_List
 {
@@ -111,6 +126,11 @@ struct OP_List
     OP_TYPE curr_type;
 };
 
+struct Decl_Node
+{
+    Identifier* IDs;
+    OP_List* OPs;
+};
 
 /* Add pre-statement expression? */
 struct Statement

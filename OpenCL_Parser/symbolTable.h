@@ -18,6 +18,7 @@ struct SymbolTableEntry
     OP_TYPE identifier_type;
     char* identifier_name;
     SymbolTableEntry* next;
+    Operation* OP;
 };
 
 struct SymbolTable
@@ -75,6 +76,7 @@ void AddSymbolEntry(OP_TYPE type, char* name)
     SymbolTableEntry *tmp = (SymbolTableEntry *)malloc(sizeof(SymbolTableEntry));
     tmp->identifier_type = type;
     tmp->identifier_name = name;
+    tmp->OP = NULL;
     tmp->next = NULL;
 
     if (currLevel->entry_head)
