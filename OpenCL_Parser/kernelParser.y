@@ -10,6 +10,7 @@ PROGRAM* CreateProgram(FUNCTION*, FUNCTION*);
 void ReleaseOP(Operation*);
 Operation* CreateOP(OP_KIND);
 void GetStatementTypeName(Statement*, char*);
+void GetOperationDescriptor(Operation*, char*, char*);
 void ReleaseSTMTList(STMT_List*);
 void DebugSTMTList(STMT_List*, int);
 void DebugOPList(OP_List*);
@@ -19,17 +20,27 @@ void ReleaseSTMT(Statement*);
 Statement* CreateSTMT(void*, STMT_TYPE);
 void ReleaseOPList(OP_List*);
 OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
-OP_List* AddPostStmtOP(OP_List*, Operation*);
+OP_List* CreateEmptyOPList(OP_List*, OP_TYPE);
 Decl_Node* AddDeclNode(Decl_Node*, Decl_Node*);
-Decl_Node* MakeDeclNode(Identifier*, OP_List*);
+Decl_Node* MakeDeclNode(ID_List*, OP_List*);
+Identifier* CreateIdentifier(char*);
+ID_List* CreateIDList(Identifier*);
+ID_List* AddToIDList(ID_List*, ID_List*);
+OP_TYPE MixType(OP_TYPE, OP_TYPE);
 
 extern PROGRAM* prog;
 extern SymbolTable* symTable;
 
+OP_TYPE MixType(OP_TYPE left, OP_TYPE right)
+{
+    return ((left > right) ? left : right);
+}
+
 void initial()
 {
     prog = NULL;
-    symTable = NULL;
+    symTable = CreateSymbolTable();
+    CreateSymbolTableLevel();
 }
 
 void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency)
@@ -165,33 +176,99 @@ void GetStatementTypeName(Statement* stmt, char* output)
     }
 }
 
-void GetOperationTypeName(Operation* op, char* output)
+void GetOperationDescriptor(Operation* op, char* outputKind, char* outputType)
 {
     switch(op -> kind)
     {
         case ADDITION_OP:
-            sprintf(output, "%s", "Add");
+            sprintf(outputKind, "add");
             break;
         case SUBTRACTION_OP:
-            sprintf(output, "%s", "Sub");
+            sprintf(outputKind, "sub");
             break;
         case MULTIPLICATION_OP:
-            sprintf(output, "%s", "Mul");
+            sprintf(outputKind, "mul");
             break;
         case DIVISION_OP:
-            sprintf(output, "%s", "Div");
+            sprintf(outputKind, "div");
             break;
         case MODULAR_OP:
-            sprintf(output, "%s", "Modular");
+            sprintf(outputKind, "modular");
             break;
         case MEMORY_OP:
-            sprintf(output, "%s", "Memory");
+            sprintf(outputKind, "memory");
             break;
+        case NONE_OP:
+            sprintf(outputKind, "none");
+            break;
+        default:
+            fprintf(stderr, "Unrecognized operation kind\n");
+            break;
+    }
+
+    switch(op->type)
+    {
+        case NONE_TYPE: sprintf(outputType, "none"); break;
+        case BOOL_TYPE: sprintf(outputType, "bool"); break;
+        case HALF_TYPE: sprintf(outputType, "half"); break;
+        case VOID_TYPE: sprintf(outputType, "void"); break;
+        case CHAR_TYPE: sprintf(outputType, "char"); break;
+        case CHAR2_TYPE: sprintf(outputType, "char2"); break;
+        case CHAR4_TYPE: sprintf(outputType, "char4"); break;
+        case CHAR8_TYPE: sprintf(outputType, "char8"); break;
+        case CHAR16_TYPE: sprintf(outputType, "char16"); break;
+        case UCHAR_TYPE: sprintf(outputType, "uchar"); break;
+        case UCHAR2_TYPE: sprintf(outputType, "uchar2"); break;
+        case UCHAR4_TYPE: sprintf(outputType, "uchar4"); break;
+        case UCHAR8_TYPE: sprintf(outputType, "uchar8"); break;
+        case UCHAR16_TYPE: sprintf(outputType, "uchar16"); break;
+        case SHORT_TYPE: sprintf(outputType, "short"); break;
+        case SHORT2_TYPE: sprintf(outputType, "short2"); break;
+        case SHORT4_TYPE: sprintf(outputType, "short4"); break;
+        case SHORT8_TYPE: sprintf(outputType, "short8"); break;
+        case SHORT16_TYPE: sprintf(outputType, "short16"); break;
+        case USHORT_TYPE: sprintf(outputType, "ushort"); break;
+        case USHORT2_TYPE: sprintf(outputType, "ushort2"); break;
+        case USHORT4_TYPE: sprintf(outputType, "ushort4"); break;
+        case USHORT8_TYPE: sprintf(outputType, "ushort8"); break;
+        case USHORT16_TYPE: sprintf(outputType, "ushort16"); break;
+        case INT_TYPE: sprintf(outputType, "int"); break;
+        case INT2_TYPE: sprintf(outputType, "int2"); break;
+        case INT4_TYPE: sprintf(outputType, "int4"); break;
+        case INT8_TYPE: sprintf(outputType, "int8"); break;
+        case INT16_TYPE: sprintf(outputType, "int16"); break;
+        case UINT_TYPE: sprintf(outputType, "uint"); break;
+        case UINT2_TYPE: sprintf(outputType, "uint2"); break;
+        case UINT4_TYPE: sprintf(outputType, "uint4"); break;
+        case UINT8_TYPE: sprintf(outputType, "uint8"); break;
+        case UINT16_TYPE: sprintf(outputType, "uint16"); break;
+        case LONG_TYPE: sprintf(outputType, "long"); break;
+        case LONG2_TYPE: sprintf(outputType, "long2"); break;
+        case LONG4_TYPE: sprintf(outputType, "long4"); break;
+        case LONG8_TYPE: sprintf(outputType, "long8"); break;
+        case LONG16_TYPE: sprintf(outputType, "long16"); break;
+        case ULONG_TYPE: sprintf(outputType, "ulong"); break;
+        case ULONG2_TYPE: sprintf(outputType, "ulong2"); break;
+        case ULONG4_TYPE: sprintf(outputType, "ulong4"); break;
+        case ULONG8_TYPE: sprintf(outputType, "ulong8"); break;
+        case ULONG16_TYPE: sprintf(outputType, "ulong16"); break;
+        case FLOAT_TYPE: sprintf(outputType, "float"); break;
+        case FLOAT2_TYPE: sprintf(outputType, "float2"); break;
+        case FLOAT4_TYPE: sprintf(outputType, "float4"); break;
+        case FLOAT8_TYPE: sprintf(outputType, "float8"); break;
+        case FLOAT16_TYPE: sprintf(outputType, "float16"); break;
+        case DOUBLE_TYPE: sprintf(outputType, "double"); break;
+        case DOUBLE2_TYPE: sprintf(outputType, "double2"); break;
+        case DOUBLE4_TYPE: sprintf(outputType, "double4"); break;
+        case DOUBLE8_TYPE: sprintf(outputType, "double8"); break;
+        case DOUBLE16_TYPE: sprintf(outputType, "double16"); break;
+        default: fprintf(stderr, "Unrecognized operation type\n");
     }
 }
 
 void DebugSTMTList(STMT_List* stmt_list, int order)
 {
+    char opKind[30];
     char opType[30];
     char stmtType[30];
     int i;
@@ -206,13 +283,11 @@ void DebugSTMTList(STMT_List* stmt_list, int order)
 
             if (iterStmt->type == EXPRESSION_STMT)
             {
-                //GetStatementTypeName(iterStmt, stmtType);
-                //printf("[ STMT TYPE %s ]\n", stmtType);
                 iterOP = iterStmt->op_list->op_head;
                 while (iterOP != NULL)
                 {
-                    GetOperationTypeName(iterOP, opType);
-                    printf("%s -> ", opType);
+                    GetOperationDescriptor(iterOP, opKind, opType);
+                    printf("%s_%s -> ", opType, opKind);
                     iterOP = iterOP->next;
                 }
                 printf("NULL\n");
@@ -223,12 +298,13 @@ void DebugSTMTList(STMT_List* stmt_list, int order)
                 printf("[ STMT TYPE %s ]\n", stmtType);
                 DebugSTMTList(iterStmt->stmt_list, order + 1);
             }
-
             iterStmt = iterStmt->next;
         }
     }
     else
     {
+        for (i = 0 ; i < order ; i ++)
+            printf("\t");
         printf("STMT is NULL\n");
     }
 }
@@ -249,6 +325,66 @@ void DebugOPList(OP_List* list)
     {
         printf("List is NULL\n");
     }
+}
+
+Identifier* CreateIdentifier(char* name)
+{
+    Identifier* tmp = (Identifier*) malloc(sizeof(Identifier));
+    tmp->name = name;
+    tmp->next = NULL;
+    return tmp;
+}
+
+ID_List* CreateIDList(Identifier* ID)
+{
+    ID_List* tmp = (ID_List*)malloc(sizeof(ID_List));
+    tmp->id_head = ID;
+    tmp->id_tail = ID;
+    return tmp;
+}
+
+ID_List* AddToIDList(ID_List* left, ID_List* right)
+{
+    if ((!left) && (!right)) return NULL;
+
+    if (!left)
+        return right;
+    else if (!right)
+        return left;
+    else
+    {
+        left->id_tail->next = right->id_head;
+        left->id_tail = right->id_tail;
+
+        free (right);
+        return left;
+    }
+}
+
+Decl_Node* AddDeclNode(Decl_Node* left, Decl_Node* right)
+{
+    if ((!left) && (!right)) return NULL;
+    
+    if (!left)
+        return right;
+    else if (!right)
+        return left;
+    else
+    {
+        left->IDs = AddToIDList(left->IDs, right->IDs);
+        left->OPs = AddToOPList(left->OPs, right->OPs, NULL);
+
+        free (right);
+        return left;
+    }
+}
+
+Decl_Node* MakeDeclNode(ID_List* id_list, OP_List* op_list)
+{
+    Decl_Node* tmp = (Decl_Node*) malloc(sizeof(Decl_Node));
+    tmp->IDs = id_list;
+    tmp->OPs = op_list;
+    return tmp;
 }
 
 void ReleaseSTMTList(STMT_List* stmt_list)
@@ -335,6 +471,7 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
     tmp->opID = 0;
     tmp->stmt_list = NULL;
     tmp->op_list = NULL;
+    tmp->next = NULL;
 
     if (type == EXPRESSION_STMT)
     {
@@ -347,7 +484,6 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
     {
         tmp->stmt_list = (STMT_List*)(ptr);
     }
-
     return tmp;
 }
 
@@ -370,38 +506,47 @@ void ReleaseOPList(OP_List* op_list)
     }
 }
 
-//TODO type
 OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
 {
+    OP_TYPE mix_type;
+    OP_List* mix_post_stmt_op_list;
+
+    // type
+    if ((left == NULL) && (right == NULL))
+        mix_type = NONE_TYPE;
+    else if (left == NULL)
+        mix_type = right->curr_type;
+    else if (right == NULL)
+        mix_type = left->curr_type;
+    else
+        mix_type = MixType(left->curr_type, right->curr_type);
+
+    if (newOP)
+        newOP->type = mix_type;
+
+    // post_stmt_op_list
+    if ((left == NULL) && (right == NULL))
+        mix_post_stmt_op_list = NULL;
+    else if (left == NULL)
+        mix_post_stmt_op_list = right->post_stmt_op_list;
+    else if (right == NULL)
+        mix_post_stmt_op_list = left->post_stmt_op_list;
+    else
+        mix_post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
+
+    // contain_ops
     if ((left == NULL) && (right == NULL))
     {
         OP_List* tmp = NULL;
-        if (newOP != NULL)
+        if ((newOP != NULL) || (mix_type != NONE_TYPE) || (mix_post_stmt_op_list != NULL))
         {
             tmp = (OP_List*)malloc(sizeof(OP_List));
             tmp->op_head = newOP;
             tmp->op_tail = newOP;
-            tmp->post_stmt_op_list = NULL;
+            tmp->curr_type = mix_type;
+            tmp->post_stmt_op_list = mix_post_stmt_op_list;
         }
         return tmp;
-    }
-    else if (right == NULL)
-    {
-        if (newOP != NULL)
-        {
-            if (left->op_head != NULL)
-            {
-                MakeDependency(newOP, left->op_tail, ISSUE_DEP, 1);        
-                left->op_tail->next = newOP;
-                left->op_tail = newOP;
-            }
-            else
-            {
-                left->op_head = newOP;
-                left->op_tail = newOP;
-            }
-        }
-        return left;
     }
     else if (left == NULL)
     {
@@ -419,9 +564,31 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
                 right->op_tail = newOP;
             }
         }
+        right->curr_type = mix_type;
+        right->post_stmt_op_list = mix_post_stmt_op_list;
         return right;
     }
-    else // merge two list
+    else if (right == NULL)
+    {
+        if (newOP != NULL)
+        {
+            if (left->op_head != NULL)
+            {
+                MakeDependency(newOP, left->op_tail, ISSUE_DEP, 1);        
+                left->op_tail->next = newOP;
+                left->op_tail = newOP;
+            }
+            else
+            {
+                left->op_head = newOP;
+                left->op_tail = newOP;
+            }
+        }
+        left->curr_type = mix_type;
+        left->post_stmt_op_list = mix_post_stmt_op_list;
+        return left;
+    } 
+    else
     {
         if ((left->op_head != NULL) && (right->op_head != NULL))
         {
@@ -437,86 +604,90 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
             {
                 left->op_tail = right->op_tail;
             }
-            left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
+            left->curr_type = mix_type;
+            left->post_stmt_op_list = mix_post_stmt_op_list;
             free (right);
             return left;
         }
-        else if (left->op_head == NULL)
+        else if (right->op_head != NULL) // only left contain operation, right contain post_stmt_op_list
         {
-            right->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
             if (newOP != NULL)
             {
                 MakeDependency(newOP, right->op_tail, ISSUE_DEP, 1);
                 right->op_tail->next = newOP;
                 right->op_tail = newOP;
             }
+            right->curr_type = mix_type;
+            right->post_stmt_op_list = mix_post_stmt_op_list;
+            free (left);
             return right;
         }
-        else if (right->op_head == NULL)
+        else if (left->op_head != NULL) // only right contain operation, left contain post_stmt_op_list
         {
-            left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
             if (newOP != NULL)
             {
                 MakeDependency(newOP, left->op_tail, ISSUE_DEP, 1);
                 left->op_tail->next = newOP;
                 left->op_tail = newOP;
             }
+            left->curr_type = mix_type;
+            left->post_stmt_op_list = mix_post_stmt_op_list;
+            free (right);
             return left;
         }
-        else
+        else // both contain only post_stmt_op_list
         {
-            left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, right->post_stmt_op_list, NULL);
             if (newOP != NULL)
             {
                 left->op_head = newOP;
                 left->op_tail = newOP;
             }
+            left->curr_type = mix_type;
+            left->post_stmt_op_list = mix_post_stmt_op_list;
+            free (right);
             return left;
         }
+
     }
 }
 
-OP_List* AddPostStmtOP(OP_List* left, Operation* newOP)
+OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type)
 {
-    if (left == NULL)
-    {
-        OP_List* tmp;
-        tmp = (OP_List*)malloc(sizeof(OP_List));
-        tmp->op_head = NULL;
-        tmp->op_tail = NULL;
-        tmp->post_stmt_op_list = AddToOPList(tmp->post_stmt_op_list, NULL, newOP);
-        return tmp;
-    }
-    else
-    {
-        left->post_stmt_op_list = AddToOPList(left->post_stmt_op_list, NULL, newOP);
-        return left;
-    }
+    OP_List* tmp;
+    tmp = (OP_List*)malloc(sizeof(OP_List));
+    tmp->op_head = NULL;
+    tmp->op_tail = NULL;
+    tmp->curr_type = type;
+    tmp->post_stmt_op_list = post_stmt_op_list;
+    return tmp;
 }
 
 %}
 
 %union
 {
+    OP_TYPE type;
     void *ptr;
 }
 
 %token KERNEL GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
-%token UCHAR USHORT UINT ULONG INT_V UINT_V CHAR_V UCHAR_V SHORT_V USHORT_V LONG_V ULONG_V FLOAT_V DOUBLE_V
 
+%token <type> OPENCL_TYPE
+%token <type> CONSTANT
 %token <ptr> IDENTIFIER
-%token CONSTANT STRING_LITERAL SIZEOF
+%token STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
 %token XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER INLINE RESTRICT
-%token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
-%token BOOL COMPLEX IMAGINARY
+%token CONST VOLATILE
 %token STRUCT UNION ENUM ELLIPSIS
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+
+%type <type> type_specifier declaration_specifiers storage_class_specifier specifier_qualifier_list type_name
 
 /* TYPE: (char*) */
 %type <ptr> declarator direct_declarator
@@ -535,8 +706,15 @@ program_unit
     ;
 
 primary_expression
-	: IDENTIFIER {$$ = NULL;}
-	| CONSTANT {$$ = NULL;}
+	: IDENTIFIER 
+    {
+        OP_TYPE type = FindSymbolInTable($1);
+        $$ = CreateEmptyOPList(NULL, type);
+    }
+	| CONSTANT
+    {
+        $$ = CreateEmptyOPList(NULL, $1);
+    }
 	| STRING_LITERAL {$$ = NULL;}
 	| '(' expression ')' {$$ = $2;}
     | GLOBAL_ID_FUNC {$$ = NULL;}
@@ -553,10 +731,10 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '.' IDENTIFIER {$$ = $1;}
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;}
-	| postfix_expression INC_OP {$$ = AddPostStmtOP($1, CreateOP(ADDITION_OP));}
-	| postfix_expression DEC_OP {$$ = AddPostStmtOP($1, CreateOP(SUBTRACTION_OP));}
-	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;}
-	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;}
+	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), NONE_TYPE), NULL);}
+    | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), NONE_TYPE), NULL);}
+	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;} /* TODO */
+	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;} /* TODO */
 	;
 
 argument_expression_list
@@ -584,7 +762,12 @@ unary_operator
 
 cast_expression
 	: unary_expression {$$ = $1;}
-	| '(' type_name ')' cast_expression {$$ = $4;}
+	| '(' type_name ')' cast_expression
+    {
+        if ($4)
+            ((OP_List*)($4))->curr_type = $2;
+        $$ = $4;
+    }
 	;
 
 multiplicative_expression
@@ -680,74 +863,52 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' {$$ = NULL;}
-	| declaration_specifiers init_declarator_list ';' 
+	| declaration_specifiers init_declarator_list ';'
     {
-        $$ = $2;
+        //Add the symbol table and return the OP_List* only
+        AddToSymbolTable($1, ((Decl_Node*)($2))->IDs);
+        //Write the type to all the OPs
+        $$ = ((Decl_Node*)($2))->OPs;
     }
 	;
 
 declaration_specifiers
-	: storage_class_specifier
-	| storage_class_specifier declaration_specifiers
-	| type_specifier
-	| type_specifier declaration_specifiers
-	| type_qualifier
-	| type_qualifier declaration_specifiers
-	| function_specifier
-	| function_specifier declaration_specifiers
-    | address_qualifier
-    | address_qualifier declaration_specifiers
+	: storage_class_specifier {$$ = $1;}
+    | storage_class_specifier declaration_specifiers {$$ = ($1 | $2);}
+	| type_specifier {$$ = $1;}
+	| type_specifier declaration_specifiers {$$ = ($1 | $2);}
+	| type_qualifier {$$ = NONE_TYPE;}
+	| type_qualifier declaration_specifiers {$$ = $2;}
+	| function_specifier {$$ = NONE_TYPE;}
+	| function_specifier declaration_specifiers {$$ = $2;}
+    | address_qualifier {$$ = NONE_TYPE;}
+    | address_qualifier declaration_specifiers {$$ = $2;}
 	;
 
 init_declarator_list
 	: init_declarator {$$ = $1;}
-	| init_declarator_list ',' init_declarator {$$ = AddToOPList($1, $3, NULL);}
+	| init_declarator_list ',' init_declarator {$$ = AddDeclNode($1, $3);} // TODO: Merge the post_stmt_op
 	;
 
 init_declarator
-	: declarator {$$ = NULL;}
-	| declarator '=' initializer {$$ = $3;}
+	: declarator {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1)), NULL);}
+	| declarator '=' initializer {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1)), $3);}
 	;
 
 storage_class_specifier
-	: TYPEDEF
-	| EXTERN
-	| STATIC
-	| AUTO
-	| REGISTER
+	: TYPEDEF {$$ = TYPE_DEFINE;}
+	| EXTERN {$$ = NONE_TYPE;}
+	| STATIC {$$ = NONE_TYPE;}
+	| AUTO {$$ = NONE_TYPE;}
+	| REGISTER {$$ = NONE_TYPE;}
 	;
 
 type_specifier
-	: VOID
-	| CHAR
-	| SHORT
-    | INT
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| SIGNED
-	| UNSIGNED
-	| BOOL
-	| COMPLEX
-	| IMAGINARY
-	| struct_or_union_specifier
-	| enum_specifier
-	| TYPE_NAME
-    | UCHAR
-    | USHORT
-    | ULONG
-    | UINT
-    | INT_V
-    | UINT_V
-    | SHORT_V
-    | USHORT_V
-    | CHAR_V
-    | UCHAR_V
-    | LONG_V
-    | ULONG_V
-    | FLOAT_V
-    | DOUBLE_V
-	;
+	: struct_or_union_specifier {$$ = NONE_TYPE;}
+	| enum_specifier {$$ = NONE_TYPE;}
+	| TYPE_NAME {$$ = NONE_TYPE;}
+	| OPENCL_TYPE {$$ = $1;}
+    ;
 
 struct_or_union_specifier
 	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
@@ -770,10 +931,10 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
+	: type_specifier specifier_qualifier_list {$$ = ($1 | $2);}
+	| type_specifier {$$ = $1;}
+    | type_qualifier specifier_qualifier_list {$$ = $2;}
+	| type_qualifier {$$ = NONE_TYPE;}
 	;
 
 struct_declarator_list
@@ -880,8 +1041,8 @@ identifier_list
 	;
 
 type_name
-	: specifier_qualifier_list
-	| specifier_qualifier_list abstract_declarator
+	: specifier_qualifier_list {$$ = $1;}
+	| specifier_qualifier_list abstract_declarator {$$ = $1;}
 	;
 
 abstract_declarator
@@ -963,7 +1124,10 @@ block_item_list
 	;
 
 block_item
-    : declaration {$$ = CreateSTMTList(CreateSTMT($1, EXPRESSION_STMT));} /* TODO: expressions in declaration */
+    : declaration 
+    {
+        $$ = CreateSTMTList(CreateSTMT($1, EXPRESSION_STMT));
+    }
 	| statement {$$ = $1;}
 	;
 

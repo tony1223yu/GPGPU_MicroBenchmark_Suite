@@ -9,7 +9,7 @@ typedef struct PROGRAM PROGRAM;
 typedef struct Statement Statement;
 typedef struct OP_List OP_List;
 typedef struct Identifier Identifier;
-typedef struct Identifier_List Identifier_List;
+typedef struct ID_List ID_List;
 typedef struct Decl_Node Decl_Node;
 typedef enum OP_TYPE OP_TYPE;
 typedef enum OP_KIND OP_KIND;
@@ -36,7 +36,11 @@ enum STMT_TYPE
 
 enum OP_TYPE
 {
+    TYPE_DEFINE = -1,
     NONE_TYPE = 0,
+    BOOL_TYPE,
+    HALF_TYPE,
+    VOID_TYPE,
     CHAR_TYPE,
     CHAR2_TYPE,
     CHAR4_TYPE,
@@ -77,7 +81,7 @@ enum OP_TYPE
     ULONG4_TYPE,
     ULONG8_TYPE,
     ULONG16_TYPE,
-    FLOAT_TYPE,
+    FLOAT_TYPE = 10000,
     FLOAT2_TYPE,
     FLOAT4_TYPE,
     FLOAT8_TYPE,
@@ -91,7 +95,8 @@ enum OP_TYPE
 
 enum OP_KIND
 {
-    ADDITION_OP = 0,
+    NONE_OP = 0,
+    ADDITION_OP,
     SUBTRACTION_OP,
     MULTIPLICATION_OP,
     DIVISION_OP,
@@ -111,10 +116,10 @@ struct Identifier
     Identifier* next;
 };
 
-struct Identifier_List
+struct ID_List
 {
-    Identifier* head;
-    Identifier* tail;
+    Identifier* id_head;
+    Identifier* id_tail;
 };
 
 /* Add post-statement operation? */
@@ -128,7 +133,7 @@ struct OP_List
 
 struct Decl_Node
 {
-    Identifier* IDs;
+    ID_List* IDs;
     OP_List* OPs;
 };
 
