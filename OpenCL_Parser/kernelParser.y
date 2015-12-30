@@ -39,8 +39,14 @@ OP_TYPE MixType(OP_TYPE left, OP_TYPE right)
 void initial()
 {
     prog = NULL;
-    symTable = CreateSymbolTable();
+    CreateSymbolTable();
     CreateSymbolTableLevel();
+}
+
+void release()
+{
+    ReleaseSymbolTableLevel();
+    ReleaseSymbolTable();
 }
 
 void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency)
@@ -672,14 +678,14 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type)
 
 %token KERNEL GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
 
-%token <type> OPENCL_TYPE
+%token <type> OPENCL_TYPE TYPE_NAME
 %token <type> CONSTANT
 %token <ptr> IDENTIFIER
 %token STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
-%token XOR_ASSIGN OR_ASSIGN TYPE_NAME
+%token XOR_ASSIGN OR_ASSIGN
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER INLINE RESTRICT
 %token CONST VOLATILE
@@ -708,7 +714,7 @@ program_unit
 primary_expression
 	: IDENTIFIER 
     {
-        OP_TYPE type = FindSymbolInTable($1);
+        OP_TYPE type = FindSymbolInTable($1, SYMBOL_IDENTIFIER);
         $$ = CreateEmptyOPList(NULL, type);
     }
 	| CONSTANT
@@ -866,9 +872,17 @@ declaration
 	| declaration_specifiers init_declarator_list ';'
     {
         //Add the symbol table and return the OP_List* only
-        AddToSymbolTable($1, ((Decl_Node*)($2))->IDs);
+        AddToSymbolTable($1, ((Decl_Node*)($2))->IDs, SYMBOL_IDENTIFIER);
         //Write the type to all the OPs
         $$ = ((Decl_Node*)($2))->OPs;
+    }
+    | TYPEDEF declaration_specifiers ';' {$$ = NULL;}
+    | TYPEDEF declaration_specifiers init_declarator_list ';'
+    {
+        //Add the symbol table and return the OP_List* only
+        AddToSymbolTable($2, ((Decl_Node*)($3))->IDs, SYMBOL_TYPENAME);
+        //Write the type to all the OPs
+        $$ = ((Decl_Node*)($3))->OPs;
     }
 	;
 
@@ -896,8 +910,7 @@ init_declarator
 	;
 
 storage_class_specifier
-	: TYPEDEF {$$ = TYPE_DEFINE;}
-	| EXTERN {$$ = NONE_TYPE;}
+	: EXTERN {$$ = NONE_TYPE;}
 	| STATIC {$$ = NONE_TYPE;}
 	| AUTO {$$ = NONE_TYPE;}
 	| REGISTER {$$ = NONE_TYPE;}
@@ -906,7 +919,8 @@ storage_class_specifier
 type_specifier
 	: struct_or_union_specifier {$$ = NONE_TYPE;}
 	| enum_specifier {$$ = NONE_TYPE;}
-	| TYPE_NAME {$$ = NONE_TYPE;}
+	/*| IDENTIFIER {$$ = FindSymbolInTable($1, SYMBOL_TYPENAME);}*/
+    | TYPE_NAME {$$ = $1;}
 	| OPENCL_TYPE {$$ = $1;}
     ;
 
@@ -1109,7 +1123,7 @@ labeled_statement
 
 compound_statement
 	: '{' '}' {$$ = NULL;}
-    | '{' block_item_list '}' {$$ = $2;}
+    | '{' {CreateSymbolTableLevel();} block_item_list '}' {ReleaseSymbolTableLevel(); $$ = $3;}
 	;
 
 block_item_list

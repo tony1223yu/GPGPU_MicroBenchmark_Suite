@@ -22,8 +22,10 @@ int main(int argc, char *argv[])
 
     yyin=fp;
     initial();
+
     yyparse();
     fclose(fp);
-
+    
+    release();
     //ReleaseParseResult(prog);
 }

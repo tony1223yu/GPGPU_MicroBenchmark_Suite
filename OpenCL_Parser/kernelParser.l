@@ -8,6 +8,7 @@ IS                      ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
 
 %{
 #include <stdio.h>
+#include "symbolTable.h"
 #include "kernelParser.h"
 #include "y.tab.h"
 
@@ -233,11 +234,20 @@ int check_type(void)
 *	it actually will only return IDENTIFIER
 */
 
-    yylval.ptr = strdup(yytext);
-    if (!yylval.ptr)
+    OP_TYPE type = FindSymbolInTable(yytext, SYMBOL_TYPENAME);
+    if (type != NONE_TYPE)
     {
-        fprintf(stderr, "out of memory\n");
-        exit(1);
+        yylval.type = type;
+        return TYPE_NAME;
     }
-	return IDENTIFIER;
+    else
+    {
+        yylval.ptr = strdup(yytext);
+        if (!yylval.ptr)
+        {
+            fprintf(stderr, "out of memory\n");
+            exit(1);
+        }
+        return IDENTIFIER;
+    }
 }
