@@ -19,7 +19,7 @@ SymbolTable* symTable;
 
 enum SYMBOL_TYPE
 {
-    SYMBOL_IDENTIFIER = 1,
+    SYMBOL_IDENTIFIER = 0,
     SYMBOL_TYPENAME
 };
 

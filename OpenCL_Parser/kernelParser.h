@@ -36,7 +36,6 @@ enum STMT_TYPE
 
 enum OP_TYPE
 {
-    USER_DEFINED_TYPE = -1,
     NONE_TYPE = 0,
     BOOL_TYPE,
     HALF_TYPE,

@@ -871,17 +871,13 @@ declaration
 	: declaration_specifiers ';' {$$ = NULL;}
 	| declaration_specifiers init_declarator_list ';'
     {
-        //Add the symbol table and return the OP_List* only
         AddToSymbolTable($1, ((Decl_Node*)($2))->IDs, SYMBOL_IDENTIFIER);
-        //Write the type to all the OPs
         $$ = ((Decl_Node*)($2))->OPs;
     }
     | TYPEDEF declaration_specifiers ';' {$$ = NULL;}
     | TYPEDEF declaration_specifiers init_declarator_list ';'
     {
-        //Add the symbol table and return the OP_List* only
         AddToSymbolTable($2, ((Decl_Node*)($3))->IDs, SYMBOL_TYPENAME);
-        //Write the type to all the OPs
         $$ = ((Decl_Node*)($3))->OPs;
     }
 	;
