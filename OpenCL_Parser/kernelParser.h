@@ -22,7 +22,8 @@ enum DEP_TYPE
 {
     ISSUE_DEP = 0,
     STRUCTURAL_DEP,
-    DATA_DEP
+    DATA_DEP_L,
+    DATA_DEP_R
 };
 
 enum STMT_TYPE
@@ -37,7 +38,7 @@ enum STMT_TYPE
 enum OP_TYPE
 {
     NONE_TYPE = 0,
-    BOOL_TYPE,
+    BOOL_TYPE = 0x1000,
     HALF_TYPE,
     VOID_TYPE,
     CHAR_TYPE,
@@ -80,7 +81,7 @@ enum OP_TYPE
     ULONG4_TYPE,
     ULONG8_TYPE,
     ULONG16_TYPE,
-    FLOAT_TYPE = 10000,
+    FLOAT_TYPE = 0x10000,
     FLOAT2_TYPE,
     FLOAT4_TYPE,
     FLOAT8_TYPE,
@@ -112,6 +113,7 @@ struct DEP
 struct Identifier
 {
     char* name;
+    Operation* op;
     Identifier* next;
 };
 
@@ -127,6 +129,7 @@ struct OP_List
     Operation* op_head;
     Operation* op_tail;
     OP_List* post_stmt_op_list;
+    char* identifier;
     OP_TYPE curr_type;
 };
 
@@ -153,9 +156,11 @@ struct Operation
     OP_KIND kind;
     OP_TYPE type;
 
+    long long number;
     DEP* issue_dep; // pointer to the stmt that current stmt need to wait becuase of issue dependency
     DEP* structural_dep; // pointer to the stmt that current stmt need to wait becuase of structural dependency
-    DEP* data_dep; // pointer to the stmt that current stmt need to wait becuase of data dependency
+    DEP* data_dep_l; // pointer to the stmt that current stmt need to wait becuase of data dependency
+    DEP* data_dep_r; // pointer to the stmt that current stmt need to wait becuase of data dependency
     Operation *next; // pointer to next stmt with ID equals to (id+1)
 };
 

@@ -14,6 +14,7 @@ void CreateSymbolTableLevel();
 void ReleaseSymbolTableLevel();
 void AddToSymbolTable(OP_TYPE, ID_List*, SYMBOL_TYPE);
 OP_TYPE FindSymbolInTable(char*, SYMBOL_TYPE);
+Operation* FindOPDepInTable(char*);
 
 SymbolTable* symTable;
 
@@ -29,7 +30,7 @@ struct SymbolTableEntry
     char* sym_name;
     SYMBOL_TYPE sym_type;
     SymbolTableEntry* next;
-    Operation* OP;
+    Operation* op;
 };
 
 struct SymbolTable

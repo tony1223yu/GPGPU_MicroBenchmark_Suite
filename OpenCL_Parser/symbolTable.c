@@ -2,6 +2,64 @@
 #include <stdlib.h>
 #include "symbolTable.h"
 
+// use to maintain the RAW data hazard of specific identifier (store the latest operation)
+void UpdateSymbolTable(OP_List* source, OP_List* update)
+{
+    char* name = source->identifier;
+    if (name != NULL)
+    {
+        SymbolTableLevel* currLevel = symTable->level_tail;
+        int cmpResult;
+        while (currLevel)
+        {
+            SymbolTableEntry* currEntry = currLevel->entry_head;
+            while (currEntry)
+            {
+                cmpResult = strcmp(currEntry->sym_name, name);
+                if (cmpResult == 0)
+                {
+                    currEntry->op = update->op_tail;
+                }
+                else if (cmpResult > 0)
+                {
+                    break;
+                }
+                currEntry = currEntry->next;
+            }
+            currLevel = currLevel->prev;
+        }
+    }
+}
+
+// use to find the dependency due to RAW data hazard of specific identifier
+Operation* FindOPDepInTable(char* name)
+{
+    if (name != NULL)
+    {
+        SymbolTableLevel* currLevel = symTable->level_tail;
+        int cmpResult;
+        while (currLevel)
+        {
+            SymbolTableEntry* currEntry = currLevel->entry_head;
+            while (currEntry)
+            {
+                cmpResult = strcmp(currEntry->sym_name, name);
+                if (cmpResult == 0)
+                {
+                    return currEntry->op;
+                }
+                else if (cmpResult > 0)
+                {
+                    break;
+                }
+                currEntry = currEntry->next;
+            }
+            currLevel = currLevel->prev;
+        }
+    }
+    return NULL;
+}
+
 OP_TYPE FindSymbolInTable(char* name, SYMBOL_TYPE type)
 {
     SymbolTableLevel* currLevel = symTable->level_tail;
@@ -53,7 +111,7 @@ void AddToSymbolTable(OP_TYPE type, ID_List* IDs, SYMBOL_TYPE sym_type)
         tmp->sym_name = iter->name;
         tmp->sym_type = sym_type;
         tmp->next = NULL;
-        tmp->OP = NULL;
+        tmp->op = iter->op;
 
         if (currLevel->entry_head == NULL)
         {

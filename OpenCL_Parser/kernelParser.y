@@ -9,6 +9,7 @@ void MakeDependency(Operation*, Operation*, DEP_TYPE, unsigned long long int);
 PROGRAM* CreateProgram(FUNCTION*, FUNCTION*);
 void ReleaseOP(Operation*);
 Operation* CreateOP(OP_KIND);
+Operation* CreateOPWithDataHazard(OP_KIND, OP_List*, OP_List*);
 void GetStatementTypeName(Statement*, char*);
 void GetOperationDescriptor(Operation*, char*, char*);
 void ReleaseSTMTList(STMT_List*);
@@ -20,14 +21,15 @@ void ReleaseSTMT(Statement*);
 Statement* CreateSTMT(void*, STMT_TYPE);
 void ReleaseOPList(OP_List*);
 OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
-OP_List* CreateEmptyOPList(OP_List*, OP_TYPE);
+OP_List* CreateEmptyOPList(OP_List*, OP_TYPE, char*);
 Decl_Node* AddDeclNode(Decl_Node*, Decl_Node*);
 Decl_Node* MakeDeclNode(ID_List*, OP_List*);
-Identifier* CreateIdentifier(char*);
+Identifier* CreateIdentifier(char*, OP_List*);
 ID_List* CreateIDList(Identifier*);
 ID_List* AddToIDList(ID_List*, ID_List*);
 OP_TYPE MixType(OP_TYPE, OP_TYPE);
 
+long long op_num;
 extern PROGRAM* prog;
 extern SymbolTable* symTable;
 
@@ -39,6 +41,7 @@ OP_TYPE MixType(OP_TYPE left, OP_TYPE right)
 void initial()
 {
     prog = NULL;
+    op_num = 0;
     CreateSymbolTable();
     CreateSymbolTableLevel();
 }
@@ -51,25 +54,33 @@ void release()
 
 void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency)
 {
-    DEP* tmp;
-    tmp = (DEP*)malloc(sizeof(DEP));
-    tmp->op = dependOP;
-    tmp->latency = latency;
-
-    switch(type)
+    if ((currOP == NULL) || (dependOP == NULL))
+        return;
+    else
     {
-        case ISSUE_DEP:
-            currOP->issue_dep = tmp;
-            break;
-        case STRUCTURAL_DEP:
-            currOP->structural_dep = tmp;
-            break;
-        case DATA_DEP:
-            currOP->data_dep = tmp;
-            break;
-        default:
-            fprintf(stderr, "Unknown type of dependency\n");
-            break;
+        DEP* tmp;
+        tmp = (DEP*)malloc(sizeof(DEP));
+        tmp->op = dependOP;
+        tmp->latency = latency;
+
+        switch(type)
+        {
+            case ISSUE_DEP:
+                currOP->issue_dep = tmp;
+                break;
+            case STRUCTURAL_DEP:
+                currOP->structural_dep = tmp;
+                break;
+            case DATA_DEP_L:
+                currOP->data_dep_l = tmp;
+                break;
+            case DATA_DEP_R:
+                currOP->data_dep_r = tmp;
+                break;
+            default:
+                fprintf(stderr, "Unknown type of dependency\n");
+                break;
+        }
     }
 }
 
@@ -133,18 +144,66 @@ void CreateFunction(char *name, STMT_GROUP* group_head, STMT_GROUP* group_tail)
 }
 */
 
+// use to create new operation with RAW dependency
+Operation* CreateOPWithDataHazard(OP_KIND kind, OP_List* left, OP_List* right)
+{
+    if (kind != NONE_OP)
+    {
+        Operation* tmp;
+        //fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
+        tmp = (Operation*)malloc(sizeof(Operation));
+        tmp->kind = kind;
+        tmp->type = NONE_TYPE;
+        tmp->data_dep_l = NULL;
+        tmp->data_dep_r = NULL;
+        tmp->issue_dep = NULL;
+        tmp->structural_dep = NULL;
+        tmp->next = NULL;
+        tmp->number = ++op_num;
+
+        if (left == NULL)
+            tmp->data_dep_l = NULL;
+        else if (left->op_head)
+            MakeDependency(tmp, left->op_tail, DATA_DEP_L, 1);
+        else if (left->identifier)
+            MakeDependency(tmp, FindOPDepInTable(left->identifier), DATA_DEP_L, 1);
+        else
+            tmp->data_dep_l = NULL;
+
+        if (right == NULL)
+            tmp->data_dep_r = NULL;
+        else if (right->op_head)
+            MakeDependency(tmp, right->op_tail, DATA_DEP_R, 1);
+        else if (right->identifier)
+            MakeDependency(tmp, FindOPDepInTable(right->identifier), DATA_DEP_R, 1);
+        else
+            tmp->data_dep_r = NULL;
+
+        return tmp;
+    }
+    else
+        return NULL;
+}
+
 Operation* CreateOP(OP_KIND kind)
 {
-    Operation* tmp;
-    //fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
-    tmp = (Operation*)malloc(sizeof(Operation));
-    tmp->kind = kind;
-    tmp->type = NONE_TYPE;
-    tmp->issue_dep = NULL;
-    tmp->structural_dep = NULL;
-    tmp->data_dep = NULL;
-    tmp->next = NULL;
-    return tmp;
+    if (kind != NONE_OP)
+    {
+        Operation* tmp;
+        //fprintf(stderr, "[OpenCL Parser] Create STMT of type = %d\n", type);
+        tmp = (Operation*)malloc(sizeof(Operation));
+        tmp->kind = kind;
+        tmp->type = NONE_TYPE;
+        tmp->issue_dep = NULL;
+        tmp->structural_dep = NULL;
+        tmp->data_dep_l = NULL;
+        tmp->data_dep_r = NULL;
+        tmp->next = NULL;
+        tmp->number = ++op_num;
+        return tmp;
+    }
+    else
+        return NULL;
 }
 
 void ReleaseOP(Operation* op)
@@ -154,8 +213,10 @@ void ReleaseOP(Operation* op)
         free (op->issue_dep);
     if (op->structural_dep)
         free (op->structural_dep);
-    if (op->data_dep)
-        free (op->data_dep);
+    if (op->data_dep_l)
+        free (op->data_dep_l);
+    if (op->data_dep_r)
+        free (op->data_dep_r);
 
     free (op);
 }
@@ -276,6 +337,8 @@ void DebugSTMTList(STMT_List* stmt_list, int order)
 {
     char opKind[30];
     char opType[30];
+    char depKind[30];
+    char depType[30];
     char stmtType[30];
     int i;
     if (stmt_list != NULL && stmt_list->stmt_head != NULL)
@@ -284,22 +347,37 @@ void DebugSTMTList(STMT_List* stmt_list, int order)
         Operation* iterOP;
         while (iterStmt != NULL)
         {
-            for (i = 0 ; i < order ; i ++)
-                printf("\t");
-
             if (iterStmt->type == EXPRESSION_STMT)
             {
                 iterOP = iterStmt->op_list->op_head;
                 while (iterOP != NULL)
                 {
+                    for (i = 0 ; i < order ; i ++)
+                        printf("\t");
+
                     GetOperationDescriptor(iterOP, opKind, opType);
-                    printf("%s_%s -> ", opType, opKind);
+                    printf("[%lld] %s_%s", iterOP->number, opType, opKind);
+                    if (iterOP->issue_dep != NULL)
+                    {
+                        printf(", [issue] #%lld", iterOP->issue_dep->op->number);
+                    }
+                    if (iterOP->data_dep_l != NULL)
+                    {
+                        printf(", [data] #%lld", iterOP->data_dep_l->op->number);
+                    }
+                    if (iterOP->data_dep_r != NULL)
+                    {
+                        printf(", [data] #%lld", iterOP->data_dep_r->op->number);
+                    }
+                    printf("\n");
                     iterOP = iterOP->next;
                 }
-                printf("NULL\n");
+                //printf("NULL\n");
             }
             else                 // recursive call for ITERATION_STMT, SELECTION_STMT, IF_STMT and ELSE_STMT
             {
+                for (i = 0 ; i < order ; i ++)
+                    printf("\t");
                 GetStatementTypeName(iterStmt, stmtType);
                 printf("[ STMT TYPE %s ]\n", stmtType);
                 DebugSTMTList(iterStmt->stmt_list, order + 1);
@@ -333,10 +411,13 @@ void DebugOPList(OP_List* list)
     }
 }
 
-Identifier* CreateIdentifier(char* name)
+Identifier* CreateIdentifier(char* name, OP_List* op_list)
 {
     Identifier* tmp = (Identifier*) malloc(sizeof(Identifier));
     tmp->name = name;
+    tmp->op = NULL;
+    if (op_list)
+        tmp->op = op_list->op_tail;
     tmp->next = NULL;
     return tmp;
 }
@@ -433,7 +514,7 @@ STMT_List* AddToSTMTList(STMT_List* prev, STMT_List* curr)
     if (prev->stmt_tail->type == EXPRESSION_STMT && curr->stmt_head->type == EXPRESSION_STMT)
     {
         prev->stmt_tail->op_list->op_tail->next = curr->stmt_head->op_list->op_head;
-        MakeDependency(curr->stmt_head->op_list->op_head, prev->stmt_tail->op_list->op_tail->next, ISSUE_DEP, 1);
+        MakeDependency(curr->stmt_head->op_list->op_head, prev->stmt_tail->op_list->op_tail, ISSUE_DEP, 1);
         prev->stmt_tail->op_list->op_tail = curr->stmt_head->op_list->op_tail;
         if (curr->stmt_tail == curr->stmt_head)
             curr->stmt_tail = curr->stmt_tail->next;
@@ -441,7 +522,6 @@ STMT_List* AddToSTMTList(STMT_List* prev, STMT_List* curr)
         prev->stmt_tail->next = curr->stmt_head;
         if (curr->stmt_tail != NULL)
             prev->stmt_tail = curr->stmt_tail;
-        
         free(curr);
         return prev;
     }
@@ -484,7 +564,26 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
         OP_List* list = (OP_List*)(ptr);
         list = AddToOPList(list, list->post_stmt_op_list, NULL);
         list->post_stmt_op_list = NULL;
-        tmp->op_list = list;
+
+        if (list == NULL)
+        {
+            free (tmp);
+            return NULL;
+        }
+        else if (list->op_head == NULL)
+        {
+            if (list->identifier)
+                free (list->identifier);
+            free(tmp);
+            free(list);
+            return NULL;
+        }
+        else
+        {
+            if (list->identifier)
+                free (list->identifier);
+            tmp->op_list = list;
+        }
     }
     else                        // ITERATION_STMT, SELECTION_STMT, IF_STMT and ELSE_STMT
     {
@@ -510,6 +609,9 @@ void ReleaseOPList(OP_List* op_list)
         if (next)
             next = next->next;
     }
+
+    if (op_list->identifier)
+        free (op_list->identifier);
 }
 
 OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
@@ -544,12 +646,13 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
     if ((left == NULL) && (right == NULL))
     {
         OP_List* tmp = NULL;
-        if ((newOP != NULL) || (mix_type != NONE_TYPE) || (mix_post_stmt_op_list != NULL))
+        if (newOP != NULL)
         {
             tmp = (OP_List*)malloc(sizeof(OP_List));
             tmp->op_head = newOP;
             tmp->op_tail = newOP;
             tmp->curr_type = mix_type;
+            tmp->identifier = NULL;
             tmp->post_stmt_op_list = mix_post_stmt_op_list;
         }
         return tmp;
@@ -655,16 +758,37 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
         }
 
     }
+/*
+    if ((left != NULL) && (left->identifier))
+        free (left->identifier);
+
+    if ((right != NULL) && (right->identifier))
+        free (right->identifier);
+*/
 }
 
-OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type)
+OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, char* identifier)
 {
     OP_List* tmp;
     tmp = (OP_List*)malloc(sizeof(OP_List));
     tmp->op_head = NULL;
     tmp->op_tail = NULL;
+    tmp->identifier = NULL;
     tmp->curr_type = type;
     tmp->post_stmt_op_list = post_stmt_op_list;
+
+    if (identifier)
+        tmp->identifier = identifier;
+
+    if (post_stmt_op_list)
+    {
+        Operation* iterOP = post_stmt_op_list->op_head;
+        while (iterOP)
+        {
+            iterOP->type = type;
+            iterOP = iterOP->next;
+        }
+    }
     return tmp;
 }
 
@@ -672,14 +796,15 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type)
 
 %union
 {
-    OP_TYPE type;
+    OP_TYPE op_type;
+    OP_KIND op_kind;
     void *ptr;
 }
 
 %token KERNEL GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
 
-%token <type> OPENCL_TYPE TYPE_NAME
-%token <type> CONSTANT
+%token <op_type> OPENCL_TYPE TYPE_NAME
+%token <op_type> CONSTANT
 %token <ptr> IDENTIFIER
 %token STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -693,13 +818,15 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type)
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <type> type_specifier declaration_specifiers storage_class_specifier specifier_qualifier_list type_name
+%type <op_type> type_specifier declaration_specifiers storage_class_specifier specifier_qualifier_list type_name
+
+%type <op_kind> assignment_operator
 
 /* TYPE: (char*) */
 %type <ptr> declarator direct_declarator
 
 /* TYPE: (OP_List*) */
-%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression unary_operator conditional_expression assignment_expression assignment_operator expression expression_statement declaration init_declarator_list init_declarator initializer initializer_list
+%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression unary_operator conditional_expression assignment_expression expression expression_statement declaration init_declarator_list init_declarator initializer initializer_list
 
 /* TYPE: (STMT_List*) */
 %type <ptr> selection_statement iteration_statement statement block_item block_item_list compound_statement
@@ -715,11 +842,11 @@ primary_expression
 	: IDENTIFIER 
     {
         OP_TYPE type = FindSymbolInTable($1, SYMBOL_IDENTIFIER);
-        $$ = CreateEmptyOPList(NULL, type);
+        $$ = CreateEmptyOPList(NULL, type, $1);
     }
 	| CONSTANT
     {
-        $$ = CreateEmptyOPList(NULL, $1);
+        $$ = CreateEmptyOPList(NULL, $1, NULL);
     }
 	| STRING_LITERAL {$$ = NULL;}
 	| '(' expression ')' {$$ = $2;}
@@ -737,8 +864,8 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '.' IDENTIFIER {$$ = $1;}
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;}
-	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), NONE_TYPE), NULL);}
-    | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), NONE_TYPE), NULL);}
+	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), ((OP_List*)($1))->curr_type, NULL), NULL);}
+    | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type, NULL), NULL);}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;} /* TODO */
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;} /* TODO */
 	;
@@ -750,8 +877,16 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression {$$ = $1;}
-	| INC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(ADDITION_OP));}
-	| DEC_OP unary_expression {$$ = AddToOPList(NULL, $2, CreateOP(SUBTRACTION_OP));}
+	| INC_OP unary_expression
+    {
+        Operation* op = CreateOPWithDataHazard(ADDITION_OP, NULL, $2);
+        $$ = AddToOPList(NULL, $2, op);
+    }
+	| DEC_OP unary_expression
+    {
+        Operation* op = CreateOPWithDataHazard(SUBTRACTION_OP, NULL, $2);
+        $$ = AddToOPList(NULL, $2, op);
+    }
 	| unary_operator cast_expression {$$ = AddToOPList(NULL, $2, $1);}
 	| SIZEOF unary_expression {$$ = $2;}
 	| SIZEOF '(' type_name ')' {$$ = NULL;}
@@ -778,15 +913,35 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression {$$ = $1;}
-	| multiplicative_expression '*' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MULTIPLICATION_OP));}
-	| multiplicative_expression '/' cast_expression {$$ = AddToOPList($1, $3, CreateOP(DIVISION_OP));}
-	| multiplicative_expression '%' cast_expression {$$ = AddToOPList($1, $3, CreateOP(MODULAR_OP));}
+	| multiplicative_expression '*' cast_expression
+    {
+        Operation* op = CreateOPWithDataHazard(MULTIPLICATION_OP, $1, $3);
+        $$ = AddToOPList($1, $3, op);
+    }
+	| multiplicative_expression '/' cast_expression
+    {
+        Operation* op = CreateOPWithDataHazard(DIVISION_OP, $1, $3);
+        $$ = AddToOPList($1, $3, op);
+    }
+	| multiplicative_expression '%' cast_expression
+    {
+        Operation* op = CreateOPWithDataHazard(MODULAR_OP, $1, $3);
+        $$ = AddToOPList($1, $3, op);
+    }
 	;
 
 additive_expression
 	: multiplicative_expression {$$ = $1;}
-	| additive_expression '+' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(ADDITION_OP));}
-	| additive_expression '-' multiplicative_expression {$$ = AddToOPList($1, $3, CreateOP(SUBTRACTION_OP));}
+	| additive_expression '+' multiplicative_expression
+    {
+        Operation* op = CreateOPWithDataHazard(ADDITION_OP, $1, $3);
+        $$ = AddToOPList($1, $3, op);
+    }
+	| additive_expression '-' multiplicative_expression
+    {
+        Operation* op = CreateOPWithDataHazard(SUBTRACTION_OP, $1, $3);
+        $$ = AddToOPList($1, $3, op);
+    }
 	;
 
 shift_expression
@@ -841,21 +996,26 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression {$$ = $1;}
-	| unary_expression assignment_operator assignment_expression {$$ = AddToOPList($3, $1, $2);}
+	| unary_expression assignment_operator assignment_expression
+    {
+        Operation* op = CreateOPWithDataHazard($2, $1, $3);
+        $$ = AddToOPList($3, $1, op);
+        UpdateSymbolTable($1, $$);
+    }
 	;
 
 assignment_operator
-	: '=' {$$ = NULL;}
-	| MUL_ASSIGN {$$ = CreateOP(MULTIPLICATION_OP);}
-	| DIV_ASSIGN {$$ = CreateOP(DIVISION_OP);}
-	| MOD_ASSIGN {$$ = CreateOP(MODULAR_OP);}
-	| ADD_ASSIGN {$$ = CreateOP(ADDITION_OP);}
-	| SUB_ASSIGN {$$ = CreateOP(SUBTRACTION_OP);}
-	| LEFT_ASSIGN {$$ = NULL;}
-	| RIGHT_ASSIGN {$$ = NULL;}
-	| AND_ASSIGN {$$ = NULL;}
-	| XOR_ASSIGN {$$ = NULL;}
-	| OR_ASSIGN {$$ = NULL;}
+	: '=' {$$ = NONE_OP;}
+	| MUL_ASSIGN {$$ = MULTIPLICATION_OP;}
+	| DIV_ASSIGN {$$ = DIVISION_OP;}
+	| MOD_ASSIGN {$$ = MODULAR_OP;}
+	| ADD_ASSIGN {$$ = ADDITION_OP;}
+	| SUB_ASSIGN {$$ = SUBTRACTION_OP;}
+	| LEFT_ASSIGN {$$ = NONE_OP;}
+	| RIGHT_ASSIGN {$$ = NONE_OP;}
+	| AND_ASSIGN {$$ = NONE_OP;}
+	| XOR_ASSIGN {$$ = NONE_OP;}
+	| OR_ASSIGN {$$ = NONE_OP;}
 	;
 
 expression
@@ -901,8 +1061,8 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1)), NULL);}
-	| declarator '=' initializer {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1)), $3);}
+	: declarator {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1, NULL)), NULL);}
+	| declarator '=' initializer {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1, $3)), $3);}
 	;
 
 storage_class_specifier
@@ -1040,7 +1200,7 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
+	: declaration_specifiers declarator {printf("param: %s\n", (char*)($2));}
 	| declaration_specifiers abstract_declarator
 	| declaration_specifiers
 	;
