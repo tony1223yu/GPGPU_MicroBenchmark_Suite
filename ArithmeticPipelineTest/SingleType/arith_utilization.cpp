@@ -140,12 +140,15 @@ void CommandParser(int argc, char *argv[])
                     {
                         case TYPE_INT:
                             g_opencl_ctrl.dataType = TYPE_INT;
+                            fprintf(stderr, "Integer type\n");
                             break;
                         case TYPE_FLOAT:
                             g_opencl_ctrl.dataType = TYPE_FLOAT;
+                            fprintf(stderr, "Float type\n");
                             break;
                         case TYPE_DOUBLE:
                             g_opencl_ctrl.dataType = TYPE_DOUBLE;
+                            fprintf(stderr, "Double type\n");
                             break;
                         default:
                             break;
@@ -292,7 +295,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
+    error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
     if (error < 0)
     {
         size_t logSize;

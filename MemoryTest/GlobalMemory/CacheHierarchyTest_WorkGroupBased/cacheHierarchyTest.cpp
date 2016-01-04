@@ -192,7 +192,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     CHECK_CL_ERROR(error);
     fprintf(stderr, "Device selected: '%s'\n", queryString);
 
-#if 0
+#if 1
     {
         cl_ulong global_cache_size;
         cl_device_mem_cache_type global_cache_type;
@@ -213,9 +213,9 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
         fprintf(stderr, "Global memory cache line size: %u B\n", global_cache_line_size);
         fprintf(stderr, "Global memory cache type:      ");
         if (global_cache_type == CL_READ_ONLY_CACHE)
-            printf("Read Only\n");
+            fprintf(stderr, "Read Only\n");
         else if (global_cache_type == CL_READ_WRITE_CACHE)
-            printf("Read Write\n");
+            fprintf(stderr, "Read Write\n");
     }
 #endif
 

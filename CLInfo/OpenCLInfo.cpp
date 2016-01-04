@@ -104,6 +104,7 @@ void GetCLDeviceInfo(cl_device_id device, int index)
     ShowCLDeviceNumberInfo <cl_uint> (device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, "Work item dim");
     ShowCLDeviceNumberInfo <size_t> (device, CL_DEVICE_MAX_WORK_ITEM_SIZES, "Work item size");
     ShowCLDeviceNumberInfo <size_t> (device, CL_DEVICE_MAX_WORK_GROUP_SIZE, "Work group size");
+    ShowCLDeviceNumberInfo <cl_uint> (device, CL_DEVICE_MAX_COMPUTE_UNITS, "Compute units");
     ShowCLDeviceStringInfo(device, CL_DEVICE_VENDOR, "Vendor");
     ShowCLDeviceStringInfo(device, CL_DEVICE_VERSION, "Device Version");
     ShowCLDeviceStringInfo(device, CL_DRIVER_VERSION, "Driver Version");

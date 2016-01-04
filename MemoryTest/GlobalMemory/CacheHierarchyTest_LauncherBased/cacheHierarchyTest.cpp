@@ -17,7 +17,7 @@
 
 
 /* Macros */
-#define DISPATCH_SIZE 32
+#define DISPATCH_SIZE 64
 //#define USE_CL_2_0_API
 #define CL_FILE_NAME "cacheHierarchyTest.cl"
 #define BINARY_FILE_NAME "cacheHierarchyTest.bin"
