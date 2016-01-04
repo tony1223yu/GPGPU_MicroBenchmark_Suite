@@ -30,6 +30,7 @@ uint64_t      num_node = 0;
 uint64_t      delay_us = 1000000;
 double        duration = 3600.0;
 double        delay_unit = 1000000.0;
+FILE*         outputFile = NULL;
 
 double
 get_rapl_energy_info(uint64_t power_domain, uint64_t node)
@@ -94,8 +95,6 @@ do_print_energy_info()
 
     double prev_sample[num_node][RAPL_NR_DOMAIN];
     double power_watt[num_node][RAPL_NR_DOMAIN];
-    double cum_energy_J[num_node][RAPL_NR_DOMAIN];
-    double cum_energy_mWh[num_node][RAPL_NR_DOMAIN];
 
     char time_buffer[32];
     struct timeval tv;
@@ -110,17 +109,18 @@ do_print_energy_info()
     setbuf(stdout, NULL);
 
     /* Print header */
-    fprintf(stdout, "System Time,RDTSC,Elapsed Time (sec),");
+    fprintf(stdout, "number of pkg = %ld\n", num_node);
+    fprintf(stdout, "TimeStamp");
     for (i = node; i < num_node; i++) {
-        fprintf(stdout, "IA Frequency_%d (MHz),",i);
+        fprintf(stdout, " IA_Frequency (MHz)");
         if(is_supported_domain(RAPL_PKG))
-            fprintf(stdout,"Processor Power_%d (Watt),Cumulative Processor Energy_%d (Joules),Cumulative Processor Energy_%d (mWh),", i,i,i);
+            fprintf(stdout," Processor_Power(W)");
         if(is_supported_domain(RAPL_PP0))
-            fprintf(stdout, "IA Power_%d (Watt),Cumulative IA Energy_%d (Joules),Cumulative IA Energy_%d(mWh),", i,i,i);
+            fprintf(stdout, " IA_Power(W)");
         if(is_supported_domain(RAPL_PP1))
-            fprintf(stdout, "GT Power_%d (Watt),Cumulative GT Energy_%d (Joules),Cumulative GT Energy_%d(mWh)", i,i,i);
+            fprintf(stdout, " GT_Power(W)");
         if(is_supported_domain(RAPL_DRAM))
-            fprintf(stdout, "DRAM Power_%d (Watt),Cumulative DRAM Energy_%d (Joules),Cumulative DRAM Energy_%d(mWh),", i,i,i);
+            fprintf(stdout, " DRAM_Power(W)");
     }
     fprintf(stdout, "\n");
 
@@ -163,8 +163,6 @@ do_print_energy_info()
                     // just the sleep delay, in order to more accourately account for
                     // the delay between samples
                     power_watt[i][domain] = delta / interval_elapsed_time;
-                    cum_energy_J[i][domain] += delta;
-                    cum_energy_mWh[i][domain] = cum_energy_J[i][domain] / 3.6; // mWh
                 }
             }
         }
@@ -172,21 +170,19 @@ do_print_energy_info()
         gettimeofday(&tv, NULL);
         end = convert_time_to_sec(tv);
         total_elapsed_time = end - start;
-        convert_time_to_string(tv, time_buffer);
 
-        read_tsc(&tsc);
-        fprintf(stdout,"%s,%llu,%.4lf,", time_buffer, tsc, total_elapsed_time);
+        //read_tsc(&tsc);
+        fprintf(outputFile, "%lu ", tv.tv_sec * 1000 + tv.tv_usec / 1000);
         for (i = node; i < num_node; i++) {
             get_pp0_freq_mhz(i, &freq);
-            fprintf(stdout, "%u,", freq);
+            fprintf(outputFile, "%lu ", freq);
             for (domain = 0; domain < RAPL_NR_DOMAIN; ++domain) {
                 if(is_supported_domain(domain)) {
-                    fprintf(stdout, "%.4lf,%.4lf,%.4lf,",
-                            power_watt[i][domain], cum_energy_J[i][domain], cum_energy_mWh[i][domain]);
+                    fprintf(outputFile, "%.5lf ",power_watt[i][domain]);
                 }
             }
         }
-        fprintf(stdout, "\n");
+        fprintf(outputFile, "\n");
 
         // check to see if we are done
         if(total_elapsed_time >= duration)
@@ -197,6 +193,7 @@ do_print_energy_info()
 
     /* Print summary */
     fprintf(stdout, "\nTotal Elapsed Time(sec)=%.4lf\n\n", total_elapsed_time);
+#if 0
     for (i = node; i < num_node; i++) {
         if(is_supported_domain(RAPL_PKG)){
             fprintf(stdout, "Total Processor Energy_%d(Joules)=%.4lf\n", i, cum_energy_J[i][RAPL_PKG]);
@@ -221,6 +218,7 @@ do_print_energy_info()
     }
     read_tsc(&tsc);
     fprintf(stdout,"TSC=%llu\n", tsc);
+#endif
 }
 
 void
@@ -228,7 +226,7 @@ usage()
 {
     fprintf(stdout, "\nIntel(r) Power Gadget %s\n", version);
     fprintf(stdout, "\nUsage: \n");
-    fprintf(stdout, "%s [-e [sampling delay (ms) ] optional] -d [duration (sec)]\n", progname);
+    fprintf(stdout, "%s [-t [sampling delay (ms) ] optional] -T [duration (sec)]\n", progname);
     fprintf(stdout, "\nExample: %s -e 1000 -d 10\n", progname);
     fprintf(stdout, "\n");
 }
@@ -238,13 +236,13 @@ int
 cmdline(int argc, char **argv)
 {
     int             opt;
-    uint64_t    delay_ms_temp = 1000;
+    uint64_t    delay_ms_temp = 500;
 
     progname = argv[0];
 
-    while ((opt = getopt(argc, argv, "e:d:")) != -1) {
+    while ((opt = getopt(argc, argv, "o:t:T:")) != -1) {
         switch (opt) {
-        case 'e':
+        case 't':
             delay_ms_temp = atoi(optarg);
             if(delay_ms_temp > 50) {
                 delay_us = delay_ms_temp * 1000;
@@ -253,12 +251,15 @@ cmdline(int argc, char **argv)
                 return -1;
             }
             break;
-        case 'd':
+        case 'T':
             duration = atof(optarg);
             if(duration <= 0.0){
                 fprintf(stdout, "Duration must be greater than 0 seconds.\n");
                 return -1;
             }
+            break;
+        case 'o':
+            outputFile = fopen(optarg, "w");
             break;
         case 'h':
             usage();
@@ -269,6 +270,13 @@ cmdline(int argc, char **argv)
             return -1;
         }
     }
+    
+    if (outputFile == NULL)
+    {
+        fprintf(stdout, "Use default output file...\n");
+        outputFile = fopen("PowerUsageOutput.log", "w");
+    }
+
     return 0;
 }
 
