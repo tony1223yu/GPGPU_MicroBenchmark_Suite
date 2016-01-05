@@ -1,5 +1,6 @@
 Data dependencies which related to loop iterations.
 [v] Parameter declaration/scope of functions
+OpenCL NDRange functions
 struct and union
 RAW hazard with Increment operation
 Memory operations of the arithmetic assignment

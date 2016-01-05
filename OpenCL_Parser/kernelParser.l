@@ -26,10 +26,10 @@ void comment(void);
 "__local"      { count(); return(ADDRESS_LOCAL); }
 "__constant"      { count(); return(ADDRESS_CONSTANT); }
 "__private"      { count(); return(ADDRESS_PRIVATE); }
-"get_global_id"     { count(); return(GLOBAL_ID_FUNC); }
-"get_global_size"   { count(); return(GLOBAL_SIZE_FUNC); }
-"get_local_id"      { count(); return(LOCAL_ID_FUNC); }
-"get_local_size"    { count(); return(LOCAL_SIZE_FUNC); }
+"get_global_id"     { count(); yylval.op_type = (ULONG_TYPE); return(GLOBAL_ID_FUNC); }
+"get_global_size"   { count(); yylval.op_type = (ULONG_TYPE); return(GLOBAL_SIZE_FUNC); }
+"get_local_id"      { count(); yylval.op_type = (ULONG_TYPE); return(LOCAL_ID_FUNC); }
+"get_local_size"    { count(); yylval.op_type = (ULONG_TYPE); return(LOCAL_SIZE_FUNC); }
 
 "float"           { count(); yylval.op_type = (FLOAT_TYPE); return (OPENCL_TYPE); }
 "float2"          { count(); yylval.op_type = (FLOAT2_TYPE); return (OPENCL_TYPE); }

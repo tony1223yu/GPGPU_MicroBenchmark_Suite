@@ -172,7 +172,11 @@ Operation* CreateOPWithDataHazard(OP_KIND kind, OP_List* left, OP_List* right)
         else if (left->op_head)
             MakeDependency(tmp, left->op_tail, DATA_DEP_L, 1);
         else if (left->identifier)
+        {
             MakeDependency(tmp, FindOPDepInTable(left->identifier), DATA_DEP_L, 1);
+            free (left->identifier);
+            left->identifier = NULL;
+        }
         else
             tmp->data_dep_l = NULL;
 
@@ -181,7 +185,11 @@ Operation* CreateOPWithDataHazard(OP_KIND kind, OP_List* left, OP_List* right)
         else if (right->op_head)
             MakeDependency(tmp, right->op_tail, DATA_DEP_R, 1);
         else if (right->identifier)
+        {
             MakeDependency(tmp, FindOPDepInTable(right->identifier), DATA_DEP_R, 1);
+            free (right->identifier);
+            right->identifier = NULL;
+        }
         else
             tmp->data_dep_r = NULL;
 
@@ -712,6 +720,17 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
     OP_TYPE mix_type;
     OP_List* mix_post_stmt_op_list;
 
+    if ((left != NULL) && (left->identifier))
+    {
+        free (left->identifier);
+        left->identifier = NULL;
+    }
+    if ((right != NULL) && (right->identifier))
+    {
+        free (right->identifier);
+        right->identifier = NULL;
+    }
+
     // type
     if ((left == NULL) && (right == NULL))
         mix_type = NONE_TYPE;
@@ -851,13 +870,6 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
         }
 
     }
-/*
-    if ((left != NULL) && (left->identifier))
-        free (left->identifier);
-
-    if ((right != NULL) && (right->identifier))
-        free (right->identifier);
-*/
 }
 
 OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, char* identifier)
@@ -894,9 +906,9 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, char* ident
     void *ptr;
 }
 
-%token KERNEL GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
+%token KERNEL ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
 
-%token <op_type> OPENCL_TYPE TYPE_NAME
+%token <op_type> OPENCL_TYPE TYPE_NAME GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC
 %token <op_type> CONSTANT
 %token <ptr> IDENTIFIER
 %token STRING_LITERAL SIZEOF
@@ -950,10 +962,6 @@ primary_expression
     }
 	| STRING_LITERAL {$$ = NULL;}
 	| '(' expression ')' {$$ = $2;}
-    | GLOBAL_ID_FUNC {$$ = NULL;}
-    | GLOBAL_SIZE_FUNC {$$ = NULL;}
-    | LOCAL_ID_FUNC {$$ = NULL;}
-    | LOCAL_SIZE_FUNC {$$ = NULL;}
 	;
 
 /* function call here */
@@ -968,6 +976,10 @@ postfix_expression
     | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type, NULL), NULL);}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;} /* TODO */
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;} /* TODO */
+    | GLOBAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
+    | GLOBAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
+    | LOCAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
+    | LOCAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
 	;
 
 argument_expression_list

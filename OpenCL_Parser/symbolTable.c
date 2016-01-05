@@ -116,7 +116,7 @@ void AddIDToSymbolTable(OP_TYPE type, char* ID, SYMBOL_TYPE sym_type)
     else
     {
         int cmp_result;
-        SymbolTableEntry *prev;
+        SymbolTableEntry *prev = NULL;
         SymbolTableEntry *iterEntry = currLevel->entry_head;
         while(1)
         {
@@ -130,14 +130,17 @@ void AddIDToSymbolTable(OP_TYPE type, char* ID, SYMBOL_TYPE sym_type)
             cmp_result = strcmp(iterEntry->sym_name, tmp->sym_name);
             if (cmp_result > 0)
             {
-                prev->next = tmp;
+                if (prev)
+                    prev->next = tmp;
                 tmp->next = iterEntry;
-                break;
+                if (currLevel->entry_head == iterEntry)
+                    currLevel->entry_head = tmp;
+                return;
             }
             else if (cmp_result == 0)
             {
                 fprintf(stderr, "Redefine symbol \'%s\'. \n", tmp->sym_name);
-                break;
+                return;
             }
             else
             {
@@ -146,8 +149,6 @@ void AddIDToSymbolTable(OP_TYPE type, char* ID, SYMBOL_TYPE sym_type)
             }
         }
     }
-
-
 }
 // Add to the last level in symTable
 void AddIDListToSymbolTable(OP_TYPE type, ID_List* IDs, SYMBOL_TYPE sym_type)
