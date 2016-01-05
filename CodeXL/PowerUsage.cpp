@@ -205,7 +205,10 @@ int main(int argc, char *argv[])
                             AMDTPwrCounterDesc counter;
                             AMDTPwrGetCounterDesc(sampleResult->m_counterValues[i].m_counterID, &counter);
                             //fprintf(fp, "%s %f\n", counter.m_name, sampleResult->m_counterValues[i].m_counterValue);
-                            fprintf(fp, "%f ", sampleResult->m_counterValues[i].m_counterValue);
+                            if (counter.m_units == AMDT_PWR_UNIT_TYPE_WATT)
+                                fprintf(fp, "%f ", sampleResult->m_counterValues[i].m_counterValue * 1000);
+                            else
+                                fprintf(fp, "%f ", sampleResult->m_counterValues[i].m_counterValue);
                         }
                         fprintf(fp, "\n");
                         sampleResult ++;
