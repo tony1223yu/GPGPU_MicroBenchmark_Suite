@@ -114,13 +114,13 @@ do_print_energy_info()
     for (i = node; i < num_node; i++) {
         fprintf(stdout, " IA_Frequency (MHz)");
         if(is_supported_domain(RAPL_PKG))
-            fprintf(stdout," Processor_Power(W)");
+            fprintf(stdout," Processor_Power(mW)");
         if(is_supported_domain(RAPL_PP0))
-            fprintf(stdout, " IA_Power(W)");
+            fprintf(stdout, " IA_Power(mW)");
         if(is_supported_domain(RAPL_PP1))
-            fprintf(stdout, " GT_Power(W)");
+            fprintf(stdout, " GT_Power(mW)");
         if(is_supported_domain(RAPL_DRAM))
-            fprintf(stdout, " DRAM_Power(W)");
+            fprintf(stdout, " DRAM_Power(mW)");
     }
     fprintf(stdout, "\n");
 
@@ -178,7 +178,7 @@ do_print_energy_info()
             fprintf(outputFile, "%lu ", freq);
             for (domain = 0; domain < RAPL_NR_DOMAIN; ++domain) {
                 if(is_supported_domain(domain)) {
-                    fprintf(outputFile, "%.5lf ",power_watt[i][domain]);
+                    fprintf(outputFile, "%.5lf ", power_watt[i][domain] * 1000);
                 }
             }
         }
