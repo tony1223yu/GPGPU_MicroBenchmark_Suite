@@ -98,8 +98,59 @@ OP_TYPE FindSymbolInTable(char* name, SYMBOL_TYPE type)
     return NONE_TYPE;
 }
 
+void AddIDToSymbolTable(OP_TYPE type, char* ID, SYMBOL_TYPE sym_type)
+{
+    SymbolTableLevel* currLevel = symTable->level_tail;
+    SymbolTableEntry* tmp = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
+    tmp->type = type;
+    tmp->sym_name = ID;
+    tmp->sym_type = sym_type;
+    tmp->next = NULL;
+    tmp->op = NULL;
+
+    if (currLevel->entry_head == NULL)
+    {
+        currLevel->entry_head = tmp;
+        currLevel->entry_tail = tmp;
+    }
+    else
+    {
+        int cmp_result;
+        SymbolTableEntry *prev;
+        SymbolTableEntry *iterEntry = currLevel->entry_head;
+        while(1)
+        {
+            if (!iterEntry) // to the end
+            {
+                prev->next = tmp;
+                currLevel->entry_tail = prev;
+                break;
+            }
+
+            cmp_result = strcmp(iterEntry->sym_name, tmp->sym_name);
+            if (cmp_result > 0)
+            {
+                prev->next = tmp;
+                tmp->next = iterEntry;
+                break;
+            }
+            else if (cmp_result == 0)
+            {
+                fprintf(stderr, "Redefine symbol \'%s\'. \n", tmp->sym_name);
+                break;
+            }
+            else
+            {
+                prev = iterEntry;
+                iterEntry = iterEntry->next;
+            }
+        }
+    }
+
+
+}
 // Add to the last level in symTable
-void AddToSymbolTable(OP_TYPE type, ID_List* IDs, SYMBOL_TYPE sym_type)
+void AddIDListToSymbolTable(OP_TYPE type, ID_List* IDs, SYMBOL_TYPE sym_type)
 {
     Identifier* iter = IDs->id_head;
     SymbolTableLevel* currLevel = symTable->level_tail;
@@ -131,7 +182,7 @@ void AddToSymbolTable(OP_TYPE type, ID_List* IDs, SYMBOL_TYPE sym_type)
                     currLevel->entry_tail = prev;
                     break;
                 }
-                
+
                 cmp_result = strcmp(iterEntry->sym_name, tmp->sym_name);
                 if (cmp_result > 0)
                 {

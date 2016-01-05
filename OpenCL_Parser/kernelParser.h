@@ -10,7 +10,10 @@ typedef struct Statement Statement;
 typedef struct OP_List OP_List;
 typedef struct Identifier Identifier;
 typedef struct ID_List ID_List;
-typedef struct Decl_Node Decl_Node;
+typedef struct Parameter Parameter;
+typedef struct Param_List Param_List;
+typedef struct Declarator Declarator;
+typedef struct Declaration Declaration;
 typedef enum OP_TYPE OP_TYPE;
 typedef enum OP_KIND OP_KIND;
 typedef enum STMT_TYPE STMT_TYPE;
@@ -123,6 +126,19 @@ struct ID_List
     Identifier* id_tail;
 };
 
+struct Parameter
+{
+    OP_TYPE type;
+    char* name;
+    Parameter* next;
+};
+
+struct Param_List
+{
+    Parameter* param_head;
+    Parameter* param_tail;
+};
+
 /* Add post-statement operation? */
 struct OP_List
 {
@@ -133,7 +149,15 @@ struct OP_List
     OP_TYPE curr_type;
 };
 
-struct Decl_Node
+// For declarator
+struct Declarator
+{
+    char* name;
+    Param_List* Params;
+};
+
+// For declaration
+struct Declaration
 {
     ID_List* IDs;
     OP_List* OPs;

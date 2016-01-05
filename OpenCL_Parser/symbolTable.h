@@ -12,7 +12,8 @@ void CreateSymbolTable();
 void ReleaseSymbolTable();
 void CreateSymbolTableLevel();
 void ReleaseSymbolTableLevel();
-void AddToSymbolTable(OP_TYPE, ID_List*, SYMBOL_TYPE);
+void AddIDToSymbolTable(OP_TYPE, char*, SYMBOL_TYPE);
+void AddIDListToSymbolTable(OP_TYPE, ID_List*, SYMBOL_TYPE);
 OP_TYPE FindSymbolInTable(char*, SYMBOL_TYPE);
 Operation* FindOPDepInTable(char*);
 

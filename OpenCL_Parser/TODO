@@ -1,4 +1,5 @@
 Data dependencies which related to loop iterations.
-Parameter declaration of functions
+[v] Parameter declaration/scope of functions
+struct and union
 RAW hazard with Increment operation
 Memory operations of the arithmetic assignment

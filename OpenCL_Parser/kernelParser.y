@@ -22,12 +22,18 @@ Statement* CreateSTMT(void*, STMT_TYPE);
 void ReleaseOPList(OP_List*);
 OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
 OP_List* CreateEmptyOPList(OP_List*, OP_TYPE, char*);
-Decl_Node* AddDeclNode(Decl_Node*, Decl_Node*);
-Decl_Node* MakeDeclNode(ID_List*, OP_List*);
+Declarator* CreateDeclarator(char*, Param_List*);
+Declarator* AddToDeclarator(Declarator*, Param_List*);
+char* GetNameInDeclarator(Declarator*);
+Declaration* AddDeclaration(Declaration*, Declaration*);
+Declaration* MakeDeclaration(ID_List*, OP_List*);
 Identifier* CreateIdentifier(char*, OP_List*);
 ID_List* CreateIDList(Identifier*);
 ID_List* AddToIDList(ID_List*, ID_List*);
 OP_TYPE MixType(OP_TYPE, OP_TYPE);
+Parameter* CreateParameter(OP_TYPE, char*);
+Param_List* CreateParamList(Parameter*);
+Param_List* AddToParamList(Param_List*, Param_List*);
 
 long long op_num;
 extern PROGRAM* prog;
@@ -411,6 +417,93 @@ void DebugOPList(OP_List* list)
     }
 }
 
+Parameter* CreateParameter(OP_TYPE type, char* name)
+{
+    Parameter* tmp = (Parameter*) malloc(sizeof(Parameter));
+    tmp->type = type;
+    tmp->name = name;
+    tmp->next = NULL;
+    return tmp;
+}
+
+Param_List* CreateParamList(Parameter* param)
+{
+    Param_List* tmp = (Param_List*) malloc(sizeof(Param_List));
+    tmp->param_head = param;
+    tmp->param_tail = param;
+    return tmp;
+}
+
+Param_List* AddToParamList(Param_List* left, Param_List* right)
+{
+    if ((!left) && (!right)) return NULL;
+
+    if (!left)
+        return right;
+    else if (!right)
+        return left;
+    else
+    {
+        left->param_tail->next = right->param_head;
+        left->param_tail = right->param_tail;
+
+        free (right);
+        return left;
+    }
+}
+
+Declarator* CreateDeclarator(char* name, Param_List* param_list)
+{
+    Declarator* tmp = (Declarator*) malloc(sizeof(Declarator));
+    tmp->name = name;
+    tmp->Params = param_list;
+    return tmp;
+}
+
+void AddParamInDeclarator(Declarator* decl)
+{
+    if (decl->Params)
+    {
+        Parameter* iter = decl->Params->param_head;
+        while (iter)
+        {
+            AddIDToSymbolTable(iter->type, iter->name, SYMBOL_IDENTIFIER);
+            iter = iter->next;
+        }
+        free (decl->Params);
+        decl->Params = NULL;
+    }
+}
+
+char* GetNameInDeclarator(Declarator* decl)
+{
+    // Release param
+    if (decl->Params)
+    {
+        Parameter* iter = decl->Params->param_head;
+        while (iter)
+        {
+            free (iter->name);
+            iter = iter->next;
+        }
+        free (decl->Params);
+    }
+    return decl->name; 
+}
+
+Declarator* AddToDeclarator(Declarator* origin, Param_List* extra_param)
+{
+    if (!origin)
+    {
+        return CreateDeclarator(NULL, extra_param);
+    }
+    else
+    {
+        origin->Params = AddToParamList(origin->Params, extra_param);
+        return origin;
+    }
+}
+
 Identifier* CreateIdentifier(char* name, OP_List* op_list)
 {
     Identifier* tmp = (Identifier*) malloc(sizeof(Identifier));
@@ -424,7 +517,7 @@ Identifier* CreateIdentifier(char* name, OP_List* op_list)
 
 ID_List* CreateIDList(Identifier* ID)
 {
-    ID_List* tmp = (ID_List*)malloc(sizeof(ID_List));
+    ID_List* tmp = (ID_List*) malloc(sizeof(ID_List));
     tmp->id_head = ID;
     tmp->id_tail = ID;
     return tmp;
@@ -448,7 +541,7 @@ ID_List* AddToIDList(ID_List* left, ID_List* right)
     }
 }
 
-Decl_Node* AddDeclNode(Decl_Node* left, Decl_Node* right)
+Declaration* AddDeclaration(Declaration* left, Declaration* right)
 {
     if ((!left) && (!right)) return NULL;
     
@@ -466,9 +559,9 @@ Decl_Node* AddDeclNode(Decl_Node* left, Decl_Node* right)
     }
 }
 
-Decl_Node* MakeDeclNode(ID_List* id_list, OP_List* op_list)
+Declaration* MakeDeclaration(ID_List* id_list, OP_List* op_list)
 {
-    Decl_Node* tmp = (Decl_Node*) malloc(sizeof(Decl_Node));
+    Declaration* tmp = (Declaration*) malloc(sizeof(Declaration));
     tmp->IDs = id_list;
     tmp->OPs = op_list;
     return tmp;
@@ -822,11 +915,18 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, char* ident
 
 %type <op_kind> assignment_operator
 
-/* TYPE: (char*) */
+/* TYPE: (Declarator*) */
 %type <ptr> declarator direct_declarator
 
+/* TYPE: (Declaration*) */
+%type <ptr> init_declarator_list init_declarator
+
+/* TYPE: (Param_List*) */
+%type <ptr> parameter_type_list parameter_list parameter_declaration
+
+
 /* TYPE: (OP_List*) */
-%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression unary_operator conditional_expression assignment_expression expression expression_statement declaration init_declarator_list init_declarator initializer initializer_list
+%type <ptr> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression unary_operator conditional_expression assignment_expression expression expression_statement declaration initializer initializer_list
 
 /* TYPE: (STMT_List*) */
 %type <ptr> selection_statement iteration_statement statement block_item block_item_list compound_statement
@@ -1031,14 +1131,16 @@ declaration
 	: declaration_specifiers ';' {$$ = NULL;}
 	| declaration_specifiers init_declarator_list ';'
     {
-        AddToSymbolTable($1, ((Decl_Node*)($2))->IDs, SYMBOL_IDENTIFIER);
-        $$ = ((Decl_Node*)($2))->OPs;
+        AddIDListToSymbolTable($1, ((Declaration*)($2))->IDs, SYMBOL_IDENTIFIER);
+        $$ = ((Declaration*)($2))->OPs;
+        free ($2);
     }
     | TYPEDEF declaration_specifiers ';' {$$ = NULL;}
     | TYPEDEF declaration_specifiers init_declarator_list ';'
     {
-        AddToSymbolTable($2, ((Decl_Node*)($3))->IDs, SYMBOL_TYPENAME);
-        $$ = ((Decl_Node*)($3))->OPs;
+        AddIDListToSymbolTable($2, ((Declaration*)($3))->IDs, SYMBOL_TYPENAME);
+        $$ = ((Declaration*)($3))->OPs;
+        free ($3);
     }
 	;
 
@@ -1057,12 +1159,12 @@ declaration_specifiers
 
 init_declarator_list
 	: init_declarator {$$ = $1;}
-	| init_declarator_list ',' init_declarator {$$ = AddDeclNode($1, $3);} // TODO: Merge the post_stmt_op
+	| init_declarator_list ',' init_declarator {$$ = AddDeclaration($1, $3);} // TODO: Merge the post_stmt_op
 	;
 
 init_declarator
-	: declarator {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1, NULL)), NULL);}
-	| declarator '=' initializer {$$ = MakeDeclNode(CreateIDList(CreateIdentifier($1, $3)), $3);}
+	: declarator {$$ = MakeDeclaration(CreateIDList(CreateIdentifier(GetNameInDeclarator($1), NULL)), NULL);}
+	| declarator '=' initializer {$$ = MakeDeclaration(CreateIDList(CreateIdentifier(GetNameInDeclarator($1), $3)), $3);}
 	;
 
 storage_class_specifier
@@ -1075,7 +1177,6 @@ storage_class_specifier
 type_specifier
 	: struct_or_union_specifier {$$ = NONE_TYPE;}
 	| enum_specifier {$$ = NONE_TYPE;}
-	/*| IDENTIFIER {$$ = FindSymbolInTable($1, SYMBOL_TYPENAME);}*/
     | TYPE_NAME {$$ = $1;}
 	| OPENCL_TYPE {$$ = $1;}
     ;
@@ -1161,7 +1262,10 @@ declarator
 
 
 direct_declarator
-	: IDENTIFIER {$$ = $1;}
+	: IDENTIFIER
+    {
+        $$ = CreateDeclarator($1, NULL);
+    }
 	| '(' declarator ')' {$$ = $2;}
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' {$$ = $1;}
 	| direct_declarator '[' type_qualifier_list ']' {$$ = $1;}
@@ -1171,7 +1275,10 @@ direct_declarator
 	| direct_declarator '[' type_qualifier_list '*' ']' {$$ = $1;}
 	| direct_declarator '[' '*' ']' {$$ = $1;}
 	| direct_declarator '[' ']' {$$ = $1;}
-	| direct_declarator '(' parameter_type_list ')' {$$ = $1;}
+	| direct_declarator '(' parameter_type_list ')'
+    {
+        $$ = AddToDeclarator($1, $3);
+    }
 	| direct_declarator '(' identifier_list ')' {$$ = $1;}
 	| direct_declarator '(' ')' {$$ = $1;}
 	;
@@ -1190,19 +1297,19 @@ type_qualifier_list
 
 
 parameter_type_list
-	: parameter_list
-	| parameter_list ',' ELLIPSIS
+	: parameter_list {$$ = $1;}
+	| parameter_list ',' ELLIPSIS {$$ = $1;}
 	;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list ',' parameter_declaration
+	: parameter_declaration {$$ = $1;}
+	| parameter_list ',' parameter_declaration {AddToParamList($1, $3);}
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator {printf("param: %s\n", (char*)($2));}
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
+	: declaration_specifiers declarator {$$ = CreateParamList(CreateParameter($1, GetNameInDeclarator($2)));}
+	| declaration_specifiers abstract_declarator {$$ = NULL;}
+	| declaration_specifiers {$$ = NULL;}
 	;
 
 identifier_list
@@ -1264,7 +1371,7 @@ designator
 
 statement
 	: labeled_statement {$$ = NULL;}
-	| compound_statement {$$ = $1;}  // Should not be a statement, return STMT_List*
+	| {CreateSymbolTableLevel();} compound_statement {ReleaseSymbolTableLevel(); $$ = $2;}  // Should not be a statement, return STMT_List*
 	| expression_statement {$$ = CreateSTMTList(CreateSTMT($1, EXPRESSION_STMT));}
 	| selection_statement {$$ = $1;}
 	| iteration_statement {$$ = $1;} // Statement contains Stmt_List
@@ -1279,7 +1386,7 @@ labeled_statement
 
 compound_statement
 	: '{' '}' {$$ = NULL;}
-    | '{' {CreateSymbolTableLevel();} block_item_list '}' {ReleaseSymbolTableLevel(); $$ = $3;}
+    | '{' block_item_list '}' {$$ = $2;}
 	;
 
 block_item_list
@@ -1385,19 +1492,35 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
+	: declaration_specifiers declarator declaration_list
     {
-        printf("[FUNCTION NAME \'%s\' START]\n", (char*)($2));
+        CreateSymbolTableLevel();
+        AddParamInDeclarator($2);
+    }
+        compound_statement
+    {
+        char* name = GetNameInDeclarator($2);
+        ReleaseSymbolTableLevel();
+        printf("[FUNCTION NAME \'%s\' START]\n", name);
+        DebugSTMTList($5, 1);
+        ReleaseSTMTList($5);
+        printf("[FUNCTION NAME \'%s\' END]\n\n", name);
+        free (name);
+    }
+    | declaration_specifiers declarator
+    {
+        CreateSymbolTableLevel();
+        AddParamInDeclarator($2);
+    }
+        compound_statement
+    {
+        char* name = GetNameInDeclarator($2);
+        ReleaseSymbolTableLevel();
+        printf("[FUNCTION NAME \'%s\' START]\n", name);
         DebugSTMTList($4, 1);
         ReleaseSTMTList($4);
-        printf("[FUNCTION NAME \'%s\' END]\n\n", (char*)($2));
-    }
-    | declaration_specifiers declarator compound_statement
-    {
-        printf("[FUNCTION NAME \'%s\' START]\n", (char*)($2));
-        DebugSTMTList($3, 1);
-        ReleaseSTMTList($3);
-        printf("[FUNCTION NAME \'%s\' END]\n\n", (char*)($2));
+        printf("[FUNCTION NAME \'%s\' END]\n\n", name);
+        free (name);
     }
 	;
 
