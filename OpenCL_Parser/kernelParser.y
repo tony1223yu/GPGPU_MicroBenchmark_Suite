@@ -2,38 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "kernelParser.h"
-#include "symbolTable.h"
-
-void initial();
-void MakeDependency(Operation*, Operation*, DEP_TYPE, unsigned long long int);
-PROGRAM* CreateProgram(FUNCTION*, FUNCTION*);
-void ReleaseOP(Operation*);
-Operation* CreateOP(OP_KIND);
-Operation* CreateOPWithDataHazard(OP_KIND, OP_List*, OP_List*);
-void GetStatementTypeName(Statement*, char*);
-void GetOperationDescriptor(Operation*, char*, char*);
-void ReleaseSTMTList(STMT_List*);
-void DebugSTMTList(STMT_List*, int);
-void DebugOPList(OP_List*);
-STMT_List* CreateSTMTList(Statement*);
-STMT_List* AddToSTMTList(STMT_List*, STMT_List*);
-void ReleaseSTMT(Statement*);
-Statement* CreateSTMT(void*, STMT_TYPE);
-void ReleaseOPList(OP_List*);
-OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
-OP_List* CreateEmptyOPList(OP_List*, OP_TYPE, char*);
-Declarator* CreateDeclarator(char*, Param_List*);
-Declarator* AddToDeclarator(Declarator*, Param_List*);
-char* GetNameInDeclarator(Declarator*);
-Declaration* AddDeclaration(Declaration*, Declaration*);
-Declaration* MakeDeclaration(ID_List*, OP_List*);
-Identifier* CreateIdentifier(char*, OP_List*);
-ID_List* CreateIDList(Identifier*);
-ID_List* AddToIDList(ID_List*, ID_List*);
-OP_TYPE MixType(OP_TYPE, OP_TYPE);
-Parameter* CreateParameter(OP_TYPE, char*);
-Param_List* CreateParamList(Parameter*);
-Param_List* AddToParamList(Param_List*, Param_List*);
 
 long long op_num;
 extern PROGRAM* prog;
@@ -171,12 +139,8 @@ Operation* CreateOPWithDataHazard(OP_KIND kind, OP_List* left, OP_List* right)
             tmp->data_dep_l = NULL;
         else if (left->op_head)
             MakeDependency(tmp, left->op_tail, DATA_DEP_L, 1);
-        else if (left->identifier)
-        {
-            MakeDependency(tmp, FindOPDepInTable(left->identifier), DATA_DEP_L, 1);
-            free (left->identifier);
-            left->identifier = NULL;
-        }
+        else if (left->table_entry)
+            MakeDependency(tmp, left->table_entry->op, DATA_DEP_L, 1);
         else
             tmp->data_dep_l = NULL;
 
@@ -184,12 +148,8 @@ Operation* CreateOPWithDataHazard(OP_KIND kind, OP_List* left, OP_List* right)
             tmp->data_dep_r = NULL;
         else if (right->op_head)
             MakeDependency(tmp, right->op_tail, DATA_DEP_R, 1);
-        else if (right->identifier)
-        {
-            MakeDependency(tmp, FindOPDepInTable(right->identifier), DATA_DEP_R, 1);
-            free (right->identifier);
-            right->identifier = NULL;
-        }
+        else if (right->table_entry)
+            MakeDependency(tmp, right->table_entry->op, DATA_DEP_R, 1);
         else
             tmp->data_dep_r = NULL;
 
@@ -673,16 +633,13 @@ Statement* CreateSTMT(void* ptr, STMT_TYPE type)
         }
         else if (list->op_head == NULL)
         {
-            if (list->identifier)
-                free (list->identifier);
             free(tmp);
             free(list);
             return NULL;
         }
         else
         {
-            if (list->identifier)
-                free (list->identifier);
+            list->table_entry = NULL;
             tmp->op_list = list;
         }
     }
@@ -710,26 +667,13 @@ void ReleaseOPList(OP_List* op_list)
         if (next)
             next = next->next;
     }
-
-    if (op_list->identifier)
-        free (op_list->identifier);
 }
 
+// TODO: handle symbol_entry issue
 OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
 {
     OP_TYPE mix_type;
     OP_List* mix_post_stmt_op_list;
-
-    if ((left != NULL) && (left->identifier))
-    {
-        free (left->identifier);
-        left->identifier = NULL;
-    }
-    if ((right != NULL) && (right->identifier))
-    {
-        free (right->identifier);
-        right->identifier = NULL;
-    }
 
     // type
     if ((left == NULL) && (right == NULL))
@@ -764,7 +708,6 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
             tmp->op_head = newOP;
             tmp->op_tail = newOP;
             tmp->curr_type = mix_type;
-            tmp->identifier = NULL;
             tmp->post_stmt_op_list = mix_post_stmt_op_list;
         }
         return tmp;
@@ -872,18 +815,15 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
     }
 }
 
-OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, char* identifier)
+OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, SymbolTableEntry* table_entry)
 {
     OP_List* tmp;
     tmp = (OP_List*)malloc(sizeof(OP_List));
     tmp->op_head = NULL;
     tmp->op_tail = NULL;
-    tmp->identifier = NULL;
+    tmp->table_entry = table_entry;
     tmp->curr_type = type;
     tmp->post_stmt_op_list = post_stmt_op_list;
-
-    if (identifier)
-        tmp->identifier = identifier;
 
     if (post_stmt_op_list)
     {
@@ -954,7 +894,8 @@ primary_expression
 	: IDENTIFIER 
     {
         OP_TYPE type = FindSymbolInTable($1, SYMBOL_IDENTIFIER);
-        $$ = CreateEmptyOPList(NULL, type, $1);
+        SymbolTableEntry* tmp = GetTableEntry($1);
+        $$ = CreateEmptyOPList(NULL, type, tmp);
     }
 	| CONSTANT
     {
@@ -1113,6 +1054,7 @@ assignment_expression
 	: conditional_expression {$$ = $1;}
 	| unary_expression assignment_operator assignment_expression
     {
+        // TODO: table_entry in AddToOPList()
         Operation* op = CreateOPWithDataHazard($2, $1, $3);
         $$ = AddToOPList($3, $1, op);
         UpdateSymbolTable($1, $$);

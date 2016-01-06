@@ -18,25 +18,53 @@ typedef enum OP_TYPE OP_TYPE;
 typedef enum OP_KIND OP_KIND;
 typedef enum STMT_TYPE STMT_TYPE;
 typedef enum DEP_TYPE DEP_TYPE;
+typedef struct SymbolTable SymbolTable;
+typedef struct SymbolTableEntry SymbolTableEntry;
+typedef struct SymbolTableLevel SymbolTableLevel;
+typedef enum SYMBOL_TYPE SYMBOL_TYPE;
 
+void CreateSymbolTable();
+void ReleaseSymbolTable();
+void CreateSymbolTableLevel();
+void ReleaseSymbolTableLevel();
+void AddIDToSymbolTable(OP_TYPE, char*, SYMBOL_TYPE);
+void AddIDListToSymbolTable(OP_TYPE, ID_List*, SYMBOL_TYPE);
+OP_TYPE FindSymbolInTable(char*, SYMBOL_TYPE);
+SymbolTableEntry* GetTableEntry(char*);
+void initial();
+void MakeDependency(Operation*, Operation*, DEP_TYPE, unsigned long long int);
+PROGRAM* CreateProgram(FUNCTION*, FUNCTION*);
+void ReleaseOP(Operation*);
+Operation* CreateOP(OP_KIND);
+Operation* CreateOPWithDataHazard(OP_KIND, OP_List*, OP_List*);
+void GetStatementTypeName(Statement*, char*);
+void GetOperationDescriptor(Operation*, char*, char*);
+void ReleaseSTMTList(STMT_List*);
+void DebugSTMTList(STMT_List*, int);
+void DebugOPList(OP_List*);
+STMT_List* CreateSTMTList(Statement*);
+STMT_List* AddToSTMTList(STMT_List*, STMT_List*);
+void ReleaseSTMT(Statement*);
+Statement* CreateSTMT(void*, STMT_TYPE);
+void ReleaseOPList(OP_List*);
+OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
+OP_List* CreateEmptyOPList(OP_List*, OP_TYPE, SymbolTableEntry*);
+Declarator* CreateDeclarator(char*, Param_List*);
+Declarator* AddToDeclarator(Declarator*, Param_List*);
+char* GetNameInDeclarator(Declarator*);
+Declaration* AddDeclaration(Declaration*, Declaration*);
+Declaration* MakeDeclaration(ID_List*, OP_List*);
+Identifier* CreateIdentifier(char*, OP_List*);
+ID_List* CreateIDList(Identifier*);
+ID_List* AddToIDList(ID_List*, ID_List*);
+OP_TYPE MixType(OP_TYPE, OP_TYPE);
+Parameter* CreateParameter(OP_TYPE, char*);
+Param_List* CreateParamList(Parameter*);
+Param_List* AddToParamList(Param_List*, Param_List*);
+
+
+SymbolTable* symTable;
 PROGRAM* prog;
-
-enum DEP_TYPE
-{
-    ISSUE_DEP = 0,
-    STRUCTURAL_DEP,
-    DATA_DEP_L,
-    DATA_DEP_R
-};
-
-enum STMT_TYPE
-{
-    EXPRESSION_STMT = 0,
-    SELECTION_STMT,
-    ITERATION_STMT,
-    IF_STMT,
-    ELSE_STMT
-};
 
 enum OP_TYPE
 {
@@ -96,6 +124,52 @@ enum OP_TYPE
     DOUBLE16_TYPE,
 };
 
+enum SYMBOL_TYPE
+{
+    SYMBOL_IDENTIFIER = 0,
+    SYMBOL_TYPENAME
+};
+
+struct SymbolTableEntry
+{
+    OP_TYPE type;
+    char* sym_name;
+    SYMBOL_TYPE sym_type;
+    SymbolTableEntry* next;
+    Operation* op;
+};
+
+struct SymbolTable
+{
+    SymbolTableLevel* level_head;
+    SymbolTableLevel* level_tail;
+};
+
+struct SymbolTableLevel
+{
+    SymbolTableLevel* prev;
+    SymbolTableLevel* next;
+    SymbolTableEntry* entry_head;
+    SymbolTableEntry* entry_tail;
+};
+
+enum DEP_TYPE
+{
+    ISSUE_DEP = 0,
+    STRUCTURAL_DEP,
+    DATA_DEP_L,
+    DATA_DEP_R
+};
+
+enum STMT_TYPE
+{
+    EXPRESSION_STMT = 0,
+    SELECTION_STMT,
+    ITERATION_STMT,
+    IF_STMT,
+    ELSE_STMT
+};
+
 enum OP_KIND
 {
     NONE_OP = 0,
@@ -145,7 +219,7 @@ struct OP_List
     Operation* op_head;
     Operation* op_tail;
     OP_List* post_stmt_op_list;
-    char* identifier;
+    SymbolTableEntry* table_entry;
     OP_TYPE curr_type;
 };
 

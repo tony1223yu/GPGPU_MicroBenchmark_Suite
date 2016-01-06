@@ -8,7 +8,6 @@ IS                      ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
 
 %{
 #include <stdio.h>
-#include "symbolTable.h"
 #include "kernelParser.h"
 #include "y.tab.h"
 

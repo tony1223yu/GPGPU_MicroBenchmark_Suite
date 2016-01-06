@@ -1,38 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "symbolTable.h"
+#include "kernelParser.h"
 
 // use to maintain the RAW data hazard of specific identifier (store the latest operation)
 void UpdateSymbolTable(OP_List* source, OP_List* update)
 {
-    char* name = source->identifier;
-    if (name != NULL)
+    SymbolTableEntry* tmp = source->table_entry;
+    if (tmp != NULL)
     {
-        SymbolTableLevel* currLevel = symTable->level_tail;
-        int cmpResult;
-        while (currLevel)
-        {
-            SymbolTableEntry* currEntry = currLevel->entry_head;
-            while (currEntry)
-            {
-                cmpResult = strcmp(currEntry->sym_name, name);
-                if (cmpResult == 0)
-                {
-                    currEntry->op = update->op_tail;
-                }
-                else if (cmpResult > 0)
-                {
-                    break;
-                }
-                currEntry = currEntry->next;
-            }
-            currLevel = currLevel->prev;
-        }
+        tmp->op = update->op_tail;
     }
 }
 
 // use to find the dependency due to RAW data hazard of specific identifier
-Operation* FindOPDepInTable(char* name)
+SymbolTableEntry* GetTableEntry(char* name)
 {
     if (name != NULL)
     {
@@ -46,7 +27,7 @@ Operation* FindOPDepInTable(char* name)
                 cmpResult = strcmp(currEntry->sym_name, name);
                 if (cmpResult == 0)
                 {
-                    return currEntry->op;
+                    return currEntry;
                 }
                 else if (cmpResult > 0)
                 {
