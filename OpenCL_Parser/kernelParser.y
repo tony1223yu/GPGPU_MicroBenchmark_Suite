@@ -908,7 +908,7 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, char* ident
 
 %token KERNEL ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
 
-%token <op_type> OPENCL_TYPE TYPE_NAME GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC
+%token <op_type> OPENCL_TYPE TYPE_NAME GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC WORK_DIM_FUNC NUM_GROUPS_FUNC GROUP_ID_FUNC
 %token <op_type> CONSTANT
 %token <ptr> IDENTIFIER
 %token STRING_LITERAL SIZEOF
@@ -970,8 +970,8 @@ postfix_expression
 	| postfix_expression '[' expression ']' {$$ = AddToOPList($1, $3, CreateOP(MEMORY_OP));}
 	| postfix_expression '(' ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
-	| postfix_expression '.' IDENTIFIER {$$ = $1;}
-	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;}
+	| postfix_expression '.' IDENTIFIER {$$ = $1;} /* TODO: reference for structure/union */
+	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;} /* TODO: reference for structure/union */
 	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), ((OP_List*)($1))->curr_type, NULL), NULL);}
     | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type, NULL), NULL);}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;} /* TODO */
@@ -980,6 +980,9 @@ postfix_expression
     | GLOBAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
     | LOCAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
     | LOCAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
+    | WORK_DIM_FUNC '(' ')' {$$ = CreateEmptyOPList(NULL, $1, NULL);}
+    | NUM_GROUPS_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
+    | GROUP_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
 	;
 
 argument_expression_list
@@ -1214,7 +1217,7 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list {$$ = ($1 | $2);}
+	: type_specifier specifier_qualifier_list {$$ = MixType($1, $2);}
 	| type_specifier {$$ = $1;}
     | type_qualifier specifier_qualifier_list {$$ = $2;}
 	| type_qualifier {$$ = NONE_TYPE;}
