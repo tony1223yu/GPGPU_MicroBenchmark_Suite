@@ -33,6 +33,8 @@ void comment(void);
 "get_num_groups"      { count(); yylval.op_type = (ULONG_TYPE); return (NUM_GROUPS_FUNC); }
 "get_group_id"      { count(); yylval.op_type = (ULONG_TYPE); return (GROUP_ID_FUNC); }
 
+"#define"          { count(); return (DEFINE); }
+
 "float"           { count(); yylval.op_type = (FLOAT_TYPE); return (OPENCL_TYPE); }
 "float2"          { count(); yylval.op_type = (FLOAT2_TYPE); return (OPENCL_TYPE); }
 "float4"          { count(); yylval.op_type = (FLOAT4_TYPE); return (OPENCL_TYPE); }
@@ -236,10 +238,10 @@ int check_type(void)
 *	it actually will only return IDENTIFIER
 */
 
-    OP_TYPE type = FindSymbolInTable(yytext, SYMBOL_TYPENAME);
-    if (type != NONE_TYPE)
+    TypeDescriptor type_desc = FindSymbolInTable(yytext, SYMBOL_TYPENAME);
+    if (type_desc.type != NONE_TYPE)
     {
-        yylval.op_type = type;
+        yylval.type_desc = type_desc;
         return TYPE_NAME;
     }
     else

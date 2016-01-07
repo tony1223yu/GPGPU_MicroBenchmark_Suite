@@ -1,6 +1,8 @@
 #ifndef __OPENCL_PARSER_H__
 #define __OPENCL_PARSER_H__
 
+/*========================================================================== DATA STRUCTURE DECLARATION ===============================================================*/
+
 typedef struct DEP DEP;
 typedef struct Operation Operation;
 typedef struct STMT_List STMT_List;
@@ -21,15 +23,21 @@ typedef enum DEP_TYPE DEP_TYPE;
 typedef struct SymbolTable SymbolTable;
 typedef struct SymbolTableEntry SymbolTableEntry;
 typedef struct SymbolTableLevel SymbolTableLevel;
+typedef struct TypeDescriptor TypeDescriptor;
+typedef struct StructMember StructMember;
+typedef struct StructDescriptor StructDescriptor;
+typedef struct StructDescriptorTable StructDescriptorTable;
 typedef enum SYMBOL_TYPE SYMBOL_TYPE;
+
+/*========================================================================== FUNCTION DECLARATION ===============================================================*/
 
 void CreateSymbolTable();
 void ReleaseSymbolTable();
 void CreateSymbolTableLevel();
 void ReleaseSymbolTableLevel();
-void AddIDToSymbolTable(OP_TYPE, char*, SYMBOL_TYPE);
-void AddIDListToSymbolTable(OP_TYPE, ID_List*, SYMBOL_TYPE);
-OP_TYPE FindSymbolInTable(char*, SYMBOL_TYPE);
+void AddIDToSymbolTable(TypeDescriptor, char*, SYMBOL_TYPE);
+void AddIDListToSymbolTable(TypeDescriptor, ID_List*, SYMBOL_TYPE);
+TypeDescriptor FindSymbolInTable(char*, SYMBOL_TYPE);
 SymbolTableEntry* GetTableEntry(char*);
 void initial();
 void MakeDependency(Operation*, Operation*, DEP_TYPE, unsigned long long int);
@@ -48,7 +56,7 @@ void ReleaseSTMT(Statement*);
 Statement* CreateSTMT(void*, STMT_TYPE);
 void ReleaseOPList(OP_List*);
 OP_List* AddToOPList(OP_List*, OP_List*, Operation*);
-OP_List* CreateEmptyOPList(OP_List*, OP_TYPE, SymbolTableEntry*);
+OP_List* CreateEmptyOPList(OP_List*, TypeDescriptor, SymbolTableEntry*);
 Declarator* CreateDeclarator(char*, Param_List*);
 Declarator* AddToDeclarator(Declarator*, Param_List*);
 char* GetNameInDeclarator(Declarator*);
@@ -57,18 +65,28 @@ Declaration* MakeDeclaration(ID_List*, OP_List*);
 Identifier* CreateIdentifier(char*, OP_List*);
 ID_List* CreateIDList(Identifier*);
 ID_List* AddToIDList(ID_List*, ID_List*);
-OP_TYPE MixType(OP_TYPE, OP_TYPE);
-Parameter* CreateParameter(OP_TYPE, char*);
+TypeDescriptor MixType(TypeDescriptor, TypeDescriptor);
+Parameter* CreateParameter(TypeDescriptor, char*);
 Param_List* CreateParamList(Parameter*);
 Param_List* AddToParamList(Param_List*, Param_List*);
+StructMember* CreateStructMember(OP_TYPE, char*);
+StructDescriptor* AddToStructDescriptor(StructDescriptor*, StructMember*);
+void AddToStructDesciptorTable(StructDescriptor*);
+TypeDescriptor CreateTypeDescriptor(OP_TYPE, StructDescriptor*);
 
+/*========================================================================== GLOBAL VARIABLE DEFINITION ===============================================================*/
 
+StructDescriptorTable* structTable;
 SymbolTable* symTable;
 PROGRAM* prog;
+
+/*========================================================================== DATA STRUCTURE DEFINITION ===============================================================*/
 
 enum OP_TYPE
 {
     NONE_TYPE = 0,
+    STRUCT_TYPE,
+    UNION_TYPE,
     BOOL_TYPE = 0x1000,
     HALF_TYPE,
     VOID_TYPE,
@@ -130,9 +148,36 @@ enum SYMBOL_TYPE
     SYMBOL_TYPENAME
 };
 
-struct SymbolTableEntry
+struct StructMember
 {
     OP_TYPE type;
+    char* name;
+    StructMember* next;
+};
+
+struct StructDescriptor
+{
+    StructMember* member_head;
+    StructMember* member_tail;
+    StructDescriptor* next;
+
+};
+
+struct StructDescriptorTable
+{
+    StructDescriptor* desc_head;
+    StructDescriptor* desc_tail;
+};
+
+struct TypeDescriptor
+{
+    OP_TYPE type;
+    StructDescriptor* struct_desc;
+};
+
+struct SymbolTableEntry
+{
+    TypeDescriptor type_desc;
     char* sym_name;
     SYMBOL_TYPE sym_type;
     SymbolTableEntry* next;
@@ -202,7 +247,7 @@ struct ID_List
 
 struct Parameter
 {
-    OP_TYPE type;
+    TypeDescriptor type_desc;
     char* name;
     Parameter* next;
 };
@@ -220,7 +265,7 @@ struct OP_List
     Operation* op_tail;
     OP_List* post_stmt_op_list;
     SymbolTableEntry* table_entry;
-    OP_TYPE curr_type;
+    TypeDescriptor curr_type_desc;
 };
 
 // For declarator
@@ -240,7 +285,6 @@ struct Declaration
 /* Add pre-statement expression? */
 struct Statement
 {
-    /* TODO: Use union to include three types of pointers? EXPRESSION_STMT, ITERATION_STMT, SELECTION_STMT */
     OP_List* op_list;
     STMT_List* stmt_list;
     STMT_TYPE type;
@@ -266,19 +310,6 @@ struct STMT_List
 {
     Statement* stmt_head;
     Statement* stmt_tail;
-};
-
-struct FUNCTION
-{
-    char* functionName;
-    PROGRAM* parentProgram;
-    FUNCTION* next;
-};
-
-struct PROGRAM
-{
-    FUNCTION* function_head;
-    FUNCTION* function_tail;
 };
 
 #endif

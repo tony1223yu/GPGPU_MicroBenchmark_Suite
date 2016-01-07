@@ -41,7 +41,7 @@ SymbolTableEntry* GetTableEntry(char* name)
     return NULL;
 }
 
-OP_TYPE FindSymbolInTable(char* name, SYMBOL_TYPE type)
+TypeDescriptor FindSymbolInTable(char* name, SYMBOL_TYPE type)
 {
     SymbolTableLevel* currLevel = symTable->level_tail;
     int cmpResult;
@@ -55,14 +55,14 @@ OP_TYPE FindSymbolInTable(char* name, SYMBOL_TYPE type)
             {
                 if (currEntry->sym_type == type)
                 {
-                    return currEntry->type;
+                    return currEntry->type_desc;
                 }
                 else
                 {
                     if (type == SYMBOL_IDENTIFIER)
                         fprintf(stderr, "Symbol \'%s\' not found\n", name);
                     
-                    return NONE_TYPE;
+                    return CreateTypeDescriptor(NONE_TYPE, NULL);
                 }
             }
             else if (cmpResult > 0)
@@ -76,14 +76,14 @@ OP_TYPE FindSymbolInTable(char* name, SYMBOL_TYPE type)
     if (type == SYMBOL_IDENTIFIER)
         fprintf(stderr, "Symbol \'%s\' not found\n", name);
     
-    return NONE_TYPE;
+    return CreateTypeDescriptor(NONE_TYPE, NULL);
 }
 
-void AddIDToSymbolTable(OP_TYPE type, char* ID, SYMBOL_TYPE sym_type)
+void AddIDToSymbolTable(TypeDescriptor type_desc, char* ID, SYMBOL_TYPE sym_type)
 {
     SymbolTableLevel* currLevel = symTable->level_tail;
     SymbolTableEntry* tmp = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
-    tmp->type = type;
+    tmp->type_desc = type_desc;
     tmp->sym_name = ID;
     tmp->sym_type = sym_type;
     tmp->next = NULL;
@@ -104,7 +104,7 @@ void AddIDToSymbolTable(OP_TYPE type, char* ID, SYMBOL_TYPE sym_type)
             if (!iterEntry) // to the end
             {
                 prev->next = tmp;
-                currLevel->entry_tail = prev;
+                currLevel->entry_tail = tmp;
                 break;
             }
 
@@ -132,7 +132,7 @@ void AddIDToSymbolTable(OP_TYPE type, char* ID, SYMBOL_TYPE sym_type)
     }
 }
 // Add to the last level in symTable
-void AddIDListToSymbolTable(OP_TYPE type, ID_List* IDs, SYMBOL_TYPE sym_type)
+void AddIDListToSymbolTable(TypeDescriptor type_desc, ID_List* IDs, SYMBOL_TYPE sym_type)
 {
     Identifier* iter = IDs->id_head;
     SymbolTableLevel* currLevel = symTable->level_tail;
@@ -140,7 +140,7 @@ void AddIDListToSymbolTable(OP_TYPE type, ID_List* IDs, SYMBOL_TYPE sym_type)
     while (iter)
     {
         SymbolTableEntry* tmp = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
-        tmp->type = type;
+        tmp->type_desc = type_desc;
         tmp->sym_name = iter->name;
         tmp->sym_type = sym_type;
         tmp->next = NULL;

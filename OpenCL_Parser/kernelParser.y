@@ -6,10 +6,11 @@
 long long op_num;
 extern PROGRAM* prog;
 extern SymbolTable* symTable;
+extern StructDescriptorTable* structTable;
 
-OP_TYPE MixType(OP_TYPE left, OP_TYPE right)
+TypeDescriptor MixType(TypeDescriptor left, TypeDescriptor right)
 {
-    return ((left > right) ? left : right);
+    return CreateTypeDescriptor(((left.type > right.type) ? left.type : right.type), NULL);
 }
 
 void initial()
@@ -57,66 +58,6 @@ void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsig
         }
     }
 }
-
-PROGRAM* CreateProgram(FUNCTION* func_head, FUNCTION* func_tail)
-{
-    PROGRAM* tmp;
-    FUNCTION* iter;
-
-    tmp = (PROGRAM*)malloc(sizeof(PROGRAM));
-    tmp->function_head = func_head;
-    tmp->function_tail = func_tail;
-
-    for (iter = func_head ; iter != NULL ; iter = iter->next)
-    {
-        iter->parentProgram = tmp;
-    }
-
-    return tmp;
-}
-
-/*
-void CreateFunction(char *name, STMT_GROUP* group_head, STMT_GROUP* group_tail)
-{
-    FUNCTION* tmp;
-    STMT_GROUP* iter;
-    STMT_GROUP* iter_sib;
-
-    fprintf(stderr, "[OpenCL Parser] Add function %s\n", name);
-
-    tmp = (FUNCTION*)malloc(sizeof(FUNCTION));
-    tmp->functionName = name;
-    tmp->stmt_group_head = group_head;
-    tmp->stmt_group_tail = group_tail;
-    tmp->next = NULL;
-    tmp->parentProgram = NULL;
-
-    for (iter = group_head ; iter != NULL ; iter = iter->next)
-    {
-        iter_sib = iter->sibling;
-        while (iter_sib != NULL)
-        {
-            iter_sib->parentFunction = tmp;
-            iter_sib = iter_sib->sibling;
-        }
-        iter->parentFunction = tmp;
-    }
-
-    if (curFunction_h == NULL)
-    {
-        curFunction_h = tmp;
-        curFunction_t = tmp;
-    }
-    else
-    {
-        curFunction_t->next = tmp;
-        curFunction_t = tmp;
-    }
-
-    curSTMTGroup_h = NULL;
-    curSTMTGroup_t = NULL;
-}
-*/
 
 // use to create new operation with RAW dependency
 Operation* CreateOPWithDataHazard(OP_KIND kind, OP_List* left, OP_List* right)
@@ -385,10 +326,10 @@ void DebugOPList(OP_List* list)
     }
 }
 
-Parameter* CreateParameter(OP_TYPE type, char* name)
+Parameter* CreateParameter(TypeDescriptor type_desc, char* name)
 {
     Parameter* tmp = (Parameter*) malloc(sizeof(Parameter));
-    tmp->type = type;
+    tmp->type_desc = type_desc;
     tmp->name = name;
     tmp->next = NULL;
     return tmp;
@@ -435,7 +376,7 @@ void AddParamInDeclarator(Declarator* decl)
         Parameter* iter = decl->Params->param_head;
         while (iter)
         {
-            AddIDToSymbolTable(iter->type, iter->name, SYMBOL_IDENTIFIER);
+            AddIDToSymbolTable(iter->type_desc, iter->name, SYMBOL_IDENTIFIER);
             iter = iter->next;
         }
         free (decl->Params);
@@ -672,21 +613,21 @@ void ReleaseOPList(OP_List* op_list)
 // TODO: handle symbol_entry issue
 OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
 {
-    OP_TYPE mix_type;
+    TypeDescriptor mix_type;
     OP_List* mix_post_stmt_op_list;
 
     // type
     if ((left == NULL) && (right == NULL))
-        mix_type = NONE_TYPE;
+        mix_type = CreateTypeDescriptor(NONE_TYPE, NULL);
     else if (left == NULL)
-        mix_type = right->curr_type;
+        mix_type = right->curr_type_desc;
     else if (right == NULL)
-        mix_type = left->curr_type;
+        mix_type = left->curr_type_desc;
     else
-        mix_type = MixType(left->curr_type, right->curr_type);
+        mix_type = MixType(left->curr_type_desc, right->curr_type_desc);
 
     if (newOP)
-        newOP->type = mix_type;
+        newOP->type = mix_type.type;
 
     // post_stmt_op_list
     if ((left == NULL) && (right == NULL))
@@ -707,7 +648,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
             tmp = (OP_List*)malloc(sizeof(OP_List));
             tmp->op_head = newOP;
             tmp->op_tail = newOP;
-            tmp->curr_type = mix_type;
+            tmp->curr_type_desc = mix_type;
             tmp->post_stmt_op_list = mix_post_stmt_op_list;
         }
         return tmp;
@@ -728,7 +669,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
                 right->op_tail = newOP;
             }
         }
-        right->curr_type = mix_type;
+        right->curr_type_desc = mix_type;
         right->post_stmt_op_list = mix_post_stmt_op_list;
         return right;
     }
@@ -748,7 +689,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
                 left->op_tail = newOP;
             }
         }
-        left->curr_type = mix_type;
+        left->curr_type_desc = mix_type;
         left->post_stmt_op_list = mix_post_stmt_op_list;
         return left;
     } 
@@ -768,7 +709,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
             {
                 left->op_tail = right->op_tail;
             }
-            left->curr_type = mix_type;
+            left->curr_type_desc = mix_type;
             left->post_stmt_op_list = mix_post_stmt_op_list;
             free (right);
             return left;
@@ -781,7 +722,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
                 right->op_tail->next = newOP;
                 right->op_tail = newOP;
             }
-            right->curr_type = mix_type;
+            right->curr_type_desc = mix_type;
             right->post_stmt_op_list = mix_post_stmt_op_list;
             free (left);
             return right;
@@ -794,7 +735,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
                 left->op_tail->next = newOP;
                 left->op_tail = newOP;
             }
-            left->curr_type = mix_type;
+            left->curr_type_desc = mix_type;
             left->post_stmt_op_list = mix_post_stmt_op_list;
             free (right);
             return left;
@@ -806,7 +747,7 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
                 left->op_head = newOP;
                 left->op_tail = newOP;
             }
-            left->curr_type = mix_type;
+            left->curr_type_desc = mix_type;
             left->post_stmt_op_list = mix_post_stmt_op_list;
             free (right);
             return left;
@@ -815,14 +756,14 @@ OP_List* AddToOPList(OP_List* left, OP_List* right, Operation* newOP)
     }
 }
 
-OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, SymbolTableEntry* table_entry)
+OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, TypeDescriptor type_desc, SymbolTableEntry* table_entry)
 {
     OP_List* tmp;
     tmp = (OP_List*)malloc(sizeof(OP_List));
     tmp->op_head = NULL;
     tmp->op_tail = NULL;
     tmp->table_entry = table_entry;
-    tmp->curr_type = type;
+    tmp->curr_type_desc = type_desc;
     tmp->post_stmt_op_list = post_stmt_op_list;
 
     if (post_stmt_op_list)
@@ -830,10 +771,95 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, SymbolTable
         Operation* iterOP = post_stmt_op_list->op_head;
         while (iterOP)
         {
-            iterOP->type = type;
+            iterOP->type = type_desc.type;
             iterOP = iterOP->next;
         }
     }
+    return tmp;
+}
+
+StructMember* CreateStructMember(OP_TYPE type, char* name)
+{
+    StructMember* tmp = (StructMember*) malloc(sizeof(StructMember));
+    tmp->type = type;
+    tmp->name = name;
+    tmp->next = NULL;
+    return tmp;
+}
+
+StructDescriptor* AddToStructDescriptor(StructDescriptor* origin, StructMember* newMember)
+{
+    if (!newMember)
+        return origin;
+    else if (!origin)
+    {
+        StructDescriptor* tmp = (StructDescriptor*) malloc(sizeof(StructDescriptor));
+        tmp->member_head = newMember;
+        tmp->member_tail = newMember;
+        tmp->next = NULL;
+        return tmp;
+    }
+    else
+    {
+        StructMember* iter = origin->member_head;
+        StructMember* prev = NULL;
+        int cmpResult;
+        while (1)
+        {
+            if (!iter)
+            {
+                prev->next = newMember;
+                origin->member_tail = newMember;
+                break;
+            }
+            cmpResult = strcmp(iter->name, newMember->name);
+            if (cmpResult > 0)
+            {
+                if (prev)
+                    prev->next = newMember;
+
+                newMember->next = iter;
+
+                if (iter == origin->member_head)
+                    origin->member_head = newMember;
+
+                break;
+            }
+            else if (cmpResult == 0)
+            {
+                fprintf(stderr, "Redefine symbol %s\n", newMember->name);
+                break;
+            }
+            else // cmpResult < 0
+            {
+                prev = iter;
+                iter = iter->next;
+            }
+        }
+        return origin;
+    }
+}
+
+void AddToStructDesciptorTable(StructDescriptor* new_desc)
+{
+    if (!structTable)
+    {
+        structTable = (StructDescriptorTable*) malloc(sizeof(StructDescriptorTable));
+        structTable->desc_head = new_desc;
+        structTable->desc_tail = new_desc;
+    }
+    else
+    {
+        structTable->desc_tail->next = new_desc;
+        structTable->desc_tail = new_desc;
+    }
+}
+
+TypeDescriptor CreateTypeDescriptor(OP_TYPE type, StructDescriptor* struct_desc)
+{
+    TypeDescriptor tmp;
+    tmp.type = type;
+    tmp.struct_desc = struct_desc;
     return tmp;
 }
 
@@ -842,11 +868,12 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, SymbolTable
 %union
 {
     OP_TYPE op_type;
+    TypeDescriptor type_desc;
     OP_KIND op_kind;
     void *ptr;
 }
 
-%token KERNEL ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT
+%token KERNEL ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT DEFINE
 
 %token <op_type> OPENCL_TYPE TYPE_NAME GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC WORK_DIM_FUNC NUM_GROUPS_FUNC GROUP_ID_FUNC
 %token <op_type> CONSTANT
@@ -863,7 +890,9 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, OP_TYPE type, SymbolTable
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <op_type> type_specifier declaration_specifiers storage_class_specifier specifier_qualifier_list type_name
+%type <type_desc> type_specifier declaration_specifiers storage_class_specifier specifier_qualifier_list type_name struct_or_union_specifier
+
+%type <op_type> struct_or_union
 
 %type <op_kind> assignment_operator
 
@@ -893,13 +922,13 @@ program_unit
 primary_expression
 	: IDENTIFIER 
     {
-        OP_TYPE type = FindSymbolInTable($1, SYMBOL_IDENTIFIER);
+        TypeDescriptor type = FindSymbolInTable($1, SYMBOL_IDENTIFIER);
         SymbolTableEntry* tmp = GetTableEntry($1);
         $$ = CreateEmptyOPList(NULL, type, tmp);
     }
 	| CONSTANT
     {
-        $$ = CreateEmptyOPList(NULL, $1, NULL);
+        $$ = CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL);
     }
 	| STRING_LITERAL {$$ = NULL;}
 	| '(' expression ')' {$$ = $2;}
@@ -913,17 +942,38 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '.' IDENTIFIER {$$ = $1;} /* TODO: reference for structure/union */
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;} /* TODO: reference for structure/union */
-	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), ((OP_List*)($1))->curr_type, NULL), NULL);}
-    | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type, NULL), NULL);}
+	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
+    | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;} /* TODO */
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;} /* TODO */
-    | GLOBAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
-    | GLOBAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
-    | LOCAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
-    | LOCAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
-    | WORK_DIM_FUNC '(' ')' {$$ = CreateEmptyOPList(NULL, $1, NULL);}
-    | NUM_GROUPS_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
-    | GROUP_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, $1, NULL), $3, NULL);}
+    | GLOBAL_ID_FUNC '(' assignment_expression ')'
+	{
+		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
+	}
+    | GLOBAL_SIZE_FUNC '(' assignment_expression ')'
+	{
+		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
+	}
+    | LOCAL_ID_FUNC '(' assignment_expression ')'
+	{
+		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
+	}
+    | LOCAL_SIZE_FUNC '(' assignment_expression ')'
+	{
+		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
+	}
+    | WORK_DIM_FUNC '(' ')'
+	{
+		$$ = CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL);
+	}
+    | NUM_GROUPS_FUNC '(' assignment_expression ')'
+	{
+		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
+	}
+    | GROUP_ID_FUNC '(' assignment_expression ')'
+	{
+		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
+	}
 	;
 
 argument_expression_list
@@ -962,7 +1012,7 @@ cast_expression
 	| '(' type_name ')' cast_expression
     {
         if ($4)
-            ((OP_List*)($4))->curr_type = $2;
+            ((OP_List*)($4))->curr_type_desc = $2;
         $$ = $4;
     }
 	;
@@ -1103,14 +1153,14 @@ declaration
 
 declaration_specifiers
 	: storage_class_specifier {$$ = $1;}
-    | storage_class_specifier declaration_specifiers {$$ = ($1 | $2);}
+    | storage_class_specifier declaration_specifiers {$$ = MixType($1, $2);}
 	| type_specifier {$$ = $1;}
-	| type_specifier declaration_specifiers {$$ = ($1 | $2);}
-	| type_qualifier {$$ = NONE_TYPE;}
+	| type_specifier declaration_specifiers {$$ = MixType($1, $2);}
+	| type_qualifier {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
 	| type_qualifier declaration_specifiers {$$ = $2;}
-	| function_specifier {$$ = NONE_TYPE;}
+	| function_specifier {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
 	| function_specifier declaration_specifiers {$$ = $2;}
-    | address_qualifier {$$ = NONE_TYPE;}
+    | address_qualifier {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
     | address_qualifier declaration_specifiers {$$ = $2;}
 	;
 
@@ -1125,28 +1175,28 @@ init_declarator
 	;
 
 storage_class_specifier
-	: EXTERN {$$ = NONE_TYPE;}
-	| STATIC {$$ = NONE_TYPE;}
-	| AUTO {$$ = NONE_TYPE;}
-	| REGISTER {$$ = NONE_TYPE;}
+	: EXTERN {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
+	| STATIC {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
+	| AUTO {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
+	| REGISTER {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
 	;
 
 type_specifier
-	: struct_or_union_specifier {$$ = NONE_TYPE;}
-	| enum_specifier {$$ = NONE_TYPE;}
-    | TYPE_NAME {$$ = $1;}
-	| OPENCL_TYPE {$$ = $1;}
+    : struct_or_union_specifier {$$ = $1;}
+	| enum_specifier {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
+    | TYPE_NAME {$$ = CreateTypeDescriptor($1, NULL);} // TODO: check if it is struct
+	| OPENCL_TYPE {$$ = CreateTypeDescriptor($1, NULL);}
     ;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
-	| struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER
+	: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {$$ = CreateTypeDescriptor($1, NULL);}
+	| struct_or_union '{' struct_declaration_list '}' {$$ = CreateTypeDescriptor($1, NULL);}
+	| struct_or_union IDENTIFIER {$$ = CreateTypeDescriptor($1, NULL);}
 	;
 
 struct_or_union
-	: STRUCT
-	| UNION
+	: STRUCT {$$ = STRUCT_TYPE;}
+	| UNION {$$ = UNION_TYPE;}
 	;
 
 struct_declaration_list
@@ -1162,7 +1212,7 @@ specifier_qualifier_list
 	: type_specifier specifier_qualifier_list {$$ = MixType($1, $2);}
 	| type_specifier {$$ = $1;}
     | type_qualifier specifier_qualifier_list {$$ = $2;}
-	| type_qualifier {$$ = NONE_TYPE;}
+	| type_qualifier {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
 	;
 
 struct_declarator_list
