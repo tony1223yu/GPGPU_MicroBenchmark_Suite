@@ -1,7 +1,9 @@
 Data dependencies which related to loop iterations.
 [v] Parameter declaration/scope of functions
 OpenCL NDRange functions
-struct and union (store the name in OP type)
+[v] struct
+RAW dependency with the granularity of struct member
+union
 RAW hazard with increment operation
 Memory operations of the arithmetic assignment
 Preprocessor

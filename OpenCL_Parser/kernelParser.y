@@ -778,10 +778,47 @@ OP_List* CreateEmptyOPList(OP_List* post_stmt_op_list, TypeDescriptor type_desc,
     return tmp;
 }
 
-StructMember* CreateStructMember(OP_TYPE type, char* name)
+StructDescriptor* MergeStructDescriptor(StructDescriptor* left, StructDescriptor* right)
+{
+    if ((left == NULL) && (right == NULL))
+        return NULL;
+    else if (left == NULL)
+        return right;
+    else if (right == NULL)
+        return left;
+    else
+    {
+        StructMember* iter_member = right->member_head;
+        while (iter_member)
+        {
+            left = AddToStructDescriptor(left, iter_member);
+            iter_member = iter_member->next;
+        }
+        return left;
+    }
+}
+
+StructDescriptor* CreateStructDescriptor(TypeDescriptor type_desc, ID_List* IDs)
+{
+    Identifier* iter = IDs->id_head;
+
+    StructMember* tmp_member = NULL;
+    StructDescriptor* tmp_desc = NULL;
+
+    while (iter)
+    {
+        tmp_member = CreateStructMember(type_desc, iter->name);
+        tmp_desc = AddToStructDescriptor(tmp_desc, tmp_member);
+        tmp_member = NULL;
+        iter = iter->next;
+    }
+    return tmp_desc;
+}
+
+StructMember* CreateStructMember(TypeDescriptor type_desc, char* name)
 {
     StructMember* tmp = (StructMember*) malloc(sizeof(StructMember));
-    tmp->type = type;
+    tmp->type_desc = type_desc;
     tmp->name = name;
     tmp->next = NULL;
     return tmp;
@@ -840,8 +877,28 @@ StructDescriptor* AddToStructDescriptor(StructDescriptor* origin, StructMember* 
     }
 }
 
-void AddToStructDesciptorTable(StructDescriptor* new_desc)
+StructDescriptor* FindInStructTable(char* name)
 {
+    if (!structTable)
+        return NULL;
+    else
+    {
+        StructDescriptor* iter = structTable->desc_head;
+        while (iter)
+        {
+            if (strcmp(iter->name, name) == 0)
+                return iter;
+
+            iter = iter->next;
+        }
+    }
+}
+
+void AddToStructDescriptorTable(StructDescriptor* new_desc, char* desc_name)
+{
+    if (new_desc)
+        new_desc->name = desc_name;
+
     if (!structTable)
     {
         structTable = (StructDescriptorTable*) malloc(sizeof(StructDescriptorTable));
@@ -852,6 +909,32 @@ void AddToStructDesciptorTable(StructDescriptor* new_desc)
     {
         structTable->desc_tail->next = new_desc;
         structTable->desc_tail = new_desc;
+    }
+}
+
+TypeDescriptor GetTypeInStructDescriptor(StructDescriptor* struct_desc, char* member_name)
+{
+    if (!struct_desc)
+        return CreateTypeDescriptor(NONE_TYPE, NULL);
+    else
+    {
+        StructMember* iter = struct_desc->member_head;
+        int compare;
+        while (iter)
+        {
+            compare = strcmp(iter->name, member_name);
+            if (compare == 0)
+                return iter->type_desc;
+            else if (compare < 0)
+                iter = iter->next;
+            else
+            {
+                fprintf(stderr, "Identifier %s does not define struct %s\n", member_name, struct_desc->name);
+                return CreateTypeDescriptor(NONE_TYPE, NULL);
+            }
+        }
+        fprintf(stderr, "Identifier %s does not define struct %s\n", member_name, struct_desc->name);
+        return CreateTypeDescriptor(NONE_TYPE, NULL);
     }
 }
 
@@ -875,7 +958,8 @@ TypeDescriptor CreateTypeDescriptor(OP_TYPE type, StructDescriptor* struct_desc)
 
 %token KERNEL ADDRESS_GLOBAL ADDRESS_LOCAL ADDRESS_PRIVATE ADDRESS_CONSTANT DEFINE
 
-%token <op_type> OPENCL_TYPE TYPE_NAME GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC WORK_DIM_FUNC NUM_GROUPS_FUNC GROUP_ID_FUNC
+%token <type_desc> TYPE_NAME
+%token <op_type> OPENCL_TYPE GLOBAL_ID_FUNC GLOBAL_SIZE_FUNC LOCAL_ID_FUNC LOCAL_SIZE_FUNC WORK_DIM_FUNC NUM_GROUPS_FUNC GROUP_ID_FUNC
 %token <op_type> CONSTANT
 %token <ptr> IDENTIFIER
 %token STRING_LITERAL SIZEOF
@@ -896,11 +980,14 @@ TypeDescriptor CreateTypeDescriptor(OP_TYPE type, StructDescriptor* struct_desc)
 
 %type <op_kind> assignment_operator
 
+/* TYPE: (StructDescriptor*) */
+%type <ptr> struct_declaration struct_declaration_list
+
 /* TYPE: (Declarator*) */
-%type <ptr> declarator direct_declarator
+%type <ptr> declarator direct_declarator 
 
 /* TYPE: (Declaration*) */
-%type <ptr> init_declarator_list init_declarator
+%type <ptr> init_declarator_list init_declarator struct_declarator_list struct_declarator
 
 /* TYPE: (Param_List*) */
 %type <ptr> parameter_type_list parameter_list parameter_declaration
@@ -940,7 +1027,15 @@ postfix_expression
 	| postfix_expression '[' expression ']' {$$ = AddToOPList($1, $3, CreateOP(MEMORY_OP));}
 	| postfix_expression '(' ')' {$$ = $1;} /* TODO: function call */
 	| postfix_expression '(' argument_expression_list ')' {$$ = $1;} /* TODO: function call */
-	| postfix_expression '.' IDENTIFIER {$$ = $1;} /* TODO: reference for structure/union */
+	| postfix_expression '.' IDENTIFIER
+    {
+        OP_List* tmp = (OP_List*)($1);
+        if (tmp->curr_type_desc.type == STRUCT_TYPE)
+        {
+            tmp->curr_type_desc = GetTypeInStructDescriptor(tmp->curr_type_desc.struct_desc, $3);
+        }
+        $$ = $1;
+    }
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;} /* TODO: reference for structure/union */
 	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
     | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
@@ -1184,14 +1279,25 @@ storage_class_specifier
 type_specifier
     : struct_or_union_specifier {$$ = $1;}
 	| enum_specifier {$$ = CreateTypeDescriptor(NONE_TYPE, NULL);}
-    | TYPE_NAME {$$ = CreateTypeDescriptor($1, NULL);} // TODO: check if it is struct
+    | TYPE_NAME {$$ = $1;}
 	| OPENCL_TYPE {$$ = CreateTypeDescriptor($1, NULL);}
     ;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {$$ = CreateTypeDescriptor($1, NULL);}
-	| struct_or_union '{' struct_declaration_list '}' {$$ = CreateTypeDescriptor($1, NULL);}
-	| struct_or_union IDENTIFIER {$$ = CreateTypeDescriptor($1, NULL);}
+	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
+    {
+        AddToStructDescriptorTable($4, $2);
+        $$ = CreateTypeDescriptor($1, $4);
+    }
+	| struct_or_union '{' struct_declaration_list '}'
+    {
+        $$ = CreateTypeDescriptor($1, $3);
+    }
+	| struct_or_union IDENTIFIER
+    {
+        StructDescriptor* tmp = FindInStructTable($2);
+        $$ = CreateTypeDescriptor($1, tmp);
+    }
 	;
 
 struct_or_union
@@ -1200,12 +1306,12 @@ struct_or_union
 	;
 
 struct_declaration_list
-	: struct_declaration
-	| struct_declaration_list struct_declaration
+	: struct_declaration {$$ = $1;}
+	| struct_declaration_list struct_declaration {$$ = MergeStructDescriptor($1, $2);}
 	;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list ';'
+	: specifier_qualifier_list struct_declarator_list ';' {$$ = CreateStructDescriptor($1, ((Declaration*)($2))->IDs);}
 	;
 
 specifier_qualifier_list
@@ -1216,14 +1322,14 @@ specifier_qualifier_list
 	;
 
 struct_declarator_list
-	: struct_declarator
-	| struct_declarator_list ',' struct_declarator
+	: struct_declarator {$$ = $1;}
+	| struct_declarator_list ',' struct_declarator {$$ = AddDeclaration($1, $3);}
 	;
 
 struct_declarator
-	: declarator
-	| ':' constant_expression
-	| declarator ':' constant_expression
+	: declarator {$$ = MakeDeclaration(CreateIDList(CreateIdentifier(GetNameInDeclarator($1), NULL)), NULL);}
+	| ':' constant_expression {$$ = NULL;}
+	| declarator ':' constant_expression {$$ = MakeDeclaration(CreateIDList(CreateIdentifier(GetNameInDeclarator($1), NULL)), NULL);}
 	;
 
 enum_specifier

@@ -69,10 +69,14 @@ TypeDescriptor MixType(TypeDescriptor, TypeDescriptor);
 Parameter* CreateParameter(TypeDescriptor, char*);
 Param_List* CreateParamList(Parameter*);
 Param_List* AddToParamList(Param_List*, Param_List*);
-StructMember* CreateStructMember(OP_TYPE, char*);
+StructMember* CreateStructMember(TypeDescriptor, char*);
 StructDescriptor* AddToStructDescriptor(StructDescriptor*, StructMember*);
-void AddToStructDesciptorTable(StructDescriptor*);
+void AddToStructDescriptorTable(StructDescriptor*, char*);
+StructDescriptor* FindInStructTable(char*);
 TypeDescriptor CreateTypeDescriptor(OP_TYPE, StructDescriptor*);
+StructDescriptor* CreateStructDescriptor(TypeDescriptor, ID_List*);
+StructDescriptor* MergeStructDescriptor(StructDescriptor*, StructDescriptor*);
+TypeDescriptor GetTypeInStructDescriptor(StructDescriptor*, char*);
 
 /*========================================================================== GLOBAL VARIABLE DEFINITION ===============================================================*/
 
@@ -142,6 +146,12 @@ enum OP_TYPE
     DOUBLE16_TYPE,
 };
 
+struct TypeDescriptor
+{
+    OP_TYPE type;
+    StructDescriptor* struct_desc;
+};
+
 enum SYMBOL_TYPE
 {
     SYMBOL_IDENTIFIER = 0,
@@ -150,13 +160,14 @@ enum SYMBOL_TYPE
 
 struct StructMember
 {
-    OP_TYPE type;
+    TypeDescriptor type_desc;
     char* name;
     StructMember* next;
 };
 
 struct StructDescriptor
 {
+    char* name;
     StructMember* member_head;
     StructMember* member_tail;
     StructDescriptor* next;
@@ -167,12 +178,6 @@ struct StructDescriptorTable
 {
     StructDescriptor* desc_head;
     StructDescriptor* desc_tail;
-};
-
-struct TypeDescriptor
-{
-    OP_TYPE type;
-    StructDescriptor* struct_desc;
 };
 
 struct SymbolTableEntry
