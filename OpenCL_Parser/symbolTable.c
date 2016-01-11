@@ -60,7 +60,7 @@ TypeDescriptor FindSymbolInTable(char* name, SYMBOL_TYPE type)
                 else
                 {
                     if (type == SYMBOL_IDENTIFIER)
-                        fprintf(stderr, "Symbol \'%s\' not found\n", name);
+                        fprintf(stderr, "[Error] Symbol \'%s\' not found in symbolTable\n", name);
                     
                     return CreateTypeDescriptor(NONE_TYPE, NULL);
                 }
@@ -74,7 +74,7 @@ TypeDescriptor FindSymbolInTable(char* name, SYMBOL_TYPE type)
         currLevel = currLevel->prev;
     }
     if (type == SYMBOL_IDENTIFIER)
-        fprintf(stderr, "Symbol \'%s\' not found\n", name);
+        fprintf(stderr, "[Error] Symbol \'%s\' not found in symbolTable\n", name);
     
     return CreateTypeDescriptor(NONE_TYPE, NULL);
 }
@@ -120,7 +120,7 @@ void AddIDToSymbolTable(TypeDescriptor type_desc, char* ID, SYMBOL_TYPE sym_type
             }
             else if (cmp_result == 0)
             {
-                fprintf(stderr, "Redefine symbol \'%s\'. \n", tmp->sym_name);
+                fprintf(stderr, "[Error] Redefine symbol \'%s\'. \n", tmp->sym_name);
                 return;
             }
             else
@@ -154,7 +154,7 @@ void AddIDListToSymbolTable(TypeDescriptor type_desc, ID_List* IDs, SYMBOL_TYPE 
         else
         {
             int cmp_result;
-            SymbolTableEntry *prev;
+            SymbolTableEntry *prev = NULL;
             SymbolTableEntry *iterEntry = currLevel->entry_head;
             while(1)
             {
@@ -168,13 +168,16 @@ void AddIDListToSymbolTable(TypeDescriptor type_desc, ID_List* IDs, SYMBOL_TYPE 
                 cmp_result = strcmp(iterEntry->sym_name, tmp->sym_name);
                 if (cmp_result > 0)
                 {
-                    prev->next = tmp;
+                    if (prev)
+                        prev->next = tmp;
                     tmp->next = iterEntry;
+                    if (currLevel->entry_head == iterEntry)
+                        currLevel->entry_head = tmp;
                     break;
                 }
                 else if (cmp_result == 0)
                 {
-                    fprintf(stderr, "Redefine symbol \'%s\'. \n", tmp->sym_name);
+                    fprintf(stderr, "[Error] Redefine symbol \'%s\'. \n", tmp->sym_name);
                     break;
                 }
                 else
@@ -193,7 +196,7 @@ void CreateSymbolTable()
 {
     if (symTable != NULL)
     {
-        fprintf(stderr, "Symbol Table has already been created\n");
+        fprintf(stderr, "[Error] Symbol Table has already been created\n");
         return;
     }
     symTable = (SymbolTable*) malloc(sizeof(SymbolTable));
@@ -205,7 +208,7 @@ void ReleaseSymbolTable()
 {
     if (symTable->level_head != NULL)
     {
-        fprintf(stderr, "Need to release all the levels first\n");
+        fprintf(stderr, "[Error] Need to release all the levels first\n");
         return;
     }
     free (symTable);
@@ -214,7 +217,7 @@ void ReleaseSymbolTable()
 void ReleaseSymbolTableLevel()
 {
     if (!symTable)
-        fprintf(stderr, "Need to create symbol table first\n");
+        fprintf(stderr, "[Error] Need to create symbol table first\n");
     else
     {
         SymbolTableLevel *tmp = symTable->level_tail;
@@ -239,7 +242,7 @@ void ReleaseSymbolTableLevel()
 void CreateSymbolTableLevel()
 {
     if (!symTable)
-        fprintf(stderr, "Need to create symbol table first\n");
+        fprintf(stderr, "[Error] Need to create symbol table first\n");
     else
     {
         SymbolTableLevel *tmp = (SymbolTableLevel *)malloc(sizeof(SymbolTableLevel));

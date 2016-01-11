@@ -53,7 +53,7 @@ void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsig
                 currOP->data_dep_r = tmp;
                 break;
             default:
-                fprintf(stderr, "Unknown type of dependency\n");
+                fprintf(stderr, "[Error] Unknown type of dependency\n");
                 break;
         }
     }
@@ -184,7 +184,7 @@ void GetOperationDescriptor(Operation* op, char* outputKind, char* outputType)
             sprintf(outputKind, "none");
             break;
         default:
-            fprintf(stderr, "Unrecognized operation kind\n");
+            fprintf(stderr, "[Error] Unrecognized operation kind\n");
             break;
     }
 
@@ -244,7 +244,7 @@ void GetOperationDescriptor(Operation* op, char* outputKind, char* outputType)
         case DOUBLE4_TYPE: sprintf(outputType, "double4"); break;
         case DOUBLE8_TYPE: sprintf(outputType, "double8"); break;
         case DOUBLE16_TYPE: sprintf(outputType, "double16"); break;
-        default: fprintf(stderr, "Unrecognized operation type\n");
+        default: fprintf(stderr, "[Error] Unrecognized operation type\n");
     }
 }
 
@@ -864,7 +864,7 @@ StructDescriptor* AddToStructDescriptor(StructDescriptor* origin, StructMember* 
             }
             else if (cmpResult == 0)
             {
-                fprintf(stderr, "Redefine symbol %s\n", newMember->name);
+                fprintf(stderr, "[Error] Redefine symbol %s\n", newMember->name);
                 break;
             }
             else // cmpResult < 0
@@ -929,11 +929,11 @@ TypeDescriptor GetTypeInStructDescriptor(StructDescriptor* struct_desc, char* me
                 iter = iter->next;
             else
             {
-                fprintf(stderr, "Identifier %s does not define struct %s\n", member_name, struct_desc->name);
+                fprintf(stderr, "[Error] Identifier %s does not defined in struct %s\n", member_name, struct_desc->name);
                 return CreateTypeDescriptor(NONE_TYPE, NULL);
             }
         }
-        fprintf(stderr, "Identifier %s does not define struct %s\n", member_name, struct_desc->name);
+        fprintf(stderr, "[Error] Identifier %s does not defined in struct %s\n", member_name, struct_desc->name);
         return CreateTypeDescriptor(NONE_TYPE, NULL);
     }
 }
@@ -1033,6 +1033,10 @@ postfix_expression
         if (tmp->curr_type_desc.type == STRUCT_TYPE)
         {
             tmp->curr_type_desc = GetTypeInStructDescriptor(tmp->curr_type_desc.struct_desc, $3);
+        }
+        else
+        {
+            fprintf(stderr, "[Error] Target identifier is not a struct\n");
         }
         $$ = $1;
     }
