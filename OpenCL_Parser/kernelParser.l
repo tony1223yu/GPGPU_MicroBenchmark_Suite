@@ -45,6 +45,7 @@ void comment(void);
 "double4"          { count(); yylval.op_type = (DOUBLE4_TYPE); return (OPENCL_TYPE); }
 "double8"          { count(); yylval.op_type = (DOUBLE8_TYPE); return (OPENCL_TYPE); }
 "double16"          { count(); yylval.op_type = (DOUBLE16_TYPE); return (OPENCL_TYPE); }
+"char"          { count(); yylval.op_type = (CHAR_TYPE); return (OPENCL_TYPE); }
 "char2"          { count(); yylval.op_type = (CHAR2_TYPE); return (OPENCL_TYPE); }
 "char4"          { count(); yylval.op_type = (CHAR4_TYPE); return (OPENCL_TYPE); }
 "char8"          { count(); yylval.op_type = (CHAR8_TYPE); return (OPENCL_TYPE); }
@@ -64,22 +65,26 @@ void comment(void);
 "long4"          { count(); yylval.op_type = (LONG4_TYPE); return (OPENCL_TYPE); }
 "long8"          { count(); yylval.op_type = (LONG8_TYPE); return (OPENCL_TYPE); }
 "long16"          { count(); yylval.op_type = (LONG16_TYPE); return (OPENCL_TYPE); }
-"uchar" | "unsigned char"           { count(); yylval.op_type = (UCHAR_TYPE); return (OPENCL_TYPE); }
+"uchar"           { count(); yylval.op_type = (UCHAR_TYPE); return (OPENCL_TYPE); }
+"unsigned char"           { count(); yylval.op_type = (UCHAR_TYPE); return (OPENCL_TYPE); }
 "uchar2"          { count(); yylval.op_type = (UCHAR2_TYPE); return (OPENCL_TYPE); }
 "uchar4"          { count(); yylval.op_type = (UCHAR4_TYPE); return (OPENCL_TYPE); }
 "uchar8"          { count(); yylval.op_type = (UCHAR8_TYPE); return (OPENCL_TYPE); }
 "uchar16"          { count(); yylval.op_type = (UCHAR16_TYPE); return (OPENCL_TYPE); }
-"ushort" | "unsigned short"           { count(); yylval.op_type = (USHORT_TYPE); return (OPENCL_TYPE); }
+"ushort"           { count(); yylval.op_type = (USHORT_TYPE); return (OPENCL_TYPE); }
+"unsigned short"           { count(); yylval.op_type = (USHORT_TYPE); return (OPENCL_TYPE); }
 "ushort2"          { count(); yylval.op_type = (USHORT2_TYPE); return (OPENCL_TYPE); }
 "ushort4"          { count(); yylval.op_type = (USHORT4_TYPE); return (OPENCL_TYPE); }
 "ushort8"          { count(); yylval.op_type = (USHORT8_TYPE); return (OPENCL_TYPE); }
 "ushort16"          { count(); yylval.op_type = (USHORT16_TYPE); return (OPENCL_TYPE); }
-"uint" | "unsigned int"           { count(); yylval.op_type = (UINT_TYPE); return (OPENCL_TYPE); }
+"uint"           { count(); yylval.op_type = (UINT_TYPE); return (OPENCL_TYPE); }
+"unsigned int"           { count(); yylval.op_type = (UINT_TYPE); return (OPENCL_TYPE); }
 "uint2"          { count(); yylval.op_type = (UINT2_TYPE); return (OPENCL_TYPE); }
 "uint4"          { count(); yylval.op_type = (UINT4_TYPE); return (OPENCL_TYPE); }
 "uint8"          { count(); yylval.op_type = (UINT8_TYPE); return (OPENCL_TYPE); }
 "uint16"          { count(); yylval.op_type = (UINT16_TYPE); return (OPENCL_TYPE); }
-"ulong" | "unsigned long"           { count(); yylval.op_type = (ULONG_TYPE); return (OPENCL_TYPE); }
+"ulong"           { count(); yylval.op_type = (ULONG_TYPE); return (OPENCL_TYPE); }
+"unsigned long"           { count(); yylval.op_type = (ULONG_TYPE); return (OPENCL_TYPE); }
 "ulong2"          { count(); yylval.op_type = (ULONG2_TYPE); return (OPENCL_TYPE); }
 "ulong4"          { count(); yylval.op_type = (ULONG4_TYPE); return (OPENCL_TYPE); }
 "ulong8"          { count(); yylval.op_type = (ULONG8_TYPE); return (OPENCL_TYPE); }
@@ -218,8 +223,8 @@ void count(void)
 			column += 8 - (column % 8);
 		else
 			column++;
-
-	//ECHO;
+        
+    //ECHO;
 }
 
 

@@ -1,6 +1,9 @@
 Data dependencies which related to loop iterations.
 [v] Parameter declaration/scope of functions
-OpenCL NDRange functions
+[v] OpenCL NDRange functions
+OpenCL math functions
+OpenCL primitive functions
+Function calls
 [v] struct
 RAW dependency with the granularity of struct member
 union

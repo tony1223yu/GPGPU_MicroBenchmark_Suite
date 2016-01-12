@@ -1091,35 +1091,14 @@ postfix_expression
     | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;} /* TODO */
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;} /* TODO */
-    | GLOBAL_ID_FUNC '(' assignment_expression ')'
-	{
-		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
-	}
-    | GLOBAL_SIZE_FUNC '(' assignment_expression ')'
-	{
-		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
-	}
-    | LOCAL_ID_FUNC '(' assignment_expression ')'
-	{
-		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
-	}
-    | LOCAL_SIZE_FUNC '(' assignment_expression ')'
-	{
-		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
-	}
-    | WORK_DIM_FUNC '(' ')'
-	{
-		$$ = CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL);
-	}
-    | NUM_GROUPS_FUNC '(' assignment_expression ')'
-	{
-		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
-	}
-    | GROUP_ID_FUNC '(' assignment_expression ')'
-	{
-		$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);
-	}
-	;
+    | GLOBAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);}
+    | GLOBAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);}
+    | LOCAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);}
+    | LOCAL_SIZE_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);}
+    | WORK_DIM_FUNC '(' ')' {$$ = CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL);}
+    | NUM_GROUPS_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);}
+    | GROUP_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);}
+    ;
 
 argument_expression_list
 	: assignment_expression
