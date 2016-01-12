@@ -23,8 +23,11 @@ void initial()
 
 void release()
 {
+    /* Release the global level */
     ReleaseSymbolTableLevel();
     ReleaseSymbolTable();
+
+    ReleaseStructTable();
 }
 
 void MakeDependency(Operation* currOP, Operation* dependOP, DEP_TYPE type, unsigned long long int latency)
@@ -376,7 +379,7 @@ void AddParamInDeclarator(Declarator* decl)
         Parameter* iter = decl->Params->param_head;
         while (iter)
         {
-            AddIDToSymbolTable(iter->type_desc, iter->name, SYMBOL_IDENTIFIER);
+            AddParamToSymbolTable(iter->type_desc, iter->name, SYMBOL_IDENTIFIER);
             iter = iter->next;
         }
         free (decl->Params);
@@ -894,6 +897,35 @@ StructDescriptor* FindInStructTable(char* name)
     }
 }
 
+void ReleaseStructDescriptor(StructDescriptor* desc)
+{
+    if (!desc) return;
+    else
+    {
+        StructMember* iter = desc->member_head;
+        while (iter)
+        {
+            free (iter->name);
+            iter = iter->next;
+        }
+        free (desc->name);
+    }
+}
+
+void ReleaseStructTable()
+{
+    if (!structTable) return;
+    else
+    {
+        StructDescriptor* iter = structTable->desc_head;
+        while (iter)
+        {
+            ReleaseStructDescriptor(iter);
+            iter = iter->next;
+        }
+    }
+}
+
 void AddToStructDescriptorTable(StructDescriptor* new_desc, char* desc_name)
 {
     if (new_desc)
@@ -936,6 +968,19 @@ TypeDescriptor GetTypeInStructDescriptor(StructDescriptor* struct_desc, char* me
         fprintf(stderr, "[Error] Identifier %s does not defined in struct %s\n", member_name, struct_desc->name);
         return CreateTypeDescriptor(NONE_TYPE, NULL);
     }
+}
+
+SymbolTableEntry* GetStructMemberInSymbolEntry(SymbolTableEntry* entry, char* name)
+{
+    SymbolTableEntry* iter = entry->subEntry_head;
+    while (iter)
+    {
+        if (strcmp(iter->sym_name, name) == 0)
+            return iter;
+        else
+            iter = iter->next;
+    }
+    fprintf(stderr, "[Error] Identifier %s does not defined in struct %s\n", name, entry->sym_name);
 }
 
 TypeDescriptor CreateTypeDescriptor(OP_TYPE type, StructDescriptor* struct_desc)
@@ -1033,6 +1078,7 @@ postfix_expression
         if (tmp->curr_type_desc.type == STRUCT_TYPE)
         {
             tmp->curr_type_desc = GetTypeInStructDescriptor(tmp->curr_type_desc.struct_desc, $3);
+            tmp->table_entry = GetStructMemberInSymbolEntry(tmp->table_entry, $3);
         }
         else
         {

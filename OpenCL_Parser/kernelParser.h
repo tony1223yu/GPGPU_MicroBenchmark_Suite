@@ -35,7 +35,7 @@ void CreateSymbolTable();
 void ReleaseSymbolTable();
 void CreateSymbolTableLevel();
 void ReleaseSymbolTableLevel();
-void AddIDToSymbolTable(TypeDescriptor, char*, SYMBOL_TYPE);
+void AddParamToSymbolTable(TypeDescriptor, char*, SYMBOL_TYPE);
 void AddIDListToSymbolTable(TypeDescriptor, ID_List*, SYMBOL_TYPE);
 TypeDescriptor FindSymbolInTable(char*, SYMBOL_TYPE);
 SymbolTableEntry* GetTableEntry(char*);
@@ -77,6 +77,10 @@ TypeDescriptor CreateTypeDescriptor(OP_TYPE, StructDescriptor*);
 StructDescriptor* CreateStructDescriptor(TypeDescriptor, ID_List*);
 StructDescriptor* MergeStructDescriptor(StructDescriptor*, StructDescriptor*);
 TypeDescriptor GetTypeInStructDescriptor(StructDescriptor*, char*);
+void ReleaseStructTable();
+void ReleaseStructDescriptor(StructDescriptor*);
+SymbolTableEntry* CreateSymbolTableEntry(TypeDescriptor, char*, SYMBOL_TYPE, Operation*);
+SymbolTableEntry* GetStructMemberInSymbolEntry(SymbolTableEntry*, char*);
 
 /*========================================================================== GLOBAL VARIABLE DEFINITION ===============================================================*/
 
@@ -187,6 +191,10 @@ struct SymbolTableEntry
     SYMBOL_TYPE sym_type;
     SymbolTableEntry* next;
     Operation* op;
+
+    /* for struct */
+    SymbolTableEntry* subEntry_head;
+    SymbolTableEntry* subEntry_tail;
 };
 
 struct SymbolTable

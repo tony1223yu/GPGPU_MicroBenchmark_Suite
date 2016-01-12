@@ -79,16 +79,11 @@ TypeDescriptor FindSymbolInTable(char* name, SYMBOL_TYPE type)
     return CreateTypeDescriptor(NONE_TYPE, NULL);
 }
 
-void AddIDToSymbolTable(TypeDescriptor type_desc, char* ID, SYMBOL_TYPE sym_type)
+void AddParamToSymbolTable(TypeDescriptor type_desc, char* name, SYMBOL_TYPE sym_type)
 {
     SymbolTableLevel* currLevel = symTable->level_tail;
-    SymbolTableEntry* tmp = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
-    tmp->type_desc = type_desc;
-    tmp->sym_name = ID;
-    tmp->sym_type = sym_type;
-    tmp->next = NULL;
-    tmp->op = NULL;
-
+    SymbolTableEntry* tmp = CreateSymbolTableEntry(type_desc, name, sym_type, NULL);
+    
     if (currLevel->entry_head == NULL)
     {
         currLevel->entry_head = tmp;
@@ -131,6 +126,43 @@ void AddIDToSymbolTable(TypeDescriptor type_desc, char* ID, SYMBOL_TYPE sym_type
         }
     }
 }
+
+SymbolTableEntry* CreateSymbolTableEntry(TypeDescriptor type_desc, char* name, SYMBOL_TYPE sym_type, Operation* op)
+{
+    SymbolTableEntry* tmp = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
+    tmp->type_desc = type_desc;
+    tmp->sym_name = name;
+    tmp->sym_type = sym_type;
+    tmp->next = NULL;
+    tmp->op = op;
+    tmp->subEntry_head = NULL;
+    tmp->subEntry_tail = NULL;
+
+    if (type_desc.type == STRUCT_TYPE && type_desc.struct_desc)
+    {
+        StructMember* iter = type_desc.struct_desc->member_head;
+        SymbolTableEntry* subEntry;
+        while (iter)
+        {
+            // TODO struct initialization
+            subEntry = CreateSymbolTableEntry(iter->type_desc, iter->name, sym_type, op);
+            if (tmp->subEntry_head == NULL)
+            {
+                tmp->subEntry_head = subEntry;
+                tmp->subEntry_tail = subEntry;
+            }
+            else
+            {
+                tmp->subEntry_tail->next = subEntry;
+                tmp->subEntry_tail = subEntry;
+            }
+            
+            iter = iter->next;
+        }
+    }
+    return tmp;
+}
+
 // Add to the last level in symTable
 void AddIDListToSymbolTable(TypeDescriptor type_desc, ID_List* IDs, SYMBOL_TYPE sym_type)
 {
@@ -139,13 +171,7 @@ void AddIDListToSymbolTable(TypeDescriptor type_desc, ID_List* IDs, SYMBOL_TYPE 
 
     while (iter)
     {
-        SymbolTableEntry* tmp = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
-        tmp->type_desc = type_desc;
-        tmp->sym_name = iter->name;
-        tmp->sym_type = sym_type;
-        tmp->next = NULL;
-        tmp->op = iter->op;
-
+        SymbolTableEntry* tmp = CreateSymbolTableEntry(type_desc, iter->name, sym_type, iter->op);
         if (currLevel->entry_head == NULL)
         {
             currLevel->entry_head = tmp;
