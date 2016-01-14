@@ -183,6 +183,51 @@ void GetOperationDescriptor(Operation* op, char* outputKind, char* outputType)
         case MEMORY_OP:
             sprintf(outputKind, "memory");
             break;
+        case INCREASE_OP:
+            sprintf(outputKind, "increase");
+            break;
+        case DECREASE_OP:
+            sprintf(outputKind, "decrease");
+            break;
+        case SHIFT_LEFT_OP:
+            sprintf(outputKind, "shift_left");
+			break;
+    	case SHIFT_RIGHT_OP:
+			sprintf(outputKind, "shift_right");
+			break;
+    	case LESS_OP:
+			sprintf(outputKind, "compare_less");
+			break;
+    	case LESS_EQUAL_OP:
+			sprintf(outputKind, "compare_less_equal");
+			break;
+    	case GREATER_OP:
+			sprintf(outputKind, "compare_greater");
+			break;
+    	case GREATER_EQUAL_OP:
+			sprintf(outputKind, "compare_greater_equal");
+			break;
+    	case EQUAL_OP:
+			sprintf(outputKind, "compare_equal");
+			break;
+    	case NOT_EQUAL_OP:
+			sprintf(outputKind, "compare_not_equal");
+			break;
+    	case BITWISE_AND_OP:
+			sprintf(outputKind, "compare_bitwise_and");
+			break;
+    	case BITWISE_XOR_OP:
+			sprintf(outputKind, "compare_bitwise_xor");
+			break;
+    	case BITWISE_OR_OP:
+			sprintf(outputKind, "compare_bitwise_or");
+			break;
+    	case LOGICAL_AND_OP:
+			sprintf(outputKind, "compare_logical_and");
+			break;
+    	case LOGICAL_OR_OP:
+			sprintf(outputKind, "compare_logical_or");
+			break;
         case NONE_OP:
             sprintf(outputKind, "none");
             break;
@@ -1087,8 +1132,8 @@ postfix_expression
         $$ = $1;
     }
 	| postfix_expression PTR_OP IDENTIFIER {$$ = $1;} /* TODO: reference for structure/union */
-	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(ADDITION_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
-    | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(SUBTRACTION_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
+	| postfix_expression INC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(INCREASE_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
+    | postfix_expression DEC_OP {$$ = AddToOPList($1, CreateEmptyOPList(AddToOPList(NULL, NULL, CreateOP(DECREASE_OP)), ((OP_List*)($1))->curr_type_desc, NULL), NULL);}
 	| '(' type_name ')' '{' initializer_list '}' {$$ = NULL;} /* TODO */
 	| '(' type_name ')' '{' initializer_list ',' '}' {$$ = NULL;} /* TODO */
     | GLOBAL_ID_FUNC '(' assignment_expression ')' {$$ = AddToOPList(CreateEmptyOPList(NULL, CreateTypeDescriptor($1, NULL), NULL), $3, NULL);}
@@ -1109,15 +1154,15 @@ unary_expression
 	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression
     {
-        Operation* op = CreateOPWithDataHazard(ADDITION_OP, NULL, $2);
+        Operation* op = CreateOPWithDataHazard(INCREASE_OP, NULL, $2);
         $$ = AddToOPList(NULL, $2, op);
     }
 	| DEC_OP unary_expression
     {
-        Operation* op = CreateOPWithDataHazard(SUBTRACTION_OP, NULL, $2);
+        Operation* op = CreateOPWithDataHazard(DECREASEN_OP, NULL, $2);
         $$ = AddToOPList(NULL, $2, op);
     }
-	| unary_operator cast_expression {$$ = AddToOPList(NULL, $2, $1);}
+	| unary_operator cast_expression {$$ = AddToOPList(NULL, $2, $1);} // TODO: unary_op
 	| SIZEOF unary_expression {$$ = $2;}
 	| SIZEOF '(' type_name ')' {$$ = NULL;}
 	;
@@ -1176,47 +1221,47 @@ additive_expression
 
 shift_expression
 	: additive_expression {$$ = $1;}
-	| shift_expression LEFT_OP additive_expression {$$ = AddToOPList($1, $3, NULL);}
-	| shift_expression RIGHT_OP additive_expression {$$ = AddToOPList($1, $3, NULL);}
+	| shift_expression LEFT_OP additive_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(SHIFT_LEFT_OP, $1, $3));}
+	| shift_expression RIGHT_OP additive_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(SHIFT_RIGHT_OP, $1, $3));}
 	;
 
 relational_expression
 	: shift_expression {$$ = $1;}
-	| relational_expression '<' shift_expression {$$ = AddToOPList($1, $3, NULL);}
-	| relational_expression '>' shift_expression {$$ = AddToOPList($1, $3, NULL);}
-	| relational_expression LE_OP shift_expression {$$ = AddToOPList($1, $3, NULL);}
-	| relational_expression GE_OP shift_expression {$$ = AddToOPList($1, $3, NULL);}
+	| relational_expression '<' shift_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(LESS_OP, $1, $3));}
+	| relational_expression '>' shift_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(GREATER_OP, $1, $3));}
+	| relational_expression LE_OP shift_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(LESS_EQUAL_OP, $1, $3));}
+	| relational_expression GE_OP shift_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(GREATER_EQUAL_OP, $1, $3));}
 	;
 
 equality_expression
 	: relational_expression {$$ = $1;}
-	| equality_expression EQ_OP relational_expression {$$ = AddToOPList($1, $3, NULL);}
-	| equality_expression NE_OP relational_expression {$$ = AddToOPList($1, $3, NULL);}
+    | equality_expression EQ_OP relational_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(EQUAL_OP, $1, $3));}
+	| equality_expression NE_OP relational_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(NOT_EQUAL_OP, $1, $3));}
 	;
 
 and_expression
 	: equality_expression {$$ = $1;}
-	| and_expression '&' equality_expression {$$ = AddToOPList($1, $3, NULL);}
+    | and_expression '&' equality_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(BITWISE_AND_OP, $1, $3));}
 	;
 
 exclusive_or_expression
 	: and_expression {$$ = $1;}
-	| exclusive_or_expression '^' and_expression {$$ = AddToOPList($1, $3, NULL);}
+	| exclusive_or_expression '^' and_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(BITWISE_XOR_OP, $1, $3));}
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression {$$ = $1;}
-	| inclusive_or_expression '|' exclusive_or_expression {$$ = AddToOPList($1, $3, NULL);}
+	| inclusive_or_expression '|' exclusive_or_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(BITWISE_OR_OP, $1, $3));}
 	;
 
 logical_and_expression
 	: inclusive_or_expression {$$ = $1;}
-	| logical_and_expression AND_OP inclusive_or_expression {$$ = AddToOPList($1, $3, NULL);}
+	| logical_and_expression AND_OP inclusive_or_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(LOGICAL_AND_OP, $1, $3));}
 	;
 
 logical_or_expression
 	: logical_and_expression {$$ = $1;}
-	| logical_or_expression OR_OP logical_and_expression {$$ = AddToOPList($1, $3, NULL);}
+	| logical_or_expression OR_OP logical_and_expression {$$ = AddToOPList($1, $3, CreateOPWithDataHazard(LOGICAL_OR_OP, $1, $3));}
 	;
 
 conditional_expression
@@ -1242,11 +1287,11 @@ assignment_operator
 	| MOD_ASSIGN {$$ = MODULAR_OP;}
 	| ADD_ASSIGN {$$ = ADDITION_OP;}
 	| SUB_ASSIGN {$$ = SUBTRACTION_OP;}
-	| LEFT_ASSIGN {$$ = NONE_OP;}
-	| RIGHT_ASSIGN {$$ = NONE_OP;}
-	| AND_ASSIGN {$$ = NONE_OP;}
-	| XOR_ASSIGN {$$ = NONE_OP;}
-	| OR_ASSIGN {$$ = NONE_OP;}
+	| LEFT_ASSIGN {$$ = SHIFT_LEFT_OP;}
+	| RIGHT_ASSIGN {$$ = SHIFT_RIGHT_OP;}
+	| AND_ASSIGN {$$ = BITWISE_AND_OP;}
+	| XOR_ASSIGN {$$ = BITWISE_XOR_OP;}
+	| OR_ASSIGN {$$ = BITWISE_OR_OP;}
 	;
 
 expression
