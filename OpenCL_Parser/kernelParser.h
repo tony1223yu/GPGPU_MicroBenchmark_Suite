@@ -175,7 +175,6 @@ struct StructDescriptor
     StructMember* member_head;
     StructMember* member_tail;
     StructDescriptor* next;
-
 };
 
 struct StructDescriptorTable
@@ -236,6 +235,21 @@ enum OP_KIND
     MULTIPLICATION_OP,
     DIVISION_OP,
     MODULAR_OP,
+    INCREASE_OP,
+    DECREASE_OP,
+    SHIFT_LEFT_OP,
+    SHIFT_RIGHT_OP,
+    LESS_OP,
+    LESS_EQUAL_OP,
+    GREATER_OP,
+    GREATER_EQUAL_OP,
+    EQUAL_OP,
+    NOT_EQUAL_OP,
+    BITWISE_AND_OP,
+    BITWISE_XOR_OP,
+    BITWISE_OR_OP,
+    LOGICAL_AND_OP,
+    LOGICAL_OR_OP,
     MEMORY_OP
 };
 
