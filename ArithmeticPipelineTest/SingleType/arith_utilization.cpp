@@ -18,7 +18,6 @@
 
 /* Macros */
 //#define USE_CL_2_0_API
-#define CL_FILE_NAME "arith_utilization.cl"
 #define BINARY_FILE_NAME "arith_utilization.bin"
 #define DATA_SIZE 160
 #define INTERVAL 10
@@ -54,13 +53,16 @@ struct OpenCL_Ctrl
     long iteration;
     int interval;
     char *kernelName;
+    char *fileName;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL), interval(INTERVAL) {sprintf(powerFile, "KernelExecution.log");}
+    OpenCL_Ctrl() : platform_id(0), device_id(0), dataType(TYPE_INT), global_size(1024), local_size(32), iteration(1000), kernelName(NULL), fileName(NULL), interval(INTERVAL) {sprintf(powerFile, "KernelExecution.log");}
     ~OpenCL_Ctrl()
     {
         if (kernelName)
             free(kernelName);
+        if (fileName)
+            free(fileName);
     }
 
 } g_opencl_ctrl;
@@ -79,7 +81,7 @@ unsigned long long PrintTimingInfo(FILE* fptr)
 
 void CommandParser(int argc, char *argv[])
 {
-    char* short_options = strdup("p:d:t:i:g:l:k:o:");
+    char* short_options = strdup("p:d:t:i:g:l:k:o:f:");
     struct option long_options[] =
     {
         {"platformID", required_argument, NULL, 'p'},
@@ -89,6 +91,7 @@ void CommandParser(int argc, char *argv[])
         {"globalSize", required_argument, NULL, 'g'},
         {"localSize", required_argument, NULL, 'l'},
         {"kernelName", required_argument, NULL, 'k'},
+        {"fileName", required_argument, NULL, 'f'},
         {"powerLogFile", required_argument, NULL, 'o'},
         /* option end */
         {0, 0, 0, 0}
@@ -107,6 +110,10 @@ void CommandParser(int argc, char *argv[])
         {
             case 'o':
                 sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
+                break;
+
+            case 'f':
+                g_opencl_ctrl.fileName = strdup(optarg);
                 break;
 
             case 'k':
@@ -418,7 +425,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     /* Create program */
-    CreateAndBuildProgram(program, context, device, strdup(CL_FILE_NAME));
+    CreateAndBuildProgram(program, context, device, strdup(g_opencl_ctrl.fileName));
 
     /* Create kernels */
     kernel = clCreateKernel(program, g_opencl_ctrl.kernelName, &error);
