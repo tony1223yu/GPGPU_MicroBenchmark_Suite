@@ -41,6 +41,7 @@ bool CommandParser(int argc, char *argv[], GlobalCtrl *ctrl)
                 break;
 
             case 'o':
+                printf("Output file: %s\n", optarg);
                 memset(ctrl->outputFile, 0, MAX_FILE_LEN);
                 sprintf(ctrl->outputFile, "%s", optarg);
                 break;
@@ -197,7 +198,7 @@ int main(int argc, char *argv[])
                     if ((cur_utime - start_utime) > (ctrl.totalTime * 1000))
                         break;
                     
-                    usleep(sampleinterval);
+                    usleep(sampleInterval);
                 }
                 printf("end_time: %llu msec\n", cur_utime);
                 fclose(fp);

@@ -1,3 +1,18 @@
+struct test
+{
+    char b;
+    int a;
+    char c;
+    int d;
+    char e;
+};
+struct test2
+{
+    struct test b;
+    char a;
+    char c;
+};
+
 __kernel void MatrixMultiplication_int(__global int *matrixA, __global int *matrixB, __global int *output, int matrixSize, int matrixWidth)
 {
     int sum;
@@ -10,6 +25,8 @@ __kernel void MatrixMultiplication_int(__global int *matrixA, __global int *matr
         sum += matrixA[x * matrixWidth + i] * matrixB[i * matrixSize + y];
     }
     output[x * matrixSize + y] = sum;
+    output[0] = sizeof(struct test);
+    output[1] = sizeof(struct test2);
 }
 
 __kernel void MatrixMultiplication_float(__global float *matrixA, __global float *matrixB, __global float *output, int matrixSize, int matrixWidth)
