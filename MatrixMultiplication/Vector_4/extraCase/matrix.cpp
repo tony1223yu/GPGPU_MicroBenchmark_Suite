@@ -240,7 +240,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
+    error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
     if (error < 0)
     {
         size_t logSize;

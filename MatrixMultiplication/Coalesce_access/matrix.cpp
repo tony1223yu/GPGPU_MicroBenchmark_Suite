@@ -254,7 +254,6 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    //error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
     error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
     if (error < 0)
     {
@@ -272,7 +271,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
         exit(1);
     }
 
-#if 1
+#if 0
     {
         size_t binarySize;
         error = clGetProgramInfo(target_program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binarySize, NULL);
@@ -443,7 +442,6 @@ int main(int argc, char *argv[])
     error = clEnqueueReadBuffer(command_queue, outputBuffer, CL_TRUE, 0, g_opencl_ctrl.outputByte, outputMatrix, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
-    printf("*******size: %d %d ********\n", ((int*)(outputMatrix))[0], ((int*)(outputMatrix))[1]);
     if (g_opencl_ctrl.verify)
     {
         switch(g_opencl_ctrl.dataType)
