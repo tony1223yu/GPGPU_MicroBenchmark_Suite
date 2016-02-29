@@ -14,7 +14,7 @@ __kernel void Integer_addition_0_10(__global int* dataArray, long iter, int inte
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -100,7 +100,7 @@ __kernel void Integer_addition_10_10(__global int* dataArray, long iter, int int
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a1 + addend;
         a2 = a2 + a1;
@@ -186,7 +186,7 @@ __kernel void Integer2_addition_0_10(__global int2* dataArray, long iter, int in
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -272,7 +272,7 @@ __kernel void Integer2_addition_10_10(__global int2* dataArray, long iter, int i
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a0 + addend;
         a2 = addend + a1;
@@ -358,7 +358,7 @@ __kernel void Integer4_addition_0_10(__global int4* dataArray, long iter, int in
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -444,7 +444,7 @@ __kernel void Integer4_addition_10_10(__global int4* dataArray, long iter, int i
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a0 + addend;
         a2 = addend + a1;
@@ -530,7 +530,7 @@ __kernel void Integer8_addition_0_10(__global int8* dataArray, long iter, int in
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -616,7 +616,7 @@ __kernel void Integer8_addition_10_10(__global int8* dataArray, long iter, int i
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a1 + addend;
         a2 = a2 + a1;
@@ -702,7 +702,7 @@ __kernel void Float_addition_0_10(__global float* dataArray, long iter, int inte
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -714,7 +714,7 @@ __kernel void Float_addition_0_10(__global float* dataArray, long iter, int inte
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -725,7 +725,7 @@ __kernel void Float_addition_0_10(__global float* dataArray, long iter, int inte
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -736,7 +736,7 @@ __kernel void Float_addition_0_10(__global float* dataArray, long iter, int inte
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -747,7 +747,7 @@ __kernel void Float_addition_0_10(__global float* dataArray, long iter, int inte
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -758,7 +758,7 @@ __kernel void Float_addition_0_10(__global float* dataArray, long iter, int inte
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -788,7 +788,7 @@ __kernel void Float_addition_10_10(__global float* dataArray, long iter, int int
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = addend + a0;
         a2 = a1 + addend;
@@ -800,7 +800,7 @@ __kernel void Float_addition_10_10(__global float* dataArray, long iter, int int
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -811,7 +811,7 @@ __kernel void Float_addition_10_10(__global float* dataArray, long iter, int int
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -822,7 +822,7 @@ __kernel void Float_addition_10_10(__global float* dataArray, long iter, int int
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -833,7 +833,7 @@ __kernel void Float_addition_10_10(__global float* dataArray, long iter, int int
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -844,7 +844,7 @@ __kernel void Float_addition_10_10(__global float* dataArray, long iter, int int
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -874,7 +874,7 @@ __kernel void Float2_addition_0_10(__global float2* dataArray, long iter, int in
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -886,7 +886,7 @@ __kernel void Float2_addition_0_10(__global float2* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -897,7 +897,7 @@ __kernel void Float2_addition_0_10(__global float2* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -908,7 +908,7 @@ __kernel void Float2_addition_0_10(__global float2* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -919,7 +919,7 @@ __kernel void Float2_addition_0_10(__global float2* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -930,7 +930,7 @@ __kernel void Float2_addition_0_10(__global float2* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -960,7 +960,7 @@ __kernel void Float2_addition_10_10(__global float2* dataArray, long iter, int i
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = addend + a0;
         a2 = a1 + addend;
@@ -972,7 +972,7 @@ __kernel void Float2_addition_10_10(__global float2* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -983,7 +983,7 @@ __kernel void Float2_addition_10_10(__global float2* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -994,7 +994,7 @@ __kernel void Float2_addition_10_10(__global float2* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1005,7 +1005,7 @@ __kernel void Float2_addition_10_10(__global float2* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1016,7 +1016,7 @@ __kernel void Float2_addition_10_10(__global float2* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1046,7 +1046,7 @@ __kernel void Float4_addition_0_10(__global float4* dataArray, long iter, int in
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -1058,7 +1058,7 @@ __kernel void Float4_addition_0_10(__global float4* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1069,7 +1069,7 @@ __kernel void Float4_addition_0_10(__global float4* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1080,7 +1080,7 @@ __kernel void Float4_addition_0_10(__global float4* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1091,7 +1091,7 @@ __kernel void Float4_addition_0_10(__global float4* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1102,7 +1102,7 @@ __kernel void Float4_addition_0_10(__global float4* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1132,7 +1132,7 @@ __kernel void Float4_addition_10_10(__global float4* dataArray, long iter, int i
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = addend + a0;
         a2 = a1 + addend;
@@ -1144,7 +1144,7 @@ __kernel void Float4_addition_10_10(__global float4* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1155,7 +1155,7 @@ __kernel void Float4_addition_10_10(__global float4* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1166,7 +1166,7 @@ __kernel void Float4_addition_10_10(__global float4* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1177,7 +1177,7 @@ __kernel void Float4_addition_10_10(__global float4* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1188,7 +1188,7 @@ __kernel void Float4_addition_10_10(__global float4* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1218,7 +1218,7 @@ __kernel void Float8_addition_0_10(__global float8* dataArray, long iter, int in
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -1230,7 +1230,7 @@ __kernel void Float8_addition_0_10(__global float8* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1241,7 +1241,7 @@ __kernel void Float8_addition_0_10(__global float8* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1252,7 +1252,7 @@ __kernel void Float8_addition_0_10(__global float8* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1263,7 +1263,7 @@ __kernel void Float8_addition_0_10(__global float8* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1274,7 +1274,7 @@ __kernel void Float8_addition_0_10(__global float8* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1304,7 +1304,7 @@ __kernel void Float8_addition_10_10(__global float8* dataArray, long iter, int i
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = addend + a0;
         a2 = a1 + addend;
@@ -1316,7 +1316,7 @@ __kernel void Float8_addition_10_10(__global float8* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1327,7 +1327,7 @@ __kernel void Float8_addition_10_10(__global float8* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1338,7 +1338,7 @@ __kernel void Float8_addition_10_10(__global float8* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1349,7 +1349,7 @@ __kernel void Float8_addition_10_10(__global float8* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
         a1 = addend + a0;
         a2 = a1 + addend;
         a3 = addend + a2;
@@ -1360,7 +1360,7 @@ __kernel void Float8_addition_10_10(__global float8* dataArray, long iter, int i
         a8 = a7 + addend;
         a9 = addend + a8;
         a0 = a9 + addend;
-        addend = addend * -0.9999F;
+        addend = 0.0F - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1390,7 +1390,7 @@ __kernel void Double_addition_0_10(__global double* dataArray, long iter, int in
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -1402,7 +1402,7 @@ __kernel void Double_addition_0_10(__global double* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1413,7 +1413,7 @@ __kernel void Double_addition_0_10(__global double* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1424,7 +1424,7 @@ __kernel void Double_addition_0_10(__global double* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1435,7 +1435,7 @@ __kernel void Double_addition_0_10(__global double* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1446,7 +1446,7 @@ __kernel void Double_addition_0_10(__global double* dataArray, long iter, int in
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1476,7 +1476,7 @@ __kernel void Double_addition_10_10(__global double* dataArray, long iter, int i
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a0 + addend;
         a2 = addend + a1;
@@ -1488,7 +1488,7 @@ __kernel void Double_addition_10_10(__global double* dataArray, long iter, int i
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1499,7 +1499,7 @@ __kernel void Double_addition_10_10(__global double* dataArray, long iter, int i
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1510,7 +1510,7 @@ __kernel void Double_addition_10_10(__global double* dataArray, long iter, int i
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1521,7 +1521,7 @@ __kernel void Double_addition_10_10(__global double* dataArray, long iter, int i
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1532,7 +1532,7 @@ __kernel void Double_addition_10_10(__global double* dataArray, long iter, int i
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1562,7 +1562,7 @@ __kernel void Double2_addition_0_10(__global double2* dataArray, long iter, int 
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -1574,7 +1574,7 @@ __kernel void Double2_addition_0_10(__global double2* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1585,7 +1585,7 @@ __kernel void Double2_addition_0_10(__global double2* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1596,7 +1596,7 @@ __kernel void Double2_addition_0_10(__global double2* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1607,7 +1607,7 @@ __kernel void Double2_addition_0_10(__global double2* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1618,7 +1618,7 @@ __kernel void Double2_addition_0_10(__global double2* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1648,7 +1648,7 @@ __kernel void Double2_addition_10_10(__global double2* dataArray, long iter, int
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a0 + addend;
         a2 = addend + a1;
@@ -1660,7 +1660,7 @@ __kernel void Double2_addition_10_10(__global double2* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1671,7 +1671,7 @@ __kernel void Double2_addition_10_10(__global double2* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1682,7 +1682,7 @@ __kernel void Double2_addition_10_10(__global double2* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1693,7 +1693,7 @@ __kernel void Double2_addition_10_10(__global double2* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1704,7 +1704,7 @@ __kernel void Double2_addition_10_10(__global double2* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1734,7 +1734,7 @@ __kernel void Double4_addition_0_10(__global double4* dataArray, long iter, int 
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -1746,7 +1746,7 @@ __kernel void Double4_addition_0_10(__global double4* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1757,7 +1757,7 @@ __kernel void Double4_addition_0_10(__global double4* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1768,7 +1768,7 @@ __kernel void Double4_addition_0_10(__global double4* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1779,7 +1779,7 @@ __kernel void Double4_addition_0_10(__global double4* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1790,7 +1790,7 @@ __kernel void Double4_addition_0_10(__global double4* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1820,7 +1820,7 @@ __kernel void Double4_addition_10_10(__global double4* dataArray, long iter, int
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a0 + addend;
         a2 = addend + a1;
@@ -1832,7 +1832,7 @@ __kernel void Double4_addition_10_10(__global double4* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1843,7 +1843,7 @@ __kernel void Double4_addition_10_10(__global double4* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1854,7 +1854,7 @@ __kernel void Double4_addition_10_10(__global double4* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1865,7 +1865,7 @@ __kernel void Double4_addition_10_10(__global double4* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -1876,7 +1876,7 @@ __kernel void Double4_addition_10_10(__global double4* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1906,7 +1906,7 @@ __kernel void Double8_addition_0_10(__global double8* dataArray, long iter, int 
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a0 = addend + a0;
         a1 = a1 + addend;
@@ -1918,7 +1918,7 @@ __kernel void Double8_addition_0_10(__global double8* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1929,7 +1929,7 @@ __kernel void Double8_addition_0_10(__global double8* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1940,7 +1940,7 @@ __kernel void Double8_addition_0_10(__global double8* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1951,7 +1951,7 @@ __kernel void Double8_addition_0_10(__global double8* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a0 = addend + a0;
         a1 = a1 + addend;
         a2 = addend + a2;
@@ -1962,7 +1962,7 @@ __kernel void Double8_addition_0_10(__global double8* dataArray, long iter, int 
         a7 = a7 + addend;
         a8 = addend + a8;
         a9 = a9 + addend;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
@@ -1992,7 +1992,7 @@ __kernel void Double8_addition_10_10(__global double8* dataArray, long iter, int
     a8 = curArray[8];
     a9 = curArray[9];
     addend = a0;
-    while (iter -- > 1)
+    while (iter -- > 0)
     {
         a1 = a0 + addend;
         a2 = addend + a1;
@@ -2004,7 +2004,7 @@ __kernel void Double8_addition_10_10(__global double8* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -2015,7 +2015,7 @@ __kernel void Double8_addition_10_10(__global double8* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -2026,7 +2026,7 @@ __kernel void Double8_addition_10_10(__global double8* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -2037,7 +2037,7 @@ __kernel void Double8_addition_10_10(__global double8* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
         a1 = a0 + addend;
         a2 = addend + a1;
         a3 = a2 + addend;
@@ -2048,7 +2048,7 @@ __kernel void Double8_addition_10_10(__global double8* dataArray, long iter, int
         a8 = addend + a7;
         a9 = a8 + addend;
         a0 = addend + a9;
-        addend = addend * -0.999999;
+        addend = 0.0 - addend;
     }
     curArray[0] = a0;
     curArray[1] = a1;
