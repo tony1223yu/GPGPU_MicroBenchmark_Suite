@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
             AMDTUInt32 minSampleTime;
             AMDTPwrCounterDesc *pCounters;
             AMDTPwrDeviceId deviceId = AMDT_PWR_ALL_DEVICES;
-            
+
             error = AMDTPwrProfileInitialize(AMDT_PWR_PROFILE_MODE_ONLINE);
             CheckAMDTError(error, strdup("Unable to initialize AMDT driver"));
 
@@ -158,10 +158,10 @@ int main(int argc, char *argv[])
 
             error = AMDTPwrGetMinimalTimerSamplingPeriod(&minSampleTime);
             CheckAMDTError(error, strdup("Unable to get minimal sampling period"));
- 
+
             error = AMDTPwrSetTimerSamplingPeriod(minSampleTime * 5);
             CheckAMDTError(error, strdup("Unable to set sampling rate"));
-           
+
             printf("minimal sampling period %d ms\n", minSampleTime);
         }
 
@@ -186,32 +186,38 @@ int main(int argc, char *argv[])
                 while (1)
                 {
                     usleep(ctrl.intervalTime * 1000);
-                    
+
                     gettimeofday(&curTime, NULL);
                     cur_utime = curTime.tv_sec * 1000 + curTime.tv_usec / 1000;
 
                     // Sample
                     error = AMDTPwrReadAllEnabledCounters(&nSamples, &sampleResult);
-                    CheckAMDTError(error, strdup("Unable to read counters"));
-
-                    //printf("nSample = %d\n", nSamples);
-                    //printf("nValue = %d\n", sampleResult->m_numOfValues);
-
-                    for (AMDTUInt32 idx = 0 ; idx < nSamples ; idx ++)
+                    //CheckAMDTError(error, strdup("Unable to read counters"));
+                    if (error != AMDT_STATUS_OK)
                     {
-                        fprintf(fp, "%llu ", cur_utime);
-                        for (unsigned int i = 0; i < sampleResult->m_numOfValues; i++)
+                        printf("Error: Unable to read counters\n");
+                    }
+                    else
+                    {
+                        //printf("nSample = %d\n", nSamples);
+                        //printf("nValue = %d\n", sampleResult->m_numOfValues);
+
+                        for (AMDTUInt32 idx = 0 ; idx < nSamples ; idx ++)
                         {
-                            AMDTPwrCounterDesc counter;
-                            AMDTPwrGetCounterDesc(sampleResult->m_counterValues[i].m_counterID, &counter);
-                            //fprintf(fp, "%s %f\n", counter.m_name, sampleResult->m_counterValues[i].m_counterValue);
-                            if (counter.m_units == AMDT_PWR_UNIT_TYPE_WATT)
-                                fprintf(fp, "%f ", sampleResult->m_counterValues[i].m_counterValue * 1000);
-                            else
-                                fprintf(fp, "%f ", sampleResult->m_counterValues[i].m_counterValue);
+                            fprintf(fp, "%llu ", cur_utime);
+                            for (unsigned int i = 0; i < sampleResult->m_numOfValues; i++)
+                            {
+                                AMDTPwrCounterDesc counter;
+                                AMDTPwrGetCounterDesc(sampleResult->m_counterValues[i].m_counterID, &counter);
+                                //fprintf(fp, "%s %f\n", counter.m_name, sampleResult->m_counterValues[i].m_counterValue);
+                                if (counter.m_units == AMDT_PWR_UNIT_TYPE_WATT)
+                                    fprintf(fp, "%f ", sampleResult->m_counterValues[i].m_counterValue * 1000);
+                                else
+                                    fprintf(fp, "%f ", sampleResult->m_counterValues[i].m_counterValue);
+                            }
+                            fprintf(fp, "\n");
+                            sampleResult ++;
                         }
-                        fprintf(fp, "\n");
-                        sampleResult ++;
                     }
 
                     // Grab end
