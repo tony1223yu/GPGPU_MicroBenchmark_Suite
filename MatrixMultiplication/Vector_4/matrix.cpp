@@ -14,7 +14,7 @@
 
 
 /* Macros */
-#define WORK_GROUP_SIZE 32
+#define WORK_GROUP_SIZE 16
 #define CL_FILE_NAME "matrix.cl"
 #define BINARY_FILE_NAME "matrix.bin"
 #define CL_KERNEL_INT "MatrixMultiplication_int"
@@ -48,10 +48,13 @@ struct OpenCL_Ctrl
     bool timing;
     DATA_TYPE dataType;
     int dataSizeM, dataSizeW, dataSizeH, inputByteA, inputByteB, outputByte;
+    int local_size1;
+    int local_size2;
+    int optimization;
     bool verify;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : platform_id(0), device_id(0), timing(false), dataType(TYPE_INT), dataSizeW(1024), dataSizeH(1024), dataSizeM(1024), verify(false) {sprintf(powerFile, "KernelExecution.log");}
+    OpenCL_Ctrl() : optimization(0), local_size1(WORK_GROUP_SIZE), local_size2(WORK_GROUP_SIZE), platform_id(0), device_id(0), timing(false), dataType(TYPE_INT), dataSizeW(1024), dataSizeH(1024), dataSizeM(1024), verify(false) {sprintf(powerFile, "KernelExecution.log");}
 
 } g_opencl_ctrl;
 
@@ -72,7 +75,7 @@ void CommandParser(int argc, char *argv[])
     int cmd;
     while(1)
     {
-        cmd = getopt(argc, argv, "P:D:Tt:W:H:VM:O:");
+        cmd = getopt(argc, argv, "P:D:Tt:W:H:VM:O:L:l:o:");
 
         /* finish parsing */
         if (cmd == -1)
@@ -80,6 +83,18 @@ void CommandParser(int argc, char *argv[])
 
         switch (cmd)
         {
+            case 'o':
+                g_opencl_ctrl.optimization = atoi(optarg);
+                break;
+
+            case 'L':
+                g_opencl_ctrl.local_size1 = atoi(optarg);
+                break;
+
+            case 'l':
+                g_opencl_ctrl.local_size2 = atoi(optarg);
+                break;
+
             case 'O':
                 sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
                 break;
@@ -254,7 +269,8 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
+    //error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
+    error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
     if (error < 0)
     {
         size_t logSize;
@@ -386,14 +402,18 @@ int main(int argc, char *argv[])
     /* Create kernels */
     switch(g_opencl_ctrl.dataType)
     {
+        char kernelName[100];
         case TYPE_INT:
-            kernel = clCreateKernel(program, CL_KERNEL_INT, &error);
+            sprintf(kernelName, "%s_O%d", CL_KERNEL_INT, g_opencl_ctrl.optimization);
+            kernel = clCreateKernel(program, kernelName, &error);
             break;
         case TYPE_FLOAT:
-            kernel = clCreateKernel(program, CL_KERNEL_FLOAT, &error);
+            sprintf(kernelName, "%s_O%d", CL_KERNEL_FLOAT, g_opencl_ctrl.optimization);
+            kernel = clCreateKernel(program, kernelName, &error);
             break;
         case TYPE_DOUBLE:
-            kernel = clCreateKernel(program, CL_KERNEL_DOUBLE, &error);
+            sprintf(kernelName, "%s_O%d", CL_KERNEL_DOUBLE, g_opencl_ctrl.optimization);
+            kernel = clCreateKernel(program, kernelName, &error);
             break;
     }
     CHECK_CL_ERROR(error);
@@ -422,12 +442,29 @@ int main(int argc, char *argv[])
     if (g_opencl_ctrl.timing)
         gettimeofday(&startTime, NULL);
 
-    globalSize[0] = g_opencl_ctrl.dataSizeW;
-    globalSize[1] = g_opencl_ctrl.dataSizeH;
-    //localSize[0] = localSize[1] = WORK_GROUP_SIZE;
+    if (g_opencl_ctrl.optimization == 0)
+    {
+        globalSize[0] = g_opencl_ctrl.dataSizeW;
+        globalSize[1] = g_opencl_ctrl.dataSizeH;
+    }
+    else if (g_opencl_ctrl.optimization == 1)
+    {
+        globalSize[0] = g_opencl_ctrl.dataSizeW / 4;
+        globalSize[1] = g_opencl_ctrl.dataSizeH;
+    }
+    else if (g_opencl_ctrl.optimization >= 2)
+    {
+        globalSize[0] = g_opencl_ctrl.dataSizeW / 4;
+        globalSize[1] = g_opencl_ctrl.dataSizeH / 4;
+    }
+    localSize[0] = g_opencl_ctrl.local_size1;
+    localSize[1] = g_opencl_ctrl.local_size2;
+
+    fprintf(stderr, "global size: %lu %lu\n", globalSize[0], globalSize[1]);
+    fprintf(stderr, "local size: %lu %lu\n", localSize[0], localSize[1]);
 
     PrintTimingInfo(g_fptr);
-    error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, NULL, 0, NULL, NULL);
+    error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);

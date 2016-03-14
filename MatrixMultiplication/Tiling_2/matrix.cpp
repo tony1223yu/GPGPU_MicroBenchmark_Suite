@@ -260,7 +260,8 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
+    //error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
+    error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
     if (error < 0)
     {
         size_t logSize;
@@ -437,6 +438,9 @@ int main(int argc, char *argv[])
     globalSize[1] = g_opencl_ctrl.dataSizeH;
     localSize[0] = g_opencl_ctrl.localSize;
     localSize[1] = g_opencl_ctrl.localSize;
+
+    fprintf(stderr, "global size: %lu %lu\n", globalSize[0], globalSize[1]);
+    fprintf(stderr, "local size: %lu %lu\n", localSize[0], localSize[1]);
 
     PrintTimingInfo(g_fptr);
     error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
