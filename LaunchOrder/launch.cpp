@@ -15,11 +15,9 @@
 
 /* Macros */
 #define WORK_GROUP_SIZE 16
-#define CL_FILE_NAME "vector.cl"
-#define BINARY_FILE_NAME "vector.bin"
-#define CL_KERNEL_INT "Vector_int"
-#define CL_KERNEL_FLOAT "Vector_float"
-#define CL_KERNEL_DOUBLE "Vector_double"
+#define CL_FILE_NAME "launch.cl"
+#define BINARY_FILE_NAME "launch.bin"
+#define KERNEL_NAME "LaunchOrderTest"
 #define POWER_LOG_FILE_LEN 300
 
 #define CHECK_CL_ERROR(error)                                                                                                       \
@@ -33,26 +31,16 @@
         } while(0)
 
 
-enum DATA_TYPE
-{
-    TYPE_INT = 0,
-    TYPE_FLOAT,
-    TYPE_DOUBLE
-};
-
 /* Control struct */
 struct OpenCL_Ctrl
 {
     int platform_id;
     int device_id;
     bool timing;
-    DATA_TYPE dataType;
-    int vector;
-    int caseSel;
-    int dataSize, inputByteA, inputByteB, outputByte;
+    int dataSizeW, dataSizeH, inputByte, outputByte;
     char powerFile[POWER_LOG_FILE_LEN];
 
-    OpenCL_Ctrl() : vector(1), platform_id(0), device_id(0), timing(false), dataType(TYPE_INT), dataSize(1024) {sprintf(powerFile, "KernelExecution.log");}
+    OpenCL_Ctrl() : platform_id(0), device_id(0), timing(false), dataSizeH(32), dataSizeW(32) {sprintf(powerFile, "KernelExecution.log");}
 
 } g_opencl_ctrl;
 
@@ -73,7 +61,7 @@ void CommandParser(int argc, char *argv[])
     int cmd;
     while(1)
     {
-        cmd = getopt(argc, argv, "P:D:Tt:S:O:V:o:");
+        cmd = getopt(argc, argv, "P:D:TW:H:O:");
 
         /* finish parsing */
         if (cmd == -1)
@@ -81,10 +69,6 @@ void CommandParser(int argc, char *argv[])
 
         switch (cmd)
         {
-            case 'o':
-                g_opencl_ctrl.caseSel = atoi(optarg);
-                break;
-
             case 'O':
                 sprintf(g_opencl_ctrl.powerFile, "%s", optarg);
                 break;
@@ -101,36 +85,17 @@ void CommandParser(int argc, char *argv[])
                 g_opencl_ctrl.timing = true;
                 break;
 
-            case 't':
-                {
-                    int type = atoi(optarg);
-                    switch(type)
-                    {
-                        case TYPE_INT:
-                            g_opencl_ctrl.dataType = TYPE_INT;
-                            break;
-                        case TYPE_FLOAT:
-                            g_opencl_ctrl.dataType = TYPE_FLOAT;
-                            break;
-                        case TYPE_DOUBLE:
-                            g_opencl_ctrl.dataType = TYPE_DOUBLE;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                break;
-
-            case 'S':
+            case 'H':
                 {
                     int size = atoi(optarg);
-                    g_opencl_ctrl.dataSize = size;
+                    g_opencl_ctrl.dataSizeH = size;
                 }
                 break;
 
-            case 'V':
+            case 'W':
                 {
-                    g_opencl_ctrl.vector = atoi(optarg);
+                    int size = atoi(optarg);
+                    g_opencl_ctrl.dataSizeW = size;
                 }
                 break;
 
@@ -145,29 +110,8 @@ void CommandParser(int argc, char *argv[])
     }
 
     /* Print the setting */
-    switch(g_opencl_ctrl.dataType)
-    {
-        case TYPE_INT:
-            fprintf(stderr, "integer\n");
-            g_opencl_ctrl.inputByteA = g_opencl_ctrl.dataSize * sizeof(int);
-            g_opencl_ctrl.inputByteB = g_opencl_ctrl.dataSize * sizeof(int);
-            g_opencl_ctrl.outputByte = g_opencl_ctrl.dataSize * sizeof(int);
-            break;
-        case TYPE_FLOAT:
-            fprintf(stderr, "float\n");
-            g_opencl_ctrl.inputByteA = g_opencl_ctrl.dataSize * sizeof(float);
-            g_opencl_ctrl.inputByteB = g_opencl_ctrl.dataSize * sizeof(float);
-            g_opencl_ctrl.outputByte = g_opencl_ctrl.dataSize * sizeof(float);
-            break;
-        case TYPE_DOUBLE:
-            fprintf(stderr, "double\n");
-            g_opencl_ctrl.inputByteA = g_opencl_ctrl.dataSize * sizeof(double);
-            g_opencl_ctrl.inputByteB = g_opencl_ctrl.dataSize * sizeof(double);
-            g_opencl_ctrl.outputByte = g_opencl_ctrl.dataSize * sizeof(double);
-            break;
-    }
-    fprintf(stderr, "inputByte = %d %d\n", g_opencl_ctrl.inputByteA, g_opencl_ctrl.inputByteB);
-    fprintf(stderr, "outputByte = %d\n", g_opencl_ctrl.outputByte);
+    g_opencl_ctrl.inputByte = sizeof(int);
+    g_opencl_ctrl.outputByte = g_opencl_ctrl.dataSizeH * g_opencl_ctrl.dataSizeW * sizeof(int);
 }
 
 void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & target_device)
@@ -282,57 +226,12 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     free(fileName);
 }
 
-void HostDataCreation(void* &inputA, void* &inputB, void* &output)
+void HostDataCreation(void* &input, void* &output)
 {
     srand(time(NULL));
-    inputA = malloc(g_opencl_ctrl.inputByteA);
-    inputB = malloc(g_opencl_ctrl.inputByteB);
+    input = malloc(g_opencl_ctrl.inputByte);
     output = malloc(g_opencl_ctrl.outputByte);
-    switch(g_opencl_ctrl.dataType)
-    {
-        case TYPE_INT:
-            {
-                int *tmpA;
-                int *tmpB;
-
-                tmpA = (int *)inputA;
-                tmpB = (int *)inputB;
-
-                for (int i = 0 ; i < g_opencl_ctrl.dataSize ; i ++)
-                    tmpA[i] = (rand() % 1000);
-                for (int i = 0 ; i < g_opencl_ctrl.dataSize ; i ++)
-                    tmpB[i] = (rand() % 1000);
-            }
-            break;
-        case TYPE_FLOAT:
-            {
-                float *tmpA;
-                float *tmpB;
-
-                tmpA = (float *)inputA;
-                tmpB = (float *)inputB;
-
-                for (int i = 0 ; i < g_opencl_ctrl.dataSize ; i ++)
-                    tmpA[i] = ((float)(rand()) / RAND_MAX) * 1000;
-                for (int i = 0 ; i < g_opencl_ctrl.dataSize ; i ++)
-                    tmpB[i] = ((float)(rand()) / RAND_MAX) * 1000;
-            }
-            break;
-        case TYPE_DOUBLE:
-            {
-                double *tmpA;
-                double *tmpB;
-
-                tmpA = (double *)inputA;
-                tmpB = (double *)inputB;
-
-                for (int i = 0 ; i < g_opencl_ctrl.dataSize ; i ++)
-                    tmpA[i] = ((double)(rand()) / RAND_MAX) * 1000;
-                for (int i = 0 ; i < g_opencl_ctrl.dataSize ; i ++)
-                    tmpB[i] = ((double)(rand()) / RAND_MAX) * 1000;
-            }
-           break;
-    }
+    ((int *)input)[0] = 0;
 }
 
 int main(int argc, char *argv[])
@@ -344,16 +243,14 @@ int main(int argc, char *argv[])
     cl_command_queue command_queue;
     cl_program program;
     cl_kernel kernel;
-    cl_mem inputBufferA, inputBufferB, outputBuffer;
+    cl_mem inputBuffer, outputBuffer;
     cl_int error;
     int inputSize;
-    char kernelName[50];
-    size_t globalSize[1], localSize[1];
+    size_t globalSize[2], localSize[2];
 
     struct timeval startTime, endTime;
 
-    void* inputArrayA = NULL;
-    void* inputArrayB = NULL;
+    void* inputArray = NULL;
     void* outputArray = NULL;
     /* Parse options */
     CommandParser(argc, argv);
@@ -362,7 +259,7 @@ int main(int argc, char *argv[])
     if (!g_fptr)
         exit(1);
 
-    HostDataCreation(inputArrayA, inputArrayB, outputArray);
+    HostDataCreation(inputArray, outputArray);
 
     GetPlatformAndDevice(platform, device);
 
@@ -378,51 +275,34 @@ int main(int argc, char *argv[])
     CreateAndBuildProgram(program, context, device, strdup(CL_FILE_NAME));
 
     /* Create kernels */
-    switch(g_opencl_ctrl.dataType)
-    {
-        case TYPE_INT:
-            sprintf(kernelName, "%s%d_%d", CL_KERNEL_INT, g_opencl_ctrl.vector, g_opencl_ctrl.caseSel);
-            kernel = clCreateKernel(program, kernelName, &error);
-            break;
-        case TYPE_FLOAT:
-            sprintf(kernelName, "%s%d_%d", CL_KERNEL_FLOAT, g_opencl_ctrl.vector, g_opencl_ctrl.caseSel);
-            kernel = clCreateKernel(program, kernelName, &error);
-            break;
-        case TYPE_DOUBLE:
-            sprintf(kernelName, "%s%d_%d", CL_KERNEL_FLOAT, g_opencl_ctrl.vector, g_opencl_ctrl.caseSel);
-            kernel = clCreateKernel(program, kernelName, &error);
-            break;
-    }
+    kernel = clCreateKernel(program, KERNEL_NAME, &error);
     CHECK_CL_ERROR(error);
 
     /* Create buffers */
-    inputBufferA = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.inputByteA, inputArrayA, &error);
-    CHECK_CL_ERROR(error);
-    inputBufferB = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.inputByteB, inputArrayB, &error);
+    inputBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.inputByte, inputArray, &error);
     CHECK_CL_ERROR(error);
     outputBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, g_opencl_ctrl.outputByte, NULL, &error);
     CHECK_CL_ERROR(error);
 
-    inputSize = g_opencl_ctrl.dataSize / g_opencl_ctrl.vector;
     /* Execute kernels */
-    error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputBufferA);
+    error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputBuffer);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &inputBufferB);
+    error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputBuffer);
     CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 2, sizeof(cl_mem), &outputBuffer);
-    CHECK_CL_ERROR(error);
-    error = clSetKernelArg(kernel, 3, sizeof(int), &inputSize);
+    error = clSetKernelArg(kernel, 2, sizeof(int), &g_opencl_ctrl.dataSizeW);
     CHECK_CL_ERROR(error);
 
 
     if (g_opencl_ctrl.timing)
         gettimeofday(&startTime, NULL);
 
-    globalSize[0] = 1;
-    localSize[0] = 1;
+    globalSize[0] = g_opencl_ctrl.dataSizeW;
+    globalSize[1] = g_opencl_ctrl.dataSizeH;
+    localSize[0] = g_opencl_ctrl.dataSizeW;
+    localSize[1] = g_opencl_ctrl.dataSizeH;
 
     PrintTimingInfo(g_fptr);
-    error = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, globalSize, localSize, 0, NULL, NULL);
+    error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
     error = clFinish(command_queue);
     CHECK_CL_ERROR(error);
@@ -437,16 +317,24 @@ int main(int argc, char *argv[])
     error = clEnqueueReadBuffer(command_queue, outputBuffer, CL_TRUE, 0, g_opencl_ctrl.outputByte, outputArray, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
 
+    {
+        int* result = (int*) outputArray;
+        for (int i = 0 ; i < g_opencl_ctrl.dataSizeH ; i ++ )
+        {
+            for (int j = 0 ; j < g_opencl_ctrl.dataSizeW ; j ++ )
+                fprintf(stdout, "%4d ", result[i * g_opencl_ctrl.dataSizeW + j]);
+            fprintf(stdout, "\n");
+        }
+    }
+
     /* Release object */
     clReleaseKernel(kernel);
-    clReleaseMemObject(inputBufferA);
-    clReleaseMemObject(inputBufferB);
+    clReleaseMemObject(inputBuffer);
     clReleaseMemObject(outputBuffer);
     clReleaseProgram(program);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
-    free(inputArrayA);
-    free(inputArrayB);
+    free(inputArray);
     free(outputArray);
 
     if (g_opencl_ctrl.timing)
