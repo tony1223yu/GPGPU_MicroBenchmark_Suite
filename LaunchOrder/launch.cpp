@@ -37,6 +37,7 @@ struct OpenCL_Ctrl
     int platform_id;
     int device_id;
     bool timing;
+    int localSize_1, localSize_2;
     int dataSizeW, dataSizeH, inputByte, outputByte;
     char powerFile[POWER_LOG_FILE_LEN];
 
@@ -61,7 +62,7 @@ void CommandParser(int argc, char *argv[])
     int cmd;
     while(1)
     {
-        cmd = getopt(argc, argv, "P:D:TW:H:O:");
+        cmd = getopt(argc, argv, "P:D:TW:H:O:L:l:");
 
         /* finish parsing */
         if (cmd == -1)
@@ -96,6 +97,20 @@ void CommandParser(int argc, char *argv[])
                 {
                     int size = atoi(optarg);
                     g_opencl_ctrl.dataSizeW = size;
+                }
+                break;
+
+            case 'L':
+                {
+                    int size = atoi(optarg);
+                    g_opencl_ctrl.localSize_1 = size;
+                }
+                break;
+
+            case 'l':
+                {
+                    int size = atoi(optarg);
+                    g_opencl_ctrl.localSize_2 = size;
                 }
                 break;
 
@@ -298,8 +313,8 @@ int main(int argc, char *argv[])
 
     globalSize[0] = g_opencl_ctrl.dataSizeW;
     globalSize[1] = g_opencl_ctrl.dataSizeH;
-    localSize[0] = g_opencl_ctrl.dataSizeW;
-    localSize[1] = g_opencl_ctrl.dataSizeH;
+    localSize[0] = g_opencl_ctrl.localSize_1;
+    localSize[1] = g_opencl_ctrl.localSize_2;
 
     PrintTimingInfo(g_fptr);
     error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
