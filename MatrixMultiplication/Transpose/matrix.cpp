@@ -200,7 +200,7 @@ void GetPlatformAndDevice(cl_platform_id & target_platform, cl_device_id & targe
     clGetDeviceInfo(target_device, CL_DEVICE_NAME, length, queryString, NULL);
     fprintf(stderr, "Device selected: '%s'\n", queryString);
 
-    /* Free the space */
+    /* free the space */
     free(platforms);
     free(devices);
     free(queryString);
@@ -304,7 +304,10 @@ int main(int argc, char *argv[])
     cl_mem inputBufferA, inputBufferB;
     cl_int error;
     size_t globalSize[2], localSize[2];
+    cl_event event;
 
+    unsigned long long totalTime = 0, tmpTime;
+    int count = 0;
     struct timeval startTime, endTime;
 
     void* inputMatrixA = NULL;
@@ -325,7 +328,8 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     /* Create command queue */
-    command_queue = clCreateCommandQueue(context, device, 0, &error);
+    cl_command_queue_properties prop = CL_QUEUE_PROFILING_ENABLE;
+    command_queue = clCreateCommandQueue(context, device, prop, &error);
     CHECK_CL_ERROR(error);
 
     /* Create program */
@@ -339,6 +343,10 @@ int main(int argc, char *argv[])
             break;
     }
     CHECK_CL_ERROR(error);
+
+    size_t wgsize;
+    clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(wgsize), &wgsize, NULL);
+    //printf("wgsize: %u\n", wgsize);
 
     /* Create buffers */
     inputBufferA = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, g_opencl_ctrl.inputByteA, inputMatrixA, &error);
@@ -368,16 +376,30 @@ int main(int argc, char *argv[])
     fprintf(stderr, "local size: %lu %lu\n", localSize[0], localSize[1]);
 
     PrintTimingInfo(g_fptr);
-    error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
-    CHECK_CL_ERROR(error);
-    error = clFinish(command_queue);
-    CHECK_CL_ERROR(error);
+
+    //while (totalTime < 1000000000 || count < 20)
+    {
+        error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, &event);
+        CHECK_CL_ERROR(error);
+        error = clFinish(command_queue);
+        CHECK_CL_ERROR(error);
+
+        if (g_opencl_ctrl.timing)
+        {
+            cl_ulong start, end;
+            clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &start, NULL);
+            clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &end, NULL);
+            tmpTime = end - start;
+            totalTime += tmpTime;
+        }
+        clReleaseEvent(event);
+        count ++;
+    }
+
     PrintTimingInfo(g_fptr);
-
-    if (g_opencl_ctrl.timing)
-        gettimeofday(&endTime, NULL);
-
     fclose(g_fptr);
+
+    tmpTime = totalTime / count;
 
     /* Read the output */
     error = clEnqueueReadBuffer(command_queue, inputBufferB, CL_TRUE, 0, g_opencl_ctrl.inputByteB, inputMatrixB, 0, NULL, NULL);
@@ -424,12 +446,9 @@ int main(int argc, char *argv[])
 
     if (g_opencl_ctrl.timing)
     {
-        unsigned long long start, end;
-        start = startTime.tv_sec * 1000000 + startTime.tv_usec;
-        end = endTime.tv_sec * 1000000 + endTime.tv_usec;
-
-        fprintf(stderr, "Kernel execution time: %llu ms\n", (end - start) / 1000);
-        fprintf(stdout, "%llu\n", (end - start) * 1000);
+        fprintf(stderr, "Kernel execution time: %llu ns\n", totalTime);
+        //fprintf(stdout, "%llu\n", totalTime * 1000);
+        fprintf(stdout, "%llu\n", tmpTime);
     }
 
     fprintf(stderr, "DONE.\n");

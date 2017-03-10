@@ -333,6 +333,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     {
+        fprintf(stdout, "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t -----> dim 0\n");
         int* result = (int*) outputArray;
         for (int i = 0 ; i < g_opencl_ctrl.dataSizeH / g_opencl_ctrl.localSize_2 ; i ++ )
         {
@@ -340,6 +341,7 @@ int main(int argc, char *argv[])
                 fprintf(stdout, "%6d\t", result[i * g_opencl_ctrl.dataSizeW / g_opencl_ctrl.localSize_1 + j]);
             fprintf(stdout, "\n");
         }
+        fprintf(stdout, "\n");
     }
 
     /* Release object */

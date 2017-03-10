@@ -204,8 +204,8 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     CHECK_CL_ERROR(error);
     free(programSource);
 
-    //error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
-    error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
+    error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
+    //error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
     if (error < 0)
     {
         size_t logSize;
@@ -333,6 +333,7 @@ int main(int argc, char *argv[])
     CHECK_CL_ERROR(error);
 
     {
+        fprintf(stdout, "\n\t\t\t\t\t\t\t\t\t -----> dim 0\n");
         int* result = (int*) outputArray;
         for (int i = 0 ; i < g_opencl_ctrl.dataSizeH ; i ++ )
         {
@@ -340,6 +341,7 @@ int main(int argc, char *argv[])
                 fprintf(stdout, "%4d ", result[i * g_opencl_ctrl.dataSizeW + j]);
             fprintf(stdout, "\n");
         }
+        fprintf(stdout, "\n");
     }
 
     /* Release object */

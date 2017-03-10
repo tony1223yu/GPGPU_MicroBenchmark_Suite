@@ -303,6 +303,7 @@ void CreateAndBuildProgram(cl_program &target_program, cl_context context, cl_de
     free(programSource);
 
     error = clBuildProgram(target_program, 1, &device, "-cl-opt-disable", NULL, NULL);
+    //error = clBuildProgram(target_program, 1, &device, NULL, NULL, NULL);
     if (error < 0)
     {
         size_t logSize;
@@ -392,7 +393,6 @@ int main(int argc, char *argv[])
     cl_kernel kernel;
     cl_mem buffer;
     cl_int error;
-    cl_event event;
     cl_ulong startTime, endTime;
     size_t globalSize[1], localSize[1], warpSize;
     FILE* fptr;
@@ -478,17 +478,36 @@ int main(int argc, char *argv[])
     error = clSetKernelArg(kernel, 2, sizeof(int), &g_opencl_ctrl.interval);
     CHECK_CL_ERROR(error);
 
+    int counter = 0;
+    cl_ulong totalTime = 0;
+
     start = PrintTimingInfo(fptr);
 
-    globalSize[0] = g_opencl_ctrl.global_size;
-    localSize[0] = g_opencl_ctrl.local_size;
-    error = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, globalSize, localSize, 0, NULL, &event);
-    CHECK_CL_ERROR(error);
-    error = clFinish(command_queue);
-    CHECK_CL_ERROR(error);
+    while (totalTime < 10000000000)
+    {
+        cl_event event;
+
+        globalSize[0] = g_opencl_ctrl.global_size;
+        localSize[0] = g_opencl_ctrl.local_size;
+        error = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, globalSize, localSize, 0, NULL, &event);
+        CHECK_CL_ERROR(error);
+        error = clFinish(command_queue);
+        CHECK_CL_ERROR(error);
+        error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(startTime), &startTime, NULL);
+        CHECK_CL_ERROR(error);
+        error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
+        CHECK_CL_ERROR(error);
+
+        totalTime += (endTime - startTime);
+        counter ++;
+
+        clReleaseEvent(event);
+    }
 
     end = PrintTimingInfo(fptr);
     fclose(fptr);
+
+    totalTime /= counter;
 
     error = clEnqueueReadBuffer(command_queue, buffer, CL_TRUE, 0, g_opencl_ctrl.dataByte, hostData, 0, NULL, NULL);
     CHECK_CL_ERROR(error);
@@ -524,20 +543,15 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    /* Event profiling */
-    error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(startTime), &startTime, NULL);
-    CHECK_CL_ERROR(error);
-    error = clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(endTime), &endTime, NULL);
-    CHECK_CL_ERROR(error);
     fprintf(stderr, "\n['%s' execution time] %llu ns\n", g_opencl_ctrl.kernelName, (end - start) * 1000);
-    fprintf(stdout, "%llu\n", (end - start) * 1000);
+    //fprintf(stdout, "%llu\n", (end - start) * 1000);
+    fprintf(stdout, "%llu\n", totalTime);
 
     /* Read the output */
 
     /* Release object */
     clReleaseKernel(kernel);
     clReleaseMemObject(buffer);
-    clReleaseEvent(event);
     clReleaseProgram(program);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);

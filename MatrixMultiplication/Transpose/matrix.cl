@@ -1,8 +1,8 @@
 __kernel void MatrixTranspose_int(__global int *matrixA, __global int *matrixB, int matrixWidth, int matrixHeight)
 {
-    int sum;
-    int y = get_global_id(0);
-    int x = get_global_id(1);
- 
-    matrixB[y * matrixHeight + x] = matrixA[x * matrixWidth + y];
+    int idx0 = get_global_id(0);
+    int idx1 = get_global_id(1);
+
+    matrixB[idx1 * matrixWidth + idx0] = matrixA[idx0 * matrixHeight + idx1];
+    //matrixB[idx0 * matrixWidth + idx1] = matrixA[idx1 * matrixHeight + idx0]; // inv
 }
